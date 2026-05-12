@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, MapPin, Facebook, Instagram, PhoneCall, Menu, X } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/logo-mark.png";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -55,27 +55,17 @@ export function SiteHeader() {
       {/* Main nav */}
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between gap-4 py-3 lg:py-4">
-          <Link to="/" className="flex items-center gap-3 shrink-0">
-            <img src={logo} alt="Arizona Premier" width={56} height={56} className="h-12 w-12 lg:h-14 lg:w-14 object-contain" />
-            <div className="leading-tight">
-              <div className="font-extrabold tracking-tight text-brand-blue-deep text-lg sm:text-xl lg:text-2xl">
-                ARIZONA PREMIER
-              </div>
-              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] tracking-[0.2em] text-brand-orange font-semibold">
-                <span className="h-px w-4 bg-brand-orange" />
-                CONSTRUCTION GROUP LLC
-                <span className="h-px w-4 bg-brand-orange" />
-              </div>
-            </div>
+          <Link to="/" className="flex items-center shrink-0">
+            <img src={logo} alt="Arizona Premier Construction Group LLC" className="h-12 lg:h-16 w-auto object-contain" />
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden xl:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navItems.map((item) => (
               <button
                 key={item.label}
                 onClick={() => setActive(item.label)}
-                className={`px-4 py-2.5 rounded-full text-sm font-medium transition ${
+                className={`px-2.5 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-medium whitespace-nowrap transition ${
                   active === item.label
                     ? "bg-brand-blue-deep text-white"
                     : "text-foreground hover:text-brand-blue-deep"
@@ -86,10 +76,10 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             <a
               href="tel:6028168177"
-              className="flex items-center gap-2 rounded-full px-4 py-2.5 text-white font-semibold text-sm"
+              className="flex items-center gap-2 rounded-full px-3 xl:px-4 py-2 text-white font-semibold text-[13px] xl:text-sm whitespace-nowrap"
               style={{ background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))" }}
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
@@ -97,13 +87,13 @@ export function SiteHeader() {
               </span>
               (602) 816 8177
             </a>
-            <button className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep hover:bg-brand-blue transition">
+            <button className="rounded-full px-3 xl:px-5 py-2 text-white font-semibold text-[13px] xl:text-sm bg-brand-blue-deep hover:bg-brand-blue transition whitespace-nowrap">
               Quote With AI
             </button>
           </div>
 
           <button
-            className="xl:hidden p-2 rounded-md hover:bg-muted"
+            className="lg:hidden p-2 rounded-md hover:bg-muted"
             onClick={() => setOpen(!open)}
             aria-label="Menu"
           >
@@ -113,7 +103,7 @@ export function SiteHeader() {
 
         {/* Mobile nav */}
         {open && (
-          <div className="xl:hidden pb-4 space-y-1 border-t pt-3">
+          <div className="lg:hidden pb-4 space-y-1 border-t pt-3">
             {navItems.map((item) => (
               <button
                 key={item.label}
