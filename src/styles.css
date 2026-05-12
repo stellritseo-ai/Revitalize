@@ -72,6 +72,8 @@
   --brand-blue-deep: oklch(0.28 0.16 268);
   --brand-orange: oklch(0.66 0.19 45);
   --gradient-topbar: linear-gradient(90deg, var(--brand-blue-deep) 0%, var(--brand-blue) 45%, var(--brand-orange) 100%);
+  --gradient-brand: linear-gradient(90deg, #023C87 0%, #C3572C 100%);
+  --gradient-brand-diag: linear-gradient(135deg, #023C87 0%, #C3572C 100%);
   --shadow-nav: 0 8px 24px -12px oklch(0 0 0 / 0.15);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
