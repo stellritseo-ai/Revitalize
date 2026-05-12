@@ -59,12 +59,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-deep: var(--brand-blue-deep);
+  --color-brand-orange: var(--brand-orange);
 }
 
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
+  --brand-blue: oklch(0.38 0.18 265);
+  --brand-blue-deep: oklch(0.28 0.16 268);
+  --brand-orange: oklch(0.66 0.19 45);
+  --gradient-topbar: linear-gradient(90deg, var(--brand-blue-deep) 0%, var(--brand-blue) 45%, var(--brand-orange) 100%);
+  --shadow-nav: 0 8px 24px -12px oklch(0 0 0 / 0.15);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
