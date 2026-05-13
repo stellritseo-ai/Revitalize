@@ -1,11 +1,6 @@
 import { Video, BadgeCheck, ThumbsUp } from "lucide-react";
 import processBg from "@/assets/process-bg.png";
-import sealPhoenix from "@/assets/seal-phoenix.png";
-import sealClearwater from "@/assets/seal-clearwater.png";
-import sealScottsdale from "@/assets/seal-scottsdale.png";
-import sealMesa from "@/assets/seal-mesa.png";
-import sealChandler from "@/assets/seal-chandler.png";
-import sealGlendale from "@/assets/seal-glendale.png";
+
 
 const steps = [
   {
@@ -32,19 +27,18 @@ const steps = [
 ];
 
 const seals = [
-  { src: sealPhoenix, alt: "City of Phoenix" },
-  { src: sealClearwater, alt: "City of Clearwater, Florida" },
-  { src: sealScottsdale, alt: "City of Scottsdale, Arizona" },
-  { src: sealMesa, alt: "City of Mesa, Arizona" },
-  { src: sealChandler, alt: "City of Chandler, Arizona" },
-  { src: sealGlendale, alt: "State of Arizona — Glendale" },
+  { src: "/seal-4.png", alt: "City of Phoenix" },
+  { src: "/seal-3.png", alt: "State of Arizona" },
+  { src: "/seal-2.png", alt: "City of Chandler" },
+  { src: "/seal-1.png", alt: "City of Mesa" },
+  { src: "/seal-5.png", alt: "State of Arizona - Glendale" },
 ];
 
 export function ProcessSection() {
   const loop = [...seals, ...seals];
 
   return (
-    <section className="relative isolate w-full overflow-hidden text-white">
+    <section className="relative isolate overflow-hidden text-white mx-[15px] mt-[15px] rounded-[10px]">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img
@@ -59,7 +53,7 @@ export function ProcessSection() {
         <div className="absolute inset-0 bg-[#0b1626]/40" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 pt-16 lg:pt-20 pb-10 lg:pb-14">
+      <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-[40px]">
         {/* Heading */}
         <div className="flex flex-col items-center text-center">
           <div
@@ -68,11 +62,12 @@ export function ProcessSection() {
           >
             Process
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5">
+          <h2 className="text-[35px] font-bold tracking-tight mb-5 -mt-[20px]">
             Our Simple, Stress-Free Process
           </h2>
-          <p className="max-w-3xl text-sm sm:text-base text-white/75 leading-relaxed">
-            At Arizona Premiere Construction Group LLC, honesty and quality aren't just promises — they're our foundation. From your first call or video meeting to the final walkthrough and cleanup, we handle every project right, with zero hassle on your end.
+          <p className="max-w-4xl text-sm sm:text-base text-white/75 leading-relaxed -mt-[10px]">
+            At Arizona Premiere Construction Group LLC, honesty and quality aren't just promises — they're our foundation. <br className="hidden md:block" />
+            From your first call or video meeting to the final walkthrough and cleanup, we handle every project right, with zero hassle on your end.
           </p>
         </div>
 

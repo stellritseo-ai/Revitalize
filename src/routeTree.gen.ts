@@ -9,38 +9,221 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as FinancingRouteImport } from './routes/financing'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as ServicesSpecialtyTradeRouteImport } from './routes/services.specialty-trade'
+import { Route as ServicesRemodelingRouteImport } from './routes/services.remodeling'
+import { Route as ServicesFinishingSystemsRouteImport } from './routes/services.finishing-systems'
+import { Route as ServicesConstructionRouteImport } from './routes/services.construction'
 
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinancingRoute = FinancingRouteImport.update({
+  id: '/financing',
+  path: '/financing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const ServicesSpecialtyTradeRoute = ServicesSpecialtyTradeRouteImport.update({
+  id: '/specialty-trade',
+  path: '/specialty-trade',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const ServicesRemodelingRoute = ServicesRemodelingRouteImport.update({
+  id: '/remodeling',
+  path: '/remodeling',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const ServicesFinishingSystemsRoute =
+  ServicesFinishingSystemsRouteImport.update({
+    id: '/finishing-systems',
+    path: '/finishing-systems',
+    getParentRoute: () => ServicesRoute,
+  } as any)
+const ServicesConstructionRoute = ServicesConstructionRouteImport.update({
+  id: '/construction',
+  path: '/construction',
+  getParentRoute: () => ServicesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/financing': typeof FinancingRoute
+  '/gallery': typeof GalleryRoute
+  '/reviews': typeof ReviewsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/services/construction': typeof ServicesConstructionRoute
+  '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
+  '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
+  '/services/': typeof ServicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/financing': typeof FinancingRoute
+  '/gallery': typeof GalleryRoute
+  '/reviews': typeof ReviewsRoute
+  '/services/construction': typeof ServicesConstructionRoute
+  '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
+  '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
+  '/services': typeof ServicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/financing': typeof FinancingRoute
+  '/gallery': typeof GalleryRoute
+  '/reviews': typeof ReviewsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/services/construction': typeof ServicesConstructionRoute
+  '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
+  '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
+  '/services/': typeof ServicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/financing'
+    | '/gallery'
+    | '/reviews'
+    | '/services'
+    | '/services/construction'
+    | '/services/finishing-systems'
+    | '/services/remodeling'
+    | '/services/specialty-trade'
+    | '/services/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/financing'
+    | '/gallery'
+    | '/reviews'
+    | '/services/construction'
+    | '/services/finishing-systems'
+    | '/services/remodeling'
+    | '/services/specialty-trade'
+    | '/services'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/financing'
+    | '/gallery'
+    | '/reviews'
+    | '/services'
+    | '/services/construction'
+    | '/services/finishing-systems'
+    | '/services/remodeling'
+    | '/services/specialty-trade'
+    | '/services/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  FinancingRoute: typeof FinancingRoute
+  GalleryRoute: typeof GalleryRoute
+  ReviewsRoute: typeof ReviewsRoute
+  ServicesRoute: typeof ServicesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financing': {
+      id: '/financing'
+      path: '/financing'
+      fullPath: '/financing'
+      preLoaderRoute: typeof FinancingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +231,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/': {
+      id: '/services/'
+      path: '/'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/services/specialty-trade': {
+      id: '/services/specialty-trade'
+      path: '/specialty-trade'
+      fullPath: '/services/specialty-trade'
+      preLoaderRoute: typeof ServicesSpecialtyTradeRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/services/remodeling': {
+      id: '/services/remodeling'
+      path: '/remodeling'
+      fullPath: '/services/remodeling'
+      preLoaderRoute: typeof ServicesRemodelingRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/services/finishing-systems': {
+      id: '/services/finishing-systems'
+      path: '/finishing-systems'
+      fullPath: '/services/finishing-systems'
+      preLoaderRoute: typeof ServicesFinishingSystemsRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/services/construction': {
+      id: '/services/construction'
+      path: '/construction'
+      fullPath: '/services/construction'
+      preLoaderRoute: typeof ServicesConstructionRouteImport
+      parentRoute: typeof ServicesRoute
+    }
   }
 }
 
+interface ServicesRouteChildren {
+  ServicesConstructionRoute: typeof ServicesConstructionRoute
+  ServicesFinishingSystemsRoute: typeof ServicesFinishingSystemsRoute
+  ServicesRemodelingRoute: typeof ServicesRemodelingRoute
+  ServicesSpecialtyTradeRoute: typeof ServicesSpecialtyTradeRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
+}
+
+const ServicesRouteChildren: ServicesRouteChildren = {
+  ServicesConstructionRoute: ServicesConstructionRoute,
+  ServicesFinishingSystemsRoute: ServicesFinishingSystemsRoute,
+  ServicesRemodelingRoute: ServicesRemodelingRoute,
+  ServicesSpecialtyTradeRoute: ServicesSpecialtyTradeRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
+}
+
+const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
+  ServicesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  ContactRoute: ContactRoute,
+  FinancingRoute: FinancingRoute,
+  GalleryRoute: GalleryRoute,
+  ReviewsRoute: ReviewsRoute,
+  ServicesRoute: ServicesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

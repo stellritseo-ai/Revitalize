@@ -1,27 +1,50 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, MapPin, Facebook, Instagram, PhoneCall, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Mail, MapPin, Facebook, Instagram, PhoneCall, Menu, X, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
 import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Home", to: "/" },
-  { label: "About Us", to: "/" },
-  { label: "Services", to: "/" },
-  { label: "Financing", to: "/" },
-  { label: "Project Gallery", to: "/" },
-  { label: "Reviews", to: "/" },
-  { label: "Contact", to: "/" },
+  { label: "About Us", to: "/about" },
+  { 
+    label: "Services", 
+    to: "/services",
+    subItems: [
+      { label: "Construction", to: "/services/construction" },
+      { label: "Remodeling", to: "/services/remodeling" },
+      { label: "Specialty Trade", to: "/services/specialty-trade" },
+      { label: "Finishing & Systems", to: "/services/finishing-systems" }
+    ]
+  },
+  { label: "Financing", to: "/financing" },
+  { label: "Project Gallery", to: "/gallery" },
+  { label: "Reviews", to: "/reviews" },
+  { label: "Contact", to: "/contact" },
 ];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("Home");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-background shadow-[var(--shadow-nav)]">
+    <header 
+      className={`sticky top-[15px] z-50 mx-[15px] mt-[15px] mb-0 rounded-[10px] transition-all duration-300 border ${
+        isScrolled 
+          ? "bg-white/85 backdrop-blur-lg shadow-2xl border-gray-200/50" 
+          : "bg-background shadow-xl border-gray-100/50"
+      }`}
+    >
       {/* Top utility bar */}
       <div
-        className="text-white text-xs sm:text-sm"
+        className="text-white text-xs sm:text-sm rounded-t-[10px] overflow-hidden"
         style={{ background: "var(--gradient-topbar)" }}
       >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 h-10 flex items-center justify-between gap-4">
@@ -62,17 +85,37 @@ export function SiteHeader() {
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">
             {navItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => setActive(item.label)}
-                className={`px-2.5 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-medium whitespace-nowrap transition ${
-                  active === item.label
-                    ? "bg-brand-blue-deep text-white"
-                    : "text-foreground hover:text-brand-blue-deep"
-                }`}
-              >
-                {item.label}
-              </button>
+              <div key={item.label} className="relative group">
+                <Link
+                  to={item.to}
+                  activeProps={{
+                    className: "bg-brand-blue-deep text-white",
+                  }}
+                  inactiveProps={{
+                    className: "text-foreground hover:text-brand-blue-deep",
+                  }}
+                  className="flex items-center px-2.5 xl:px-4 py-2 rounded-full text-[13px] xl:text-sm font-medium whitespace-nowrap transition"
+                >
+                  {item.label}
+                  {item.subItems && <ChevronDown className="w-3.5 h-3.5 ml-1 opacity-70" />}
+                </Link>
+
+                {item.subItems && (
+                  <div className="absolute top-full left-0 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[99]">
+                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 overflow-hidden">
+                      {item.subItems.map((sub) => (
+                        <Link
+                          key={sub.label}
+                          to={sub.to}
+                          className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-blue-deep hover:text-white transition-colors"
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
@@ -87,9 +130,12 @@ export function SiteHeader() {
               </span>
               (602) 816 8177
             </a>
-            <button className="rounded-full px-3 xl:px-5 py-2 text-white font-semibold text-[13px] xl:text-sm bg-brand-blue-deep hover:bg-brand-blue transition whitespace-nowrap">
+            <Link 
+              to="/contact"
+              className="rounded-full px-3 xl:px-5 py-2 text-white font-semibold text-[13px] xl:text-sm bg-brand-blue-deep hover:bg-brand-blue transition whitespace-nowrap"
+            >
               Quote With AI
-            </button>
+            </Link>
           </div>
 
           <button
@@ -105,23 +151,50 @@ export function SiteHeader() {
         {open && (
           <div className="lg:hidden pb-4 space-y-1 border-t pt-3">
             {navItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => { setActive(item.label); setOpen(false); }}
-                className={`block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium ${
-                  active === item.label ? "bg-brand-blue-deep text-white" : "hover:bg-muted"
-                }`}
-              >
-                {item.label}
-              </button>
+              <div key={item.label} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Link
+                    to={item.to}
+                    onClick={() => setOpen(false)}
+                    activeProps={{
+                      className: "bg-brand-blue-deep text-white",
+                    }}
+                    inactiveProps={{
+                      className: "hover:bg-muted text-foreground",
+                    }}
+                    className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                </div>
+                
+                {item.subItems && (
+                  <div className="pl-4 space-y-1 border-l-2 border-brand-blue-deep/20 ml-6 mt-1">
+                    {item.subItems.map((sub) => (
+                      <Link
+                        key={sub.label}
+                        to={sub.to}
+                        onClick={() => setOpen(false)}
+                        className="block w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-muted transition-colors"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
             <div className="pt-2 flex flex-col gap-2">
               <a href="tel:6028168177" className="rounded-full px-4 py-2.5 text-white font-semibold text-sm text-center" style={{ background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))" }}>
                 (602) 816 8177
               </a>
-              <button className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep">
+              <Link 
+                to="/contact"
+                onClick={() => setOpen(false)}
+                className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
+              >
                 Quote With AI
-              </button>
+              </Link>
             </div>
           </div>
         )}
