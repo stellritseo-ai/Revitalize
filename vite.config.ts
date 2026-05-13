@@ -1,23 +1,23 @@
 import { defineConfig } from "vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
   plugins: [
-    tanstackStart({
-      server: {
-        preset: "vercel",
-      },
-      prerender: {
-        routes: ["/"],
-      },
+    TanStackRouterVite({
+      routesDirectory: "./src/routes",
+      generatedRouteTree: "./src/routeTree.gen.ts",
+      routeFilePrefix: "services.",
     }),
-    viteReact(),
+    react(),
     tailwindcss(),
     tsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
   ],
+  build: {
+    outDir: "dist",
+  },
 });
