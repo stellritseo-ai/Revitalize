@@ -1,5 +1,5 @@
 import { Video, BadgeCheck, ThumbsUp } from "lucide-react";
-import processBg from "@/assets/process-bg.jpg";
+import processBg from "@/assets/process-bg.png";
 import sealPhoenix from "@/assets/seal-phoenix.png";
 import sealClearwater from "@/assets/seal-clearwater.png";
 import sealScottsdale from "@/assets/seal-scottsdale.png";
