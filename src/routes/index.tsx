@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { HeroBanner } from "@/components/HeroBanner";
 import { WelcomeSection } from "@/components/WelcomeSection";
+import { ProcessSection } from "@/components/ProcessSection";
 
 export const Route = createFileRoute("/")({
   component: Index,
