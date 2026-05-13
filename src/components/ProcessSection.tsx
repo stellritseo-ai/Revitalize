@@ -44,14 +44,14 @@ export function ProcessSection() {
   const loop = [...seals, ...seals];
 
   return (
-    <section className="relative w-full overflow-hidden text-white">
+    <section className="relative isolate w-full overflow-hidden text-white">
       {/* Background */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 z-0">
         <img
           src={processBg}
           alt=""
           aria-hidden="true"
-          loading="lazy"
+          loading="eager"
           width={1920}
           height={1280}
           className="h-full w-full object-cover"
@@ -59,7 +59,7 @@ export function ProcessSection() {
         <div className="absolute inset-0 bg-[#0b1626]/40" />
       </div>
 
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 pt-16 lg:pt-20 pb-10 lg:pb-14">
+      <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 pt-16 lg:pt-20 pb-10 lg:pb-14">
         {/* Heading */}
         <div className="flex flex-col items-center text-center">
           <div
