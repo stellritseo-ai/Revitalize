@@ -15,6 +15,7 @@ function Index() {
       <main>
         <HeroBanner />
         <WelcomeSection />
+        <ProcessSection />
       </main>
     </div>
   );
