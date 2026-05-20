@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import React, { useState, useEffect } from "react";
-import { 
-  HardHat, Ruler, Building2, CheckCircle2, ShieldCheck, 
-  ClipboardCheck, Truck, Hammer, ArrowRight, Video, 
+import {
+  HardHat, Ruler, Building2, CheckCircle2, ShieldCheck,
+  ClipboardCheck, Truck, Hammer, ArrowRight, Video,
   MapPin, Phone, Mail, ChevronDown,
   Construction, Paintbrush, Zap, Droplets, Home,
   Shield, Users, Clock, CreditCard, Search, Upload,
@@ -33,9 +33,9 @@ function AzKb1DualBuildingPage() {
       {/* 1. Cinematic Hero Section */}
       <section className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden m-[15px] rounded-[10px]">
         <div className="absolute inset-0">
-          <img 
-            src="/service-1.jpg" 
-            alt="KB-1 Dual Building Construction" 
+          <img
+            src="/service-1.jpg"
+            alt="KB-1 Dual Building Construction"
             className="w-full h-full object-cover transform scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0A2B63]/90 via-[#0A2B63]/70 to-[#0A2B63]/90" />
@@ -44,9 +44,9 @@ function AzKb1DualBuildingPage() {
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-20 left-20 w-96 h-96 border-l border-t border-white/30" />
           <div className="absolute bottom-20 right-20 w-96 h-96 border-r border-b border-white/30" />
-          <div className="absolute inset-0" style={{ 
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', 
-            backgroundSize: '40px 40px' 
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '40px 40px'
           }} />
         </div>
 
@@ -56,11 +56,11 @@ function AzKb1DualBuildingPage() {
               <span className="w-2 h-2 bg-brand-orange rounded-full animate-pulse" />
               <span className="text-brand-orange text-xs font-bold uppercase tracking-widest">Licensed for Residential & Commercial</span>
             </div>
-            
+
             <h1 className="text-[35px] md:text-5xl font-black text-white mb-6 leading-tight uppercase tracking-tight">
               AZ KB-1 Dual Building <span className="text-brand-orange">Contractor</span>
             </h1>
-            
+
             <p className="text-white/80 text-lg md:text-xl max-w-4xl mx-auto mb-10 leading-relaxed font-medium">
               Arizona Premiere Construction Group holds the KB-1 license, combining <span className="text-white font-bold">B General Residential</span> and <span className="text-white font-bold">B-1 General Commercial Contractor</span> authority. We manage your entire project — from new homes and kitchen remodels to office build-outs and retail renovations. <span className="text-brand-orange font-bold">ROC #328501</span>.
             </p>
@@ -82,9 +82,9 @@ function AzKb1DualBuildingPage() {
 
       {/* 2. Introduction Section */}
       <section className="py-[100px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-[20px] bg-white relative overflow-hidden shadow-sm border border-gray-100">
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ 
-          backgroundImage: 'linear-gradient(#0A2B63 1px, transparent 1px), linear-gradient(90deg, #0A2B63 1px, transparent 1px)', 
-          backgroundSize: '40px 40px' 
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+          backgroundImage: 'linear-gradient(#0A2B63 1px, transparent 1px), linear-gradient(90deg, #0A2B63 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
         }} />
 
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 relative z-10">
@@ -92,7 +92,7 @@ function AzKb1DualBuildingPage() {
             <div className="relative z-10 rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white">
               <img src="/g1.jpg" alt="Dual Building Contractor" className="w-full h-full object-cover" />
             </div>
-            
+
             <div className="absolute -bottom-10 -left-10 bg-[#0A2B63] p-8 rounded-3xl text-white shadow-2xl hidden md:block">
               <span className="text-4xl font-black block mb-1">KB-1</span>
               <span className="text-xs opacity-60 uppercase font-bold tracking-widest">Dual License Authority</span>
@@ -158,11 +158,11 @@ function AzKb1DualBuildingPage() {
 
       {/* 4. Commercial Services (B-1 License) */}
       <section className="py-[100px] px-4 md:px-8 mx-[15px] rounded-[20px] bg-[#0A2B63] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ 
-          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)', 
-          backgroundSize: '80px 80px' 
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
+          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
+          backgroundSize: '80px 80px'
         }} />
-        
+
         <div className="max-w-7xl mx-auto relative z-10 text-center mb-20">
           <span className="text-brand-orange font-bold tracking-widest uppercase text-xs mb-4 block">B-1 General Commercial Contractor</span>
           <h2 className="text-4xl md:text-6xl font-black text-[#FFFFFF] mb-6">Commercial Construction</h2>
@@ -255,7 +255,7 @@ function AzKb1DualBuildingPage() {
       </section>
 
       {/* 7. What Our License Does NOT Cover */}
-      <section className="py-[100px] px-4 md:px-8">
+      {/* <section className="py-[100px] px-4 md:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-red-500 font-bold tracking-widest uppercase text-xs mb-4 block">Limitations</span>
@@ -292,7 +292,7 @@ function AzKb1DualBuildingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* 8. Service Areas & Why Choose Us */}
       <section className="py-[100px] px-4 md:px-8 mx-[15px] rounded-[20px] bg-[#0A2B63] relative overflow-hidden">
@@ -337,23 +337,23 @@ function AzKb1DualBuildingPage() {
             </div>
 
             {[
-              { 
-                step: "1", 
-                title: "Share Your Vision", 
+              {
+                step: "1",
+                title: "Share Your Vision",
                 desc: "Schedule a video meeting or in-person consult. Upload blueprints, photos, or sketches. Discuss budget and timeline.",
                 icon: <Upload />,
                 bg: "bg-blue-50"
               },
-              { 
-                step: "2", 
-                title: "Approve the Plan", 
+              {
+                step: "2",
+                title: "Approve the Plan",
                 desc: "Review our transparent quote. We handle permits and coordinate all subcontractors (electrical, plumbing, HVAC, etc.).",
                 icon: <ClipboardCheck />,
                 bg: "bg-orange-50"
               },
-              { 
-                step: "3", 
-                title: "We Manage, You Enjoy", 
+              {
+                step: "3",
+                title: "We Manage, You Enjoy",
                 desc: "We supervise every trade, manage the budget, and deliver a finished project. Final walkthrough – then enjoy your new space.",
                 icon: <Sparkles />,
                 bg: "bg-teal-50"
@@ -418,7 +418,7 @@ function AzKb1DualBuildingPage() {
             <h2 className="text-4xl md:text-5xl font-black text-[#1E110A] mb-8 leading-tight">
               Ready to Start Your <span className="text-brand-orange">Residential or Commercial</span> Project?
             </h2>
-            
+
             <div className="bg-[#0A2B63] p-10 rounded-[3rem] text-white relative overflow-hidden">
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-8">
@@ -477,7 +477,7 @@ function AzKb1DualBuildingPage() {
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">Project Address (City)</label>
                 <input type="text" placeholder="e.g. Chandler, AZ" className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-[#0A2B63] transition-all outline-none" />
               </div>
-              
+
               <div className="md:col-span-2 p-8 border-2 border-dashed border-gray-200 rounded-[2rem] bg-white flex flex-col items-center justify-center gap-4 group hover:border-brand-orange transition-colors cursor-pointer">
                 <Upload className="w-8 h-8 text-gray-300 group-hover:text-brand-orange transition-colors" />
                 <div className="text-center">
