@@ -226,7 +226,7 @@ function SpecialtyTradePage() {
           <div className="flex flex-col lg:flex-row justify-between items-end mb-20 gap-8">
             <div className="text-left">
               <span className="text-brand-orange font-bold tracking-widest uppercase text-xs mb-4 block">Every Trade, Mastered</span>
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-6">Complete Trade Management</h2>
+              <h2 className="text-4xl md:text-6xl font-black text-[#FFFFFF] mb-6">Complete Trade Management</h2>
               <div className="flex items-center gap-3 text-white/60 font-bold">
                 <span className="w-12 h-1 bg-brand-orange rounded-full" />
                 <p>We eliminate the headache of hiring multiple specialty contractors.</p>
@@ -279,7 +279,7 @@ function SpecialtyTradePage() {
                 cta: "Need drywall work?"
               }
             ].map((capability, i) => (
-              <div key={i} className="group bg-white/5 backdrop-blur-sm border border-white/10 p-10 rounded-[2.5rem] hover:bg-white hover:text-[#0A2B63] transition-all duration-500">
+              <div key={i} className="group bg-white/5 backdrop-blur-sm border border-white/10 p-10 rounded-[2.5rem] hover:bg-white hover:text-[#0A2B63] text-[#FFFFFF] transition-all duration-500">
                 <div className="flex items-start gap-6 mb-8">
                   <div className="bg-white/10 w-20 h-20 rounded-2xl flex items-center justify-center text-brand-orange group-hover:bg-[#0A2B63]/10 transition-all">
                     {React.cloneElement(capability.icon as React.ReactElement, { className: "w-10 h-10" })}
