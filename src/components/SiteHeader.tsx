@@ -10,10 +10,13 @@ const navItems = [
     label: "Services", 
     to: "/services",
     subItems: [
+      { label: "Residential Construction", to: "/services/residential" },
+      { label: "Commercial Construction", to: "/services/commercial" },
       { label: "Construction", to: "/services/construction" },
       { label: "Remodeling", to: "/services/remodeling" },
       { label: "Specialty Trade", to: "/services/specialty-trade" },
-      { label: "Finishing & Systems", to: "/services/finishing-systems" }
+      { label: "Finishing & Systems", to: "/services/finishing-systems" },
+      { label: "AZ KB-1 Dual Building", to: "/services/az-kb1-dual-building" }
     ]
   },
   { label: "Financing", to: "/financing" },

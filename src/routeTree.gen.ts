@@ -18,9 +18,12 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ServicesSpecialtyTradeRouteImport } from './routes/services.specialty-trade'
+import { Route as ServicesResidentialRouteImport } from './routes/services.residential'
 import { Route as ServicesRemodelingRouteImport } from './routes/services.remodeling'
 import { Route as ServicesFinishingSystemsRouteImport } from './routes/services.finishing-systems'
 import { Route as ServicesConstructionRouteImport } from './routes/services.construction'
+import { Route as ServicesCommercialRouteImport } from './routes/services.commercial'
+import { Route as ServicesAzKb1DualBuildingRouteImport } from './routes/services.az-kb1-dual-building'
 
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
@@ -67,6 +70,11 @@ const ServicesSpecialtyTradeRoute = ServicesSpecialtyTradeRouteImport.update({
   path: '/specialty-trade',
   getParentRoute: () => ServicesRoute,
 } as any)
+const ServicesResidentialRoute = ServicesResidentialRouteImport.update({
+  id: '/residential',
+  path: '/residential',
+  getParentRoute: () => ServicesRoute,
+} as any)
 const ServicesRemodelingRoute = ServicesRemodelingRouteImport.update({
   id: '/remodeling',
   path: '/remodeling',
@@ -83,6 +91,17 @@ const ServicesConstructionRoute = ServicesConstructionRouteImport.update({
   path: '/construction',
   getParentRoute: () => ServicesRoute,
 } as any)
+const ServicesCommercialRoute = ServicesCommercialRouteImport.update({
+  id: '/commercial',
+  path: '/commercial',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const ServicesAzKb1DualBuildingRoute =
+  ServicesAzKb1DualBuildingRouteImport.update({
+    id: '/az-kb1-dual-building',
+    path: '/az-kb1-dual-building',
+    getParentRoute: () => ServicesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,9 +111,12 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof GalleryRoute
   '/reviews': typeof ReviewsRoute
   '/services': typeof ServicesRouteWithChildren
+  '/services/az-kb1-dual-building': typeof ServicesAzKb1DualBuildingRoute
+  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/residential': typeof ServicesResidentialRoute
   '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
   '/services/': typeof ServicesIndexRoute
 }
@@ -105,9 +127,12 @@ export interface FileRoutesByTo {
   '/financing': typeof FinancingRoute
   '/gallery': typeof GalleryRoute
   '/reviews': typeof ReviewsRoute
+  '/services/az-kb1-dual-building': typeof ServicesAzKb1DualBuildingRoute
+  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/residential': typeof ServicesResidentialRoute
   '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
   '/services': typeof ServicesIndexRoute
 }
@@ -120,9 +145,12 @@ export interface FileRoutesById {
   '/gallery': typeof GalleryRoute
   '/reviews': typeof ReviewsRoute
   '/services': typeof ServicesRouteWithChildren
+  '/services/az-kb1-dual-building': typeof ServicesAzKb1DualBuildingRoute
+  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
+  '/services/residential': typeof ServicesResidentialRoute
   '/services/specialty-trade': typeof ServicesSpecialtyTradeRoute
   '/services/': typeof ServicesIndexRoute
 }
@@ -136,9 +164,12 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/reviews'
     | '/services'
+    | '/services/az-kb1-dual-building'
+    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
     | '/services/remodeling'
+    | '/services/residential'
     | '/services/specialty-trade'
     | '/services/'
   fileRoutesByTo: FileRoutesByTo
@@ -149,9 +180,12 @@ export interface FileRouteTypes {
     | '/financing'
     | '/gallery'
     | '/reviews'
+    | '/services/az-kb1-dual-building'
+    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
     | '/services/remodeling'
+    | '/services/residential'
     | '/services/specialty-trade'
     | '/services'
   id:
@@ -163,9 +197,12 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/reviews'
     | '/services'
+    | '/services/az-kb1-dual-building'
+    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
     | '/services/remodeling'
+    | '/services/residential'
     | '/services/specialty-trade'
     | '/services/'
   fileRoutesById: FileRoutesById
@@ -245,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSpecialtyTradeRouteImport
       parentRoute: typeof ServicesRoute
     }
+    '/services/residential': {
+      id: '/services/residential'
+      path: '/residential'
+      fullPath: '/services/residential'
+      preLoaderRoute: typeof ServicesResidentialRouteImport
+      parentRoute: typeof ServicesRoute
+    }
     '/services/remodeling': {
       id: '/services/remodeling'
       path: '/remodeling'
@@ -266,21 +310,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesConstructionRouteImport
       parentRoute: typeof ServicesRoute
     }
+    '/services/commercial': {
+      id: '/services/commercial'
+      path: '/commercial'
+      fullPath: '/services/commercial'
+      preLoaderRoute: typeof ServicesCommercialRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/services/az-kb1-dual-building': {
+      id: '/services/az-kb1-dual-building'
+      path: '/az-kb1-dual-building'
+      fullPath: '/services/az-kb1-dual-building'
+      preLoaderRoute: typeof ServicesAzKb1DualBuildingRouteImport
+      parentRoute: typeof ServicesRoute
+    }
   }
 }
 
 interface ServicesRouteChildren {
+  ServicesAzKb1DualBuildingRoute: typeof ServicesAzKb1DualBuildingRoute
+  ServicesCommercialRoute: typeof ServicesCommercialRoute
   ServicesConstructionRoute: typeof ServicesConstructionRoute
   ServicesFinishingSystemsRoute: typeof ServicesFinishingSystemsRoute
   ServicesRemodelingRoute: typeof ServicesRemodelingRoute
+  ServicesResidentialRoute: typeof ServicesResidentialRoute
   ServicesSpecialtyTradeRoute: typeof ServicesSpecialtyTradeRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
 const ServicesRouteChildren: ServicesRouteChildren = {
+  ServicesAzKb1DualBuildingRoute: ServicesAzKb1DualBuildingRoute,
+  ServicesCommercialRoute: ServicesCommercialRoute,
   ServicesConstructionRoute: ServicesConstructionRoute,
   ServicesFinishingSystemsRoute: ServicesFinishingSystemsRoute,
   ServicesRemodelingRoute: ServicesRemodelingRoute,
+  ServicesResidentialRoute: ServicesResidentialRoute,
   ServicesSpecialtyTradeRoute: ServicesSpecialtyTradeRoute,
   ServicesIndexRoute: ServicesIndexRoute,
 }
