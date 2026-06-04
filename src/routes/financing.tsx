@@ -11,10 +11,10 @@ export const Route = createFileRoute("/financing")({
 function Financing() {
   return (
     <main>
-      <PageHero 
-        title="Financing Options" 
+      <PageHero
+        title="Financing Options"
         subtitle="Flexible, competitive financing options tailored to your budget."
-        image="/service-3.jpg" 
+        image="/service-3.jpg"
       />
       <FinancingSection />
       <FaqSection />

@@ -1,110 +1,106 @@
 import {
-  Award,
-  ShieldCheck,
-  Settings,
-  MonitorPlay,
+  Clock,
   CircleDollarSign,
-  Bot,
-  Package
+  Home,
+  Hammer,
+  MapPin,
+  MessageSquare,
+  Package,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import whyChooseUsComposite from "@/assets/why-choose-us-composite.png";
 
 const features = [
   {
-    icon: Award,
-    title: "6+ Years Local Experience",
-    desc: "Deep expertise across the Valley's neighborhoods and codes."
-  },
-  {
-    icon: ShieldCheck,
-    title: "Licensed, Insured & Bonded",
-    desc: "ROC #328501 — fully credentialed for your peace of mind."
-  },
-  {
-    icon: Settings,
-    title: "End-to-End Coordination",
-    desc: "One trusted team manages every trade and timeline."
-  },
-  {
-    icon: MonitorPlay,
-    title: "Video Meetings + File Uploads",
-    desc: "Modern, transparent collaboration from day one."
+    icon: Clock,
+    title: "20+ Years Experience",
+    desc: "Veteran builders, every project.",
   },
   {
     icon: CircleDollarSign,
-    title: "Financing Available",
-    desc: "Flexible options to make your project feel effortless."
+    title: "Free Estimates",
+    desc: "Clear pricing, no obligation.",
   },
   {
-    icon: Bot,
-    title: "AI-Assisted Estimates",
-    desc: "Faster, smarter scoping — no surprises later."
-  }
+    icon: Home,
+    title: "Residential Specialists",
+    desc: "Homes are all we do.",
+  },
+  {
+    icon: Hammer,
+    title: "Quality Craftsmanship",
+    desc: "Built to outlast trends.",
+  },
+  {
+    icon: MapPin,
+    title: "Local & Trusted",
+    desc: "Proudly serving 50 miles.",
+  },
+  {
+    icon: MessageSquare,
+    title: "Transparent Communication",
+    desc: "You're informed at every step.",
+  },
 ];
 
 export function WhyChooseUsSection() {
   return (
-    <section className="relative overflow-hidden bg-[#181B34] py-[40px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-[10px]">
+    <section className="relative overflow-hidden bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
       {/* Background glowing blobs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#2B40DE]/40 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-[#74358C]/40 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-copper/5 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-silver/20 blur-[140px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
         {/* Left Column: Image */}
-        <div className="w-full h-auto flex items-center justify-center">
+        <div className="w-full h-auto flex items-center justify-center relative">
+          <div className="absolute inset-0 bg-copper/5 blur-2xl rounded-full scale-90 pointer-events-none" />
           <img
-            src="/why-choose-us-composite.png"
-            alt="Why Choose Us"
-            className="w-full h-auto object-contain rounded-[2rem] shadow-2xl"
+            src={whyChooseUsComposite}
+            alt="Revitalize Real Estate craftsmanship"
+            loading="lazy"
+            className="w-full h-auto object-contain rounded-[2rem] shadow-2xl relative z-10 transition-transform duration-500 hover:scale-[1.01]"
           />
         </div>
 
         {/* Right Column: Content */}
         <div className="flex flex-col">
           {/* Badge */}
-          <div className="w-fit inline-flex items-center justify-center px-5 py-1.5 rounded-full bg-gradient-to-r from-white/5 to-[#D96B3A]/60 border border-white/20 text-white text-sm font-medium mb-6">
+          <div className="w-fit inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest mb-6 text-copper">
+            <Sparkles className="h-3.5 w-3.5 text-copper animate-pulse" />
             Why Choose Us
           </div>
 
-          <h2 className="text-[37px] font-bold text-white mb-10 tracking-tight">
-            Premium Results, Zero Compromise.
+          <h2 className="text-3xl sm:text-4xl md:text-[46px] md:leading-tight font-bold tracking-tight text-charcoal mb-[20px] font-serif">
+            Why Homeowners Choose Us
           </h2>
+          <p className="text-base sm:text-lg text-charcoal-soft/95 mb-10 font-sans font-medium">
+            A renovation partner you can actually trust.
+          </p>
 
           {/* Features Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8 mb-8">
             {features.map((feature, idx) => (
               <div key={idx} className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <feature.icon className="w-8 h-8 text-white/90" strokeWidth={1.5} />
+                  <feature.icon className="w-7 h-7 text-copper" strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold text-base mb-1.5">{feature.title}</h4>
-                  <p className="text-white/60 text-sm leading-relaxed">{feature.desc}</p>
+                  <h4 className="text-charcoal font-semibold text-base mb-1.5">{feature.title}</h4>
+                  <p className="text-charcoal-soft/85 text-sm leading-relaxed">{feature.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Trusted Partners Feature */}
-          <div className="flex gap-4 mb-10 pt-4 border-t border-white/10">
-            <div className="flex-shrink-0">
-              <Package className="w-8 h-8 text-white/90" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h4 className="text-white font-semibold text-base mb-1.5">Trusted Supplier Partners</h4>
-              <p className="text-white/60 text-sm leading-relaxed">
-                ABC Supply · Beazer Precast · ProBuild · Sherwin-Williams · Mohawk Flooring · Kohler
-              </p>
-            </div>
-          </div>
-
           {/* Button */}
-          <Link to="/contact" className="w-fit px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D96B3A] to-[#1C3F60] border border-white/20 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg">
-            Talk Your Project With AI
+          <Link
+            to="#"
+            className="w-fit px-8 py-3.5 rounded-full bg-copper hover:bg-copper-deep text-white font-bold text-sm shadow-lg shadow-copper/20 transition-all duration-300"
+          >
+            Get Free Estimate
           </Link>
         </div>
-
       </div>
     </section>
   );

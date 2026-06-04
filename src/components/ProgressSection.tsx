@@ -4,14 +4,14 @@ const progressItems = [
   "Expertise",
   "Quality",
   "Trust",
-  "6 Years Of Experience",
-  "ROC #328501",
+  "20+ Years Of Experience",
+  "Licensed & Insured",
   "Licensed · Insured · Bonded",
 ];
 
 export function ProgressSection() {
   return (
-    <section className="bg-gradient-to-r from-[#0E356A] via-[#49445E] to-[#A84C34] py-[20px] mx-[15px] mt-[15px] rounded-[10px] overflow-hidden">
+    <section className="bg-gradient-to-r from-[#D69873] to-[#975033] py-[20px] mx-[15px] mt-[15px] rounded-[10px] overflow-hidden border border-white/10">
       <div className="flex w-max animate-marquee !mt-0">
         {/* We duplicate the list 4 times to ensure it covers wide screens and seamlessly loops */}
         {[...Array(4)].map((_, arrayIndex) => (

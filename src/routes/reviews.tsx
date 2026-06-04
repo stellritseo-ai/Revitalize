@@ -10,10 +10,10 @@ export const Route = createFileRoute("/reviews")({
 function Reviews() {
   return (
     <main>
-      <PageHero 
-        title="Client Reviews" 
+      <PageHero
+        title="Client Reviews"
         subtitle="Trusted by Arizona Homeowners & Businesses"
-        image="/hero-3.png" 
+        image="/hero-3.png"
       />
       <TestimonialSection variant="grid" />
       <QuoteSection />

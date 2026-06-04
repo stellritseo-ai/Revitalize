@@ -1,102 +1,204 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { ChevronDown, Sparkles, Play, Pause } from "lucide-react";
+import faqVideo from "@/assets/video/a0ff905f-0202-430d-9457-5580e4981a8e.mp4";
 
 const faqs = [
   {
-    question: "Are you licensed in Arizona?",
-    answer: "Yes — we're a fully licensed Arizona general contractor (ROC #328501), insured, and bonded for both residential and commercial work."
+    question: "Do you handle both real estate and renovations?",
+    answer:
+      "Absolutely. We specialize in pre-listing renovations that boost your home’s value and market appeal. From kitchens and bathrooms to curb appeal, we tailor upgrades that help you sell for top dollar.",
   },
   {
-    question: "Do you handle residential & commercial?",
-    answer: "Absolutely. Our team is equipped to handle everything from custom home builds and kitchen remodels to large-scale commercial tenant improvements."
+    question: "I’m a first-time buyer—can you help with that?",
+    answer:
+      "Yes, we guide first-time homebuyers through every step, from financing options to finding the right home. We’ll even help you with post-purchase improvements to truly make it yours.",
   },
   {
-    question: "Can I schedule a video meeting?",
-    answer: "Yes, we offer virtual consultations for your convenience to discuss your project scope, budget, and timeline before an on-site visit."
+    question: "Do you offer home improvement consultations without a real estate transaction?",
+    answer:
+      "Yes. If you’re not buying or selling but just want to renovate or update your current home, we offer standalone design and remodeling services.",
   },
   {
-    question: "Do you offer financing?",
-    answer: "We partner with several local lenders to offer flexible financing options for qualified homeowners. Contact us for more details."
+    question: "What types of renovations do you specialize in?",
+    answer:
+      "We handle kitchen remodels, bathroom upgrades, flooring, cabinetry, painting, drywall, and more. We also offer full home makeovers and investment property rehabs.",
   },
   {
-    question: "How do you handle electrical & plumbing?",
-    answer: "We have an in-house team of licensed electricians and plumbers, and we also partner with top-tier specialized sub-contractors when needed, ensuring all work is fully permitted and up to code."
+    question: "How do I get started with your team?",
+    answer:
+      "It’s easy—just contact us for a free consultation. We’ll evaluate your needs, whether it’s buying, selling, or renovating, and create a customized game plan.",
   },
   {
-    question: "Where do materials come from?",
-    answer: "We source our materials from trusted local Arizona suppliers as well as premium national brands to ensure the highest quality and durability for your build."
-  }
+    question: "Do you work with investors or flippers?",
+    answer:
+      "Yes, we work with real estate investors and property flippers throughout Tampa Bay. We provide renovation estimates, design input, and listing services to help you maximize ROI.",
+  },
+  {
+    question: "How do I know if it’s the right time to buy or sell in Tampa?",
+    answer:
+      "We monitor Tampa Bay market trends daily. Whether you’re buying or selling, we’ll give you a clear, no-fluff breakdown of timing, pricing, and competition so you can make the smartest move.",
+  },
+  {
+    question: "What’s included when I list my home with Revitalize Real Estate?",
+    answer:
+      "You get more than a listing—we offer market strategy, pre-listing improvements, professional marketing, cleaning, staging guidance, and expert negotiation to help you sell fast and for top dollar.",
+  },
+  {
+    question: "I need to buy and sell at the same time. Can you help with that?",
+    answer:
+      "Absolutely. We’ll create a plan to coordinate your sale and purchase so you’re never stuck between homes. We handle logistics, timing, and even offer temporary housing solutions if needed.",
+  },
+  {
+    question: "How much is my home worth?",
+    answer:
+      "We provide a free, no-obligation comparative market analysis (CMA) that shows your home’s current market value—and how to increase it if needed before listing.",
+  },
+  {
+    question: "Can I buy a fixer-upper and have you renovate it?",
+    answer:
+      "Yes, that’s our specialty. We help you find the right property and then handle everything from design to renovation—so you get your dream home or investment at the right price.",
+  },
+  {
+    question: "What types of financing do you help buyers with?",
+    answer:
+      "We connect buyers with trusted lenders offering conventional, FHA, VA, and even 100% financing programs. We’ll help you explore the best option based on your goals and budget.",
+  },
+  {
+    question: "How do you market homes for sale?",
+    answer:
+      "We use a high-impact mix of professional photography, video tours, online exposure, open houses, and targeted digital ads—plus exclusive buyer lists and local agent networks.",
+  },
+  {
+    question: "I’m relocating to Tampa—can you help with that?",
+    answer:
+      "Absolutely. Whether you’re moving from across Florida, out of state, or internationally, we’ve got you covered. We offer remote consultations, area insights, and virtual home tours to make your transition seamless. And if you’re relocating from another country, we can connect you with one of our trusted global real estate partners to help you sell your current property or coordinate your move with confidence. Revitalize Real Estate is part of a worldwide network—your move starts here.",
+  },
 ];
 
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch((err) => console.log(err));
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
 
   return (
-    <section className="bg-gradient-to-r from-[#F0F6FE] to-[#FDF7EE] py-[40px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-[10px]">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
-
+    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
+      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
         {/* Left Column */}
-        <div className="w-full lg:w-[500px] shrink-0 flex flex-col">
+        <div className="w-full lg:w-[480px] shrink-0 flex flex-col lg:sticky lg:top-8 self-start">
           {/* Badge */}
-          <div className="inline-flex rounded-full bg-gradient-to-r from-[#12305B] to-[#C75A2A] mb-6 self-start shadow-sm">
-            <div className="px-6 py-1.5 text-white text-[15px] font-bold tracking-wide">
-              FAQ's
-            </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest mb-6 text-copper self-start">
+            <Sparkles className="h-3.5 w-3.5 text-copper" />
+            FAQ Section
           </div>
 
           {/* Title */}
-          <h2 className="text-3xl md:text-[35px] font-extrabold text-[#0F172A] mb-5 leading-tight tracking-tight">
-            Got Questions? We've Got Answers.
+          <h2 className="text-3xl sm:text-4xl md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif">
+            Got Questions? <span className="text-copper italic font-serif font-bold">We've Got Answers</span>
           </h2>
 
           {/* Description */}
-          <p className="text-gray-700 text-lg mb-10 max-w-lg leading-relaxed font-medium">
-            Everything you need to know before starting your project. Still curious? Reach out anytime.
+          <p className="text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium mb-8 max-w-lg">
+            Everything you need to know before starting your project. Still curious? Reach out
+            anytime.
           </p>
 
-          {/* Image */}
-          <div className="rounded-2xl overflow-hidden shadow-xl w-full max-h-[400px]">
-            <img
-              src="/faq.jpg"
-              alt="Premium Custom Home in Arizona"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000 ease-out"
+          {/* Video Player */}
+          <div className="relative rounded-2xl overflow-hidden shadow-xl w-full aspect-[4/3] max-h-[360px] border border-charcoal/5 group bg-[#0d1117] cursor-pointer">
+            <video
+              ref={videoRef}
+              src={faqVideo}
+              playsInline
+              onEnded={handleEnded}
+              className="w-full h-full object-cover"
+              onClick={togglePlay}
             />
+            {/* Play/Pause Overlay */}
+            <div
+              onClick={togglePlay}
+              className={`absolute inset-0 bg-black/25 flex items-center justify-center transition-opacity duration-300 ${
+                isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+              }`}
+            >
+              <button
+                aria-label={isPlaying ? "Pause video" : "Play video"}
+                className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white transition-all duration-300 transform hover:scale-110 hover:bg-white/35 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
+              >
+                {isPlaying ? (
+                  <Pause className="h-6 w-6 text-white fill-white" />
+                ) : (
+                  <Play className="h-6 w-6 text-white fill-white translate-x-0.5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Right Column - Accordion */}
-        <div className="w-full lg:flex-1 bg-[#FCF9F5] border border-gray-200 rounded-2xl p-6 md:p-10 shadow-sm">
-          <div className="flex flex-col">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="border-b border-gray-200/80 last:border-b-0"
+        {/* Right Column - Accordions Track */}
+        <div className="w-full lg:flex-1 flex flex-col gap-3">
+          {faqs.map((faq, idx) => (
+            <div
+              key={idx}
+              className={`rounded-xl border transition-colors duration-200 ${
+                openIndex === idx
+                  ? "bg-[#faf6f0] border-copper/30 shadow-md shadow-copper/5"
+                  : "bg-white border-charcoal/5 hover:border-charcoal/10"
+              }`}
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
+                className="w-full px-5 py-4 flex items-center justify-between text-left focus:outline-none group"
               >
-                <button
-                  onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
-                  className="w-full p-[15px] flex items-center justify-between text-left focus:outline-none group"
+                <span
+                  className={`text-base font-bold transition-colors pr-8 font-sans ${
+                    openIndex === idx ? "text-charcoal" : "text-charcoal-soft hover:text-copper"
+                  }`}
                 >
-                  <span className="text-[17px] md:text-lg font-bold text-[#0F172A] group-hover:text-[#C75A2A] transition-colors pr-8">
-                    {faq.question}
-                  </span>
-                  <ChevronDown
-                    className={`w-6 h-6 text-[#C75A2A] shrink-0 transition-transform duration-300 ${openIndex === idx ? 'rotate-180' : 'rotate-0'}`}
-                  />
-                </button>
+                  {faq.question}
+                </span>
+                <ChevronDown
+                  className={`w-5 h-5 text-copper shrink-0 transition-transform duration-300 ${
+                    openIndex === idx ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </button>
 
-                <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === idx ? "max-h-48 opacity-100 pb-6" : "max-h-0 opacity-0"
+              {/* Smooth Grid Accordion Wrapper */}
+              <div
+                style={{ willChange: "grid-template-rows" }}
+                className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                  openIndex === idx
+                    ? "grid-rows-[1fr]"
+                    : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div
+                    className={`pb-5 px-5 text-charcoal-soft/90 text-sm leading-relaxed pr-6 font-sans font-medium transition-opacity duration-200 ${
+                      openIndex === idx ? "opacity-100" : "opacity-0"
                     }`}
-                >
-                  <p className="text-gray-700 text-[15px] leading-relaxed pr-8">
+                  >
                     {faq.answer}
-                  </p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-
       </div>
     </section>
   );

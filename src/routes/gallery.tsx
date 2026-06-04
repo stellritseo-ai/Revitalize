@@ -10,10 +10,10 @@ export const Route = createFileRoute("/gallery")({
 function Gallery() {
   return (
     <main>
-      <PageHero 
-        title="Project Gallery" 
+      <PageHero
+        title="Project Gallery"
         subtitle="Craftsmanship on display. Browse our recent work."
-        image="/g1.jpg" 
+        image="/g1.jpg"
       />
       <GallerySection />
       <EstimateSection />
