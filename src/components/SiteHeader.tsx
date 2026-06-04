@@ -220,17 +220,17 @@ export function SiteHeader() {
                 (813) 945-6736
               </a>
               <Link
-                to=#"
-              onClick={() => setOpen(false)}
-              className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
+                to="#"
+                onClick={() => setOpen(false)}
+                className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
               >
-              Real State Service
-            </Link>
-          </div>
+                Real State Service
+              </Link>
+            </div>
 
           </div>
         )}
-    </div>
+      </div>
     </header >
   );
 }
