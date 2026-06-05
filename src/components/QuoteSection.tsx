@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ChevronDown, Send } from "lucide-react";
 import quoteBgVideo from "../assets/video/04b45dfc-4db8-4375-b262-2eef763f0401.mp4";
 
@@ -6,6 +6,49 @@ const inputCls =
   "bg-white/10 border border-white/15 text-white placeholder-white/40 px-4 py-3.5 rounded-xl w-full outline-none focus:border-copper/70 focus:ring-2 focus:ring-copper/25 transition-all duration-200 text-[15px] font-medium";
 
 export function QuoteSection() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    service: "",
+    address: "",
+    message: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = "revitalizerealestate@gmail.com";
+    const subject = `Quote Request: ${formData.name} - ${formData.service}`;
+    const body = `Hello Revitalize Real Estate Team,
+
+I would like to request a quote for my project.
+
+Here are my details:
+- Name: ${formData.name}
+- Email: ${formData.email}
+- Phone: ${formData.phone}
+- Service Requested: ${formData.service}
+- Project Address: ${formData.address || "Not provided"}
+
+Message:
+${formData.message}
+
+Thank you!`;
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+      email
+    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.open(gmailUrl, "_blank");
+  };
+
   return (
     <section className="relative py-[50px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-2xl bg-[#09152A] overflow-hidden">
 
@@ -16,7 +59,7 @@ export function QuoteSection() {
         loop
         playsInline
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: 0.42 }}
+        style={{ opacity: 1 }}
       >
         <source src={quoteBgVideo} type="video/mp4" />
       </video>
@@ -45,6 +88,7 @@ export function QuoteSection() {
               style={{
                 background: "linear-gradient(135deg, rgba(151,80,51,0.7) 0%, rgba(214,152,115,0.5) 100%)",
                 backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
                 boxShadow: "0 2px 12px rgba(214,152,115,0.2)",
               }}
             >
@@ -68,19 +112,27 @@ export function QuoteSection() {
           </h2>
 
           {/* Form */}
-          <form className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
             {/* Row 1: Name + Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 placeholder="Full Name"
                 className={inputCls}
+                required
               />
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Email Address"
                 className={inputCls}
+                required
               />
             </div>
 
@@ -88,24 +140,31 @@ export function QuoteSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
                 placeholder="Phone Number"
                 className={inputCls}
+                required
               />
               <div className="relative">
                 <select
-                  defaultValue=""
+                  name="service"
+                  value={formData.service}
+                  onChange={handleChange}
                   className={inputCls + " appearance-none cursor-pointer"}
                   style={{ colorScheme: "dark" }}
+                  required
                 >
                   <option value="" disabled className="bg-[#09152A]">Select a Service</option>
-                  <option value="buy" className="bg-[#09152A]">Residential Remodeling</option>
-                  <option value="sell" className="bg-[#09152A]">Bathroom Remodeling</option>
-                  <option value="kitchen" className="bg-[#09152A]">Kitchen Remodeling</option>
-                  <option value="bathroom" className="bg-[#09152A]">Floor, Pavers & Carpentry</option>
-                  <option value="full" className="bg-[#09152A]">Real Estate Services</option>
-                  <option value="pre-list" className="bg-[#09152A]">Home evaluation</option>
-                  <option value="invest" className="bg-[#09152A]">PROFESSIONAL CLEANING SERVICES</option>
-                  <option value="consult" className="bg-[#09152A]">Premium Cabinet Sales & Custom Design Services</option>
+                  <option value="Residential Remodeling" className="bg-[#09152A]">Residential Remodeling</option>
+                  <option value="Bathroom Remodeling" className="bg-[#09152A]">Bathroom Remodeling</option>
+                  <option value="Kitchen Remodeling" className="bg-[#09152A]">Kitchen Remodeling</option>
+                  <option value="Floor, Pavers & Carpentry" className="bg-[#09152A]">Floor, Pavers & Carpentry</option>
+                  <option value="Real Estate Services" className="bg-[#09152A]">Real Estate Services</option>
+                  <option value="Home Evaluation" className="bg-[#09152A]">Home evaluation</option>
+                  <option value="Professional Cleaning Services" className="bg-[#09152A]">PROFESSIONAL CLEANING SERVICES</option>
+                  <option value="Premium Cabinet Sales & Custom Design Services" className="bg-[#09152A]">Premium Cabinet Sales & Custom Design Services</option>
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-white/40 pointer-events-none" />
               </div>
@@ -114,15 +173,22 @@ export function QuoteSection() {
             {/* Row 3: Project Address */}
             <input
               type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
               placeholder="Project Address (optional)"
               className={inputCls}
             />
 
             {/* Row 4: Message */}
             <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
               placeholder="Write your message — tell us about your project, timeline, or budget..."
               rows={5}
               className={inputCls + " resize-none"}
+              required
             />
 
             {/* Submit */}
