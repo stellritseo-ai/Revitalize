@@ -158,7 +158,7 @@ export function SiteHeader() {
               to="#"
               className="rounded-full px-3 xl:px-5 py-2 text-white font-semibold text-[13px] xl:text-sm bg-brand-blue-deep hover:bg-brand-blue transition whitespace-nowrap"
             >
-              Real Estate Services
+              Real State Service
             </Link>
           </div>
 
@@ -224,7 +224,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
               >
-                Real Estate Services
+                Real State Service
               </Link>
             </div>
 
