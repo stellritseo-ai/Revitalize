@@ -5,8 +5,7 @@ const progressItems = [
   "Quality",
   "Trust",
   "20+ Years Of Experience",
-  "Licensed & Insured",
-  "Licensed · Insured · Bonded",
+  // "Licensed & Insured",
 ];
 
 export function ProgressSection() {

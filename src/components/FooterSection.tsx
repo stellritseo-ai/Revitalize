@@ -98,14 +98,6 @@ export function FooterSection() {
               Licensed, insured and serving 14+ cities across the Tampa Bay area.
             </p>
 
-            {/* Trust badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/8 px-4 py-2 mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-copper" />
-              <span className="text-copper text-[11px] font-bold uppercase tracking-widest">
-                Licensed · Insured · Bonded
-              </span>
-            </div>
-
             {/* Social icons */}
             <div className="flex items-center gap-2">
               {socials.map(({ icon, label, href }) => (

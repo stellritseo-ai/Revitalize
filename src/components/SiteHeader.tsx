@@ -174,6 +174,26 @@ export function SiteHeader() {
         {/* Mobile nav */}
         {open && (
           <div className="lg:hidden pb-4 space-y-1 border-t pt-3">
+            <div className="pb-3 flex flex-col gap-2 border-b border-gray-100/50 mb-3">
+              <a
+                href="tel:8139456736"
+                className="rounded-full px-4 py-2.5 text-white font-semibold text-sm text-center flex items-center justify-center gap-2"
+                style={{
+                  background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))",
+                }}
+              >
+                <PhoneCall className="h-4 w-4" />
+                (813) 945-6736
+              </a>
+              <Link
+                to="#"
+                onClick={() => setOpen(false)}
+                className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
+              >
+                Real State Service
+              </Link>
+            </div>
+
             {navItems.map((item) => (
               <div key={item.label} className="space-y-1">
                 <div className="flex items-center justify-between">
@@ -208,26 +228,6 @@ export function SiteHeader() {
                 )}
               </div>
             ))}
-            <div className="pt-3 flex flex-col gap-2">
-              <a
-                href="tel:8139456736"
-                className="rounded-full px-4 py-2.5 text-white font-semibold text-sm text-center flex items-center justify-center gap-2"
-                style={{
-                  background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))",
-                }}
-              >
-                <PhoneCall className="h-4 w-4" />
-                (813) 945-6736
-              </a>
-              <Link
-                to="#"
-                onClick={() => setOpen(false)}
-                className="rounded-full px-5 py-2.5 text-white font-semibold text-sm bg-brand-blue-deep text-center"
-              >
-                Real State Service
-              </Link>
-            </div>
-
           </div>
         )}
       </div>
