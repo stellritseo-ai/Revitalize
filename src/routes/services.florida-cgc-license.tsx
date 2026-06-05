@@ -108,7 +108,7 @@ function FloridaCgcLicensePage() {
               <span className="text-white font-bold">B General Residential</span> and{" "}
               <span className="text-white font-bold">Certified Commercial Building Contractor</span>{" "}
               authority. We manage your entire project — from new homes and kitchen remodels to
-              office build-outs and retail renovations.{" "}
+              office build-outs and retail home improvements.{" "}
               <span className="text-brand-orange font-bold">Licensed & Insured</span>.
             </p>
 
@@ -198,7 +198,7 @@ function FloridaCgcLicensePage() {
                     <strong className="text-charcoal">
                       Certified Commercial Building Contractor
                     </strong>{" "}
-                    – For commercial buildings, office build-outs, retail renovations, and
+                    – For commercial buildings, office build-outs, retail home improvements, and
                     commercial remodels.
                   </div>
                 </li>
@@ -240,7 +240,7 @@ function FloridaCgcLicensePage() {
             },
             {
               title: "Kitchen & Bathroom Remodeling",
-              desc: "Full renovations — cabinets, countertops, tile, plumbing coordination, lighting, and flooring.",
+              desc: "Full home improvements — cabinets, countertops, tile, plumbing coordination, lighting, and flooring.",
               icon: <Hammer />,
             },
             {
@@ -308,7 +308,7 @@ function FloridaCgcLicensePage() {
           </h2>
           <p className="text-white/70 max-w-3xl mx-auto text-lg font-medium">
             Under our B-1 license, we construct, remodel, and repair commercial properties. We
-            manage everything from small retail renovations to full office build-outs. You get a
+            manage everything from small retail home improvements to full office build-outs. You get a
             single point of contact for the entire project.
           </p>
         </div>
@@ -332,7 +332,7 @@ function FloridaCgcLicensePage() {
               desc: "Complete interior construction for corporate offices, medical suites, and professional spaces.",
             },
             {
-              title: "Retail Renovations",
+              title: "Retail Home Improvements",
               desc: "Update storefronts, sales floors, break rooms, and customer areas.",
             },
             {
@@ -444,7 +444,7 @@ function FloridaCgcLicensePage() {
             },
             {
               title: "Swimming Pools & Spas",
-              desc: "New pool construction, repairs, and renovations",
+              desc: "New pool construction, repairs, and home improvements",
               icon: <Layout />,
             },
             {

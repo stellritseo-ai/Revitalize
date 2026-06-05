@@ -33,7 +33,7 @@ export function EstimateSection() {
           </h2>
 
           <p className="text-white/85 text-base md:text-lg leading-relaxed font-medium font-sans">
-            Transform your living space with our expert residential remodeling and renovation
+            Transform your living space with our expert residential remodeling and home improvement
             services. From kitchens and bathrooms to whole-home updates, Revitalize Real Estate
             delivers exceptional craftsmanship and transparent communication.
           </p>

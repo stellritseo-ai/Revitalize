@@ -54,7 +54,7 @@ const galleryItems: GalleryItem[] = [
   { id: 103, title: "Luxury Tiled Walk-in Shower", category: "Bathroom", image: bath3, ratio: 1.33, row: 1 },
   { id: 104, title: "Freestanding Soaking Tub", category: "Bathroom", image: bath4, ratio: 1.33, row: 2 },
   { id: 105, title: "Designer Powder Room", category: "Bathroom", image: bath5, ratio: 1.33, row: 2 },
-  { id: 106, title: "Minimalist Bath Renovation", category: "Bathroom", image: bath6, ratio: 0.75, row: 2 },
+  { id: 106, title: "Minimalist Bath Improvement", category: "Bathroom", image: bath6, ratio: 0.75, row: 2 },
 
   // Kitchen
   { id: 201, title: "Modern Open Kitchen", category: "Kitchen", image: kitchen1, ratio: 1.5, row: 1 },
@@ -80,7 +80,7 @@ const galleryItems: GalleryItem[] = [
   { id: 401, title: "Master Bathroom Walkthrough", category: "Video", image: bath5, video: vid1, ratio: 1.33, row: 1 },
   { id: 402, title: "Kitchen Design Tour", category: "Video", image: kitchen5, video: vid2, ratio: 1.33, row: 1 },
   { id: 403, title: "Luxury Backyard Showroom", category: "Video", image: res5, video: vid3, ratio: 1.78, row: 1 },
-  { id: 404, title: "Modern Bath Renovation", category: "Video", image: bath6, video: vid4, ratio: 0.75, row: 2 },
+  { id: 404, title: "Modern Bath Improvement", category: "Video", image: bath6, video: vid4, ratio: 0.75, row: 2 },
   { id: 405, title: "Gourmet Kitchen Walkthrough", category: "Video", image: kitchen6, video: vid5, ratio: 1.5, row: 2 },
   { id: 406, title: "Outdoor Pergola Tour", category: "Video", image: res6, video: vid6, ratio: 1.47, row: 2 },
 ];
@@ -163,7 +163,7 @@ export function GallerySection() {
               <span className="text-copper italic font-serif font-bold">On Display</span>
             </h2>
             <p className="text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium">
-              Explore our recent residential renovations, custom kitchens, luxurious bathrooms, and cinematic walkthroughs.
+              Explore our recent residential home improvements, custom kitchens, luxurious bathrooms, and cinematic walkthroughs.
             </p>
           </div>
 

@@ -60,7 +60,7 @@ const stats = [
     icon: Target,
     value: 500,
     suffix: "+",
-    label: "Homes Sold & Renovated",
+    label: "Homes Sold & Home Improved",
     color: "from-copper/30 to-copper/5",
     glow: "rgba(214,152,115,0.35)",
   },
@@ -210,12 +210,12 @@ export function CounterSection() {
             >
               Trusted
             </span>{" "}
-            Real Estate &amp; Renovation Experts
+            Real Estate &amp; Home Improvement Experts
           </h2>
 
           {/* Description */}
           <p className="text-white/55 text-[16px] leading-[30px] font-medium mb-10 max-w-lg">
-            Whether you're buying, selling, or renovating in Tampa Bay, Revitalize Real Estate
+            Whether you're buying, selling, or doing home improvements in Tampa Bay, Revitalize Real Estate
             delivers results. Our licensed team handles everything — from pre-listing upgrades and
             full remodels to finding your dream home.
           </p>

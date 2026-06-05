@@ -75,7 +75,7 @@ export function WhyChooseUsSection() {
             Why Homeowners Choose Us
           </h2>
           <p className="text-base sm:text-lg text-charcoal-soft/95 mb-10 font-sans font-medium">
-            A renovation partner you can actually trust.
+            A home improvement partner you can actually trust.
           </p>
 
           {/* Features Grid */}

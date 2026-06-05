@@ -75,8 +75,8 @@ const services = [
   },
   {
     title: "Professional Cleaning Services",
-    // lead: "Post-renovation & routine cleanings.",
-    body: "Revitalize Group offers professional cleaning services, including post-renovation, pre-listing, move-in/move-out, and routine cleanings.",
+    // lead: "Post-improvement & routine cleanings.",
+    body: "Revitalize Group offers professional cleaning services, including post-improvement, pre-listing, move-in/move-out, and routine cleanings.",
     icon: Sparkles,
     image: cleaningImg,
     to: "#",
@@ -108,7 +108,7 @@ export function ServicesSection() {
             <h2 className="text-3xl md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif lg:whitespace-nowrap">
               A full suite of{" "}
               <span className="text-copper italic font-serif font-bold">
-                Residential Renovation
+                Residential Home Improvement
               </span>{" "}
               services.
             </h2>

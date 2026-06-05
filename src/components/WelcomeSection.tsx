@@ -30,7 +30,7 @@ export function WelcomeSection() {
             >
               <p style={{ width: "120%", maxWidth: "120%" }}>
                 For more than twenty years, Revitalize Group has helped homeowners reimagine the
-                spaces they live in. We're a residential-only renovation team built on
+                spaces they live in. We're a residential-only home improvement team built on
                 craftsmanship, communication, and a genuine respect for your home.
               </p>
               <p style={{ width: "120%", maxWidth: "120%" }}>

@@ -4,9 +4,9 @@ import faqVideo from "@/assets/video/a0ff905f-0202-430d-9457-5580e4981a8e.mp4";
 
 const faqs = [
   {
-    question: "Do you handle both real estate and renovations?",
+    question: "Do you handle both real estate and home improvements?",
     answer:
-      "Absolutely. We specialize in pre-listing renovations that boost your home’s value and market appeal. From kitchens and bathrooms to curb appeal, we tailor upgrades that help you sell for top dollar.",
+      "Absolutely. We specialize in pre-listing home improvements that boost your home’s value and market appeal. From kitchens and bathrooms to curb appeal, we tailor upgrades that help you sell for top dollar.",
   },
   {
     question: "I’m a first-time buyer—can you help with that?",
@@ -16,22 +16,22 @@ const faqs = [
   {
     question: "Do you offer home improvement consultations without a real estate transaction?",
     answer:
-      "Yes. If you’re not buying or selling but just want to renovate or update your current home, we offer standalone design and remodeling services.",
+      "Yes. If you’re not buying or selling but just want to do home improvements or update your current home, we offer standalone design and remodeling services.",
   },
   {
-    question: "What types of renovations do you specialize in?",
+    question: "What types of home improvements do you specialize in?",
     answer:
       "We handle kitchen remodels, bathroom upgrades, flooring, cabinetry, painting, drywall, and more. We also offer full home makeovers and investment property rehabs.",
   },
   {
     question: "How do I get started with your team?",
     answer:
-      "It’s easy—just contact us for a free consultation. We’ll evaluate your needs, whether it’s buying, selling, or renovating, and create a customized game plan.",
+      "It’s easy—just contact us for a free consultation. We’ll evaluate your needs, whether it’s buying, selling, or doing home improvements, and create a customized game plan.",
   },
   {
     question: "Do you work with investors or flippers?",
     answer:
-      "Yes, we work with real estate investors and property flippers throughout Tampa Bay. We provide renovation estimates, design input, and listing services to help you maximize ROI.",
+      "Yes, we work with real estate investors and property flippers throughout Tampa Bay. We provide home improvement estimates, design input, and listing services to help you maximize ROI.",
   },
   {
     question: "How do I know if it’s the right time to buy or sell in Tampa?",
@@ -54,9 +54,9 @@ const faqs = [
       "We provide a free, no-obligation comparative market analysis (CMA) that shows your home’s current market value—and how to increase it if needed before listing.",
   },
   {
-    question: "Can I buy a fixer-upper and have you renovate it?",
+    question: "Can I buy a fixer-upper and have us do the home improvements?",
     answer:
-      "Yes, that’s our specialty. We help you find the right property and then handle everything from design to renovation—so you get your dream home or investment at the right price.",
+      "Yes, that’s our specialty. We help you find the right property and then handle everything from design to home improvement—so you get your dream home or investment at the right price.",
   },
   {
     question: "What types of financing do you help buyers with?",

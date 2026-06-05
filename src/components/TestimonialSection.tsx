@@ -41,7 +41,7 @@ const testimonials = [
     color: "bg-[#d57c4c]",
   },
   {
-    text: "I was nervous about undertaking a whole-home renovation, but their project manager kept me informed every single day. The transformation is breathtaking.",
+    text: "I was nervous about undertaking a whole-home improvement, but their project manager kept me informed every single day. The transformation is breathtaking.",
     name: "Amanda C.",
     location: "Riverview, FL",
     initial: "A",
@@ -88,7 +88,7 @@ export function TestimonialSection({ variant = "slider" }: { variant?: "slider" 
 
         {/* Subtitle */}
         <p className="max-w-2xl text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium mb-8">
-          See what our clients say about their experience remodeling and renovating their homes with
+          See what our clients say about their experience remodeling and improving their homes with
           Revitalize Real Estate.
         </p>
 

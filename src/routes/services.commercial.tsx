@@ -41,7 +41,7 @@ export const Route = createFileRoute("/services/commercial")({
       {
         name: "description",
         content:
-          "Licensed Certified Commercial Building Contractor in Tampa, FL. Office build-outs, retail renovations, tenant improvements, commercial remodeling & construction management. Licensed & Insured. Free video consult. Call (813) 945-6736.",
+          "Licensed Certified Commercial Building Contractor in Tampa, FL. Office build-outs, retail home improvements, tenant improvements, commercial remodeling & construction management. Licensed & Insured. Free video consult. Call (813) 945-6736.",
       },
     ],
   }),
@@ -203,7 +203,7 @@ function CommercialServicesPage() {
               icon: <Hammer />,
             },
             {
-              title: "Retail Renovations",
+              title: "Retail Home Improvements",
               desc: "Update storefronts, sales floors, break rooms, and customer areas.",
               icon: <TrendingUp />,
             },
@@ -394,7 +394,7 @@ function CommercialServicesPage() {
                   "Corporate offices, medical suites, dental offices, law firms, co-working spaces",
               },
               {
-                type: "Retail Renovations",
+                type: "Retail Home Improvements",
                 examples:
                   "Clothing stores, boutiques, electronics stores, grocery stores, showrooms",
               },
@@ -644,7 +644,7 @@ function CommercialServicesPage() {
               },
               {
                 q: "Do you offer financing for commercial projects?",
-                a: "Yes. Ask us about flexible financing options for qualifying commercial construction and renovation projects.",
+                a: "Yes. Ask us about flexible financing options for qualifying commercial construction and home improvement projects.",
               },
               {
                 q: "Can I see my project progress remotely?",
@@ -759,7 +759,7 @@ function CommercialServicesPage() {
                 </label>
                 <select className="w-full bg-gray-50 border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none appearance-none cursor-pointer">
                   <option>Office Build-Out</option>
-                  <option>Retail Renovation</option>
+                  <option>Retail Home Improvement</option>
                   <option>Tenant Improvement</option>
                   <option>New Commercial Construction</option>
                   <option>Commercial Remodel</option>

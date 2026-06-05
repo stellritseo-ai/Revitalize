@@ -178,7 +178,7 @@ function ResidentialServicesPage() {
             },
             {
               title: "Kitchen Remodeling",
-              desc: "Custom cabinetry, countertops, backsplashes, lighting, flooring, and layout changes. From minor updates to complete gut renovations.",
+              desc: "Custom cabinetry, countertops, backsplashes, lighting, flooring, and layout changes. From minor updates to complete gut home improvements.",
               icon: <Hammer />,
             },
             {
@@ -380,7 +380,7 @@ function ResidentialServicesPage() {
               {
                 type: "Kitchen & Bathroom Remodeling",
                 examples:
-                  "Full gut renovations, cabinet replacements, tile showers, quartz countertops",
+                  "Full gut home improvements, cabinet replacements, tile showers, quartz countertops",
               },
               {
                 type: "Structural Repairs",
@@ -622,7 +622,7 @@ function ResidentialServicesPage() {
               },
               {
                 q: "Do you offer financing?",
-                a: "Yes. Ask us about flexible financing options for kitchen remodels, bathroom renovations, room additions, and new construction.",
+                a: "Yes. Ask us about flexible financing options for kitchen remodels, bathroom home improvements, room additions, and new construction.",
               },
               {
                 q: "Can I see my project progress without being there?",

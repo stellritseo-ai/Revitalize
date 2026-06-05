@@ -94,7 +94,7 @@ export function FooterSection() {
             </div>
 
             <p className="text-white/50 text-[14px] leading-[26px] mb-6 max-w-xs font-medium">
-              Tampa Bay's trusted partner for real estate, remodeling & home renovation.
+              Tampa Bay's trusted partner for real estate, remodeling & home improvement.
               Licensed, insured and serving 14+ cities across the Tampa Bay area.
             </p>
 

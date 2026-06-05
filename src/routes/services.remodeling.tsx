@@ -41,12 +41,12 @@ import * as Accordion from "@radix-ui/react-accordion";
 export const Route = createFileRoute("/services/remodeling")({
   head: () => ({
     title:
-      "Professional Remodeling Services – Kitchen, Bathroom & Home Renovations | Revitalize Real Estate",
+      "Professional Remodeling Services – Kitchen, Bathroom & Home Improvements | Revitalize Real Estate",
     meta: [
       {
         name: "description",
         content:
-          "Licensed remodeling contractor in Tampa, FL. Kitchen remodeling, bathroom renovations, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 945-6736.",
+          "Licensed remodeling contractor in Tampa, FL. Kitchen remodeling, bathroom home improvements, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 945-6736.",
       },
     ],
   }),
@@ -200,7 +200,7 @@ function RemodelingPage() {
             <div className="space-y-6 text-gray-600 text-lg md:text-xl leading-relaxed">
               <p>
                 Your home should grow with you. Whether you're dreaming of a chef-inspired kitchen,
-                a spa-like bathroom, or a whole-home renovation, Revitalize Real Estate brings over
+                a spa-like bathroom, or a whole-home improvement, Revitalize Real Estate brings over
                 six years of local experience to every remodel. We are fully licensed (Licensed &
                 Insured), insured, and bonded — so your home and investment are protected.
               </p>
@@ -232,7 +232,7 @@ function RemodelingPage() {
           {[
             {
               title: "Kitchen Remodeling",
-              desc: "Custom cabinetry, countertops, backsplashes, lighting, flooring, and layout changes. From minor updates to complete gut renovations.",
+              desc: "Custom cabinetry, countertops, backsplashes, lighting, flooring, and layout changes. From minor updates to complete gut home improvements.",
               icon: <Utensils />,
               image: "/service-1.jpg",
             },
@@ -706,7 +706,7 @@ function RemodelingPage() {
                   <option>Kitchen Remodel</option>
                   <option>Bathroom Remodel</option>
                   <option>Whole Home Transformation</option>
-                  <option>Other Renovation</option>
+                  <option>Other Home Improvement</option>
                 </select>
               </div>
               <div className="space-y-2 md:col-span-2">
