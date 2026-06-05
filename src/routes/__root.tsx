@@ -67,6 +67,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+import { Toaster } from "@/components/ui/sonner";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -78,6 +80,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <FooterSection />
+        <Toaster />
       </div>
     </QueryClientProvider>
   );

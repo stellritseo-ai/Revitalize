@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, Send } from "lucide-react";
+import { toast } from "sonner";
 import quoteBgVideo from "../assets/video/04b45dfc-4db8-4375-b262-2eef763f0401.mp4";
 
 const inputCls =
@@ -14,6 +15,7 @@ export function QuoteSection() {
     address: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -22,11 +24,14 @@ export function QuoteSection() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const email = "revitalizerealestate@gmail.com";
-    const subject = `Quote Request: ${formData.name} - ${formData.service}`;
-    const body = `Hello Revitalize Real Estate Team,
+    setIsSubmitting(true);
+
+    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+    const emailTo = "revitalizerealestate@gmail.com";
+    const subjectText = `Quote Request: ${formData.name} - ${formData.service}`;
+    const emailBody = `Hello Revitalize Real Estate Team,
 
 I would like to request a quote for my project.
 
@@ -42,11 +47,62 @@ ${formData.message}
 
 Thank you!`;
 
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-      email
-    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    if (accessKey) {
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            access_key: accessKey,
+            subject: subjectText,
+            from_name: formData.name,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            service: formData.service,
+            address: formData.address || "N/A",
+            message: formData.message,
+          }),
+        });
 
-    window.open(gmailUrl, "_blank");
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          toast.success("Quote Request Sent Successfully!", {
+            description: "We will get back to you within 24 hours.",
+          });
+          setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            service: "",
+            address: "",
+            message: "",
+          });
+        } else {
+          throw new Error(result.message || "Failed to submit form.");
+        }
+      } catch (error: any) {
+        console.error("Web3Forms error:", error);
+        toast.error("Direct submission failed. Redirecting to Gmail compose...");
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+          emailTo
+        )}&su=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(emailBody)}`;
+        window.open(gmailUrl, "_blank");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      toast.info("Opening Gmail to send your request...");
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+        emailTo
+      )}&su=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(emailBody)}`;
+      window.open(gmailUrl, "_blank");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -195,14 +251,15 @@ Thank you!`;
             <div className="flex justify-center mt-3">
               <button
                 type="submit"
-                className="group flex items-center gap-3 px-14 py-4 rounded-full text-white font-bold text-[15px] tracking-wide border border-white/15 shadow-xl hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(214,152,115,0.4)] transition-all duration-300"
+                disabled={isSubmitting}
+                className="group flex items-center gap-3 px-14 py-4 rounded-full text-white font-bold text-[15px] tracking-wide border border-white/15 shadow-xl hover:scale-[1.03] hover:shadow-[0_12px_40px_rgba(214,152,115,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   background: "linear-gradient(135deg, #D69873 0%, #975033 100%)",
                   boxShadow: "0 8px 28px rgba(214,152,115,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
                 }}
               >
                 <Send className="w-4 h-4" />
-                Send Now
+                {isSubmitting ? "Sending..." : "Send Now"}
               </button>
             </div>
 
