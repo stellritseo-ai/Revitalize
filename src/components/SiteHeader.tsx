@@ -32,7 +32,7 @@ const navItems = [
     ],
   },
   { label: "Review", to: "/reviews" },
-  { label: "Blog", to: "/about" },
+  { label: "Blog", to: "/blog" },
   { label: "Contact Us", to: "/contact" },
 ];
 
