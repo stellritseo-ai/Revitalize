@@ -200,7 +200,7 @@ export function CounterSection() {
 
           {/* Heading */}
           <h2 className="font-serif text-4xl md:text-[44px] md:leading-[54px] font-bold text-white mb-5 tracking-tight">
-            Tampa Bay's{" "}
+            Tampa Bay’s{" "}
             <span
               style={{
                 background: "linear-gradient(135deg, #D69873 0%, #975033 100%)",
@@ -208,9 +208,9 @@ export function CounterSection() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Trusted
+              Elite Partner
             </span>{" "}
-            Real Estate &amp; Home Improvement Experts
+            Buy, Sell, and Transform Your Home.
           </h2>
 
           {/* Description */}
@@ -232,7 +232,7 @@ export function CounterSection() {
             <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center ring-1 ring-white/20">
               <Phone className="w-4 h-4 text-white" />
             </div>
-            <span>(813) 945-6736 — Free Consultation</span>
+            <span>Unlock Your Home’s Potential Book Now.</span>
             <ArrowRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform duration-200" />
           </a>
         </div>

@@ -21,19 +21,18 @@ export function HeroBanner() {
 
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 w-full">
-          <div className="max-w-4xl text-white">
+          <div className="max-w-5xl text-white">
             {/* Top Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#1e110a]/50 backdrop-blur px-3 py-1.5 text-[10px] sm:px-4 sm:py-2 sm:text-xs font-black uppercase tracking-widest mb-3 text-[#E2D6CF]">
               <Sparkles className="h-3.5 w-3.5 text-copper animate-pulse" />
-              Residential Home Improvement Specialists
+              Transforming Real Estate
             </div>
 
             {/* Heading */}
-            <h1 className="text-3xl xs:text-4xl sm:text-[50px] leading-tight sm:leading-[70px] font-bold tracking-tight mb-3 font-serif text-white">
-              Transforming Homes <br className="hidden sm:block" />
-              with{" "}
-              <span className="text-copper italic font-serif font-bold">Expert Home Improvement</span> &
-              Remodeling
+            <h1 className="text-3xl xs:text-4xl sm:text-[42px] md:text-[50px] leading-tight sm:leading-[55px] md:leading-[65px] font-bold tracking-tight mb-3 font-serif text-white">
+              Transforming Real Estate with <br />
+              <span className="text-copper italic font-serif font-bold">Expert Home Improvement</span> &{" "}
+              Remodeling.
             </h1>
 
             {/* Description */}

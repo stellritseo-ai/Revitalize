@@ -106,11 +106,11 @@ export function ServicesSection() {
             </div>
 
             <h2 className="text-3xl md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif lg:whitespace-nowrap">
-              A full suite of{" "}
+              A Full Suite of{" "}
               <span className="text-copper italic font-serif font-bold">
-                Residential Home Improvement
+                Real Estate And Home Improvement
               </span>{" "}
-              services.
+              Services
             </h2>
 
             <p className="text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium">
