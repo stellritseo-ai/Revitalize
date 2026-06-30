@@ -49,7 +49,7 @@ export const Route = createFileRoute("/services/florida-cgc-license")({
       {
         name: "description",
         content:
-          "Revitalize Real Estate holds the Florida Certified General Contractor (CGC) License (General Builder (Residential & Commercial)). New homes, remodeling, commercial build-outs, tenant improvements & more. Licensed & Insured. Free video consult. Call (813) 945-6736.",
+          "Revitalize Real Estate holds the Florida Certified General Contractor (CGC) License (General Builder (Residential & Commercial)). New homes, remodeling, commercial build-outs, tenant improvements & more. Licensed & Insured. Free video consult. Call (813) 323-0291.",
       },
     ],
   }),
@@ -722,7 +722,7 @@ function FloridaCgcLicensePage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <Phone className="w-5 h-5 text-brand-orange" />
-                    <span className="font-bold">(813) 945-6736</span>
+                    <span className="font-bold">(813) 323-0291</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-brand-orange" />

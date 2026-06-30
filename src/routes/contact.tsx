@@ -32,7 +32,7 @@ export const Route = createFileRoute("/contact")({
       {
         name: "description",
         content:
-          "Reach out to Revitalize Real Estate for expert home improvement, remodeling, and real estate services in Tampa Bay. Call (813) 945-6736, email, or request a free estimate today. Serving within 50 miles.",
+          "Reach out to Revitalize Real Estate for expert home improvement, remodeling, and real estate services in Tampa Bay. Call (813) 323-0291, email, or request a free estimate today. Serving within 50 miles.",
       },
     ],
   }),
@@ -97,7 +97,7 @@ const faqsData = [
   },
   {
     question: "How quickly can I get a response?",
-    answer: "We typically respond to all online inquiries within 24 hours. For urgent matters, feel free to call or text us directly at (813) 945-6736."
+    answer: "We typically respond to all online inquiries within 24 hours. For urgent matters, feel free to call or text us directly at (813) 323-0291."
   },
   {
     question: "Are your estimates really free?",
@@ -211,7 +211,7 @@ function ContactPage() {
     "@type": "LocalBusiness",
     "name": "Revitalize Real Estate",
     "image": "https://revitalizeretampa.com/logo.png",
-    "telephone": "+18139456736",
+    "telephone": "+18133230291",
     "email": "revitalizerealestate@gmail.com",
     "address": {
       "@type": "PostalAddress",
@@ -328,7 +328,7 @@ function ContactPage() {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="e.g. (813) 945-6736"
+                      placeholder="e.g. (813) 323-0291"
                       className="bg-[#faf8f6] border border-[#efe5da] px-4 py-3 rounded-lg text-charcoal placeholder-charcoal/30 text-sm focus:outline-none focus:border-copper transition"
                     />
                   </div>
@@ -530,8 +530,8 @@ function ContactPage() {
                 {/* Option */}
                 <div className="pb-3 border-b border-[#efe5da]/30 flex flex-col gap-1">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-charcoal-soft">📞 Phone</span>
-                  <a href="tel:8139456736" className="text-sm font-bold text-charcoal hover:text-copper hover:underline transition">
-                    (813) 945-6736
+                  <a href="tel:8133230291" className="text-sm font-bold text-charcoal hover:text-copper hover:underline transition">
+                    (813) 323-0291
                   </a>
                 </div>
                 {/* Option */}
@@ -577,7 +577,7 @@ function ContactPage() {
                   <div>
                     <h5 className="text-[10px] font-extrabold uppercase tracking-wider text-white/40 mb-0.5">Phone & Text</h5>
                     <p className="text-xs text-white/80 leading-relaxed font-medium mb-1">We respond quickly to answer questions or schedule your free consultation.</p>
-                    <a href="tel:8139456736" className="font-bold text-sm text-white hover:underline">(813) 945-6736</a>
+                    <a href="tel:8133230291" className="font-bold text-sm text-white hover:underline">(813) 323-0291</a>
                   </div>
                 </div>
 
@@ -698,8 +698,8 @@ function ContactPage() {
             Don't wait to create the home you deserve. Contact us today and let's start planning your project.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6">
-            <a href="tel:8139456736" className="inline-flex items-center gap-2 bg-copper hover:bg-copper-deep text-white px-7 py-3.5 rounded-full font-bold text-xs shadow-md transition-all hover:scale-[1.03]">
-              <Phone className="w-3.5 h-3.5" /> Call or Text (813) 945-6736
+            <a href="tel:8133230291" className="inline-flex items-center gap-2 bg-copper hover:bg-copper-deep text-white px-7 py-3.5 rounded-full font-bold text-xs shadow-md transition-all hover:scale-[1.03]">
+              <Phone className="w-3.5 h-3.5" /> Call or Text (813) 323-0291
             </a>
             <a href="mailto:revitalizerealestate@gmail.com" className="inline-flex items-center gap-2 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white px-7 py-3.5 rounded-full font-bold text-xs transition-all hover:scale-[1.03]">
               <Mail className="w-3.5 h-3.5 text-copper" /> revitalizerealestate@gmail.com

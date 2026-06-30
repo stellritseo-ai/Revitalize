@@ -776,10 +776,10 @@ function AllPhotosGalleryPage() {
               Get Your Free Estimate <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="tel:8139456736"
+              href="tel:8133230291"
               className="inline-flex items-center gap-2 font-bold text-white hover:text-copper transition text-sm px-6 py-4 bg-white/5 hover:bg-white/10 rounded-full border border-white/10"
             >
-              <Phone className="w-4 h-4 text-copper" /> (813) 945-6736
+              <Phone className="w-4 h-4 text-copper" /> (813) 323-0291
             </a>
           </div>
         </div>

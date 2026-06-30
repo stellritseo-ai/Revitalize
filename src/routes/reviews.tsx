@@ -154,7 +154,7 @@ function Reviews() {
     "@type": "LocalBusiness",
     "name": "Revitalize Real Estate",
     "image": "https://revitalizeretampa.com/logo.png",
-    "telephone": "+18139456736",
+    "telephone": "+18133230291",
     "email": "revitalizerealestate@gmail.com",
     "address": {
       "@type": "PostalAddress",
@@ -372,13 +372,13 @@ function Reviews() {
             <div className="bg-gradient-brand bg-background text-white p-6 md:p-8 rounded-2xl border border-charcoal/5 shadow-md">
               <h4 className="text-sm font-bold text-copper uppercase tracking-wider mb-4">Have a Project in Mind?</h4>
               <div className="space-y-4">
-                <a href="tel:8139456736" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">
+                <a href="tel:8133230291" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">
                   <div className="bg-white/10 w-9 h-9 rounded-lg flex items-center justify-center text-copper shrink-0">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
                     <p className="text-[9px] uppercase tracking-wider text-white/40 leading-none mb-0.5">Call or Text</p>
-                    <span className="font-bold text-sm">(813) 945-6736</span>
+                    <span className="font-bold text-sm">(813) 323-0291</span>
                   </div>
                 </a>
                 <a href="mailto:revitalizerealestate@gmail.com" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">

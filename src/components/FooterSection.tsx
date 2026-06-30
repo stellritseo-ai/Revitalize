@@ -167,7 +167,7 @@ export function FooterSection() {
             <ul className="space-y-4 mb-8">
               <li>
                 <a
-                  href="tel:8139456736"
+                  href="tel:8133230291"
                   className="group flex items-start gap-3 hover:opacity-90 transition-opacity"
                 >
                   <div
@@ -181,7 +181,7 @@ export function FooterSection() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Phone</p>
-                    <p className="text-white text-[14px] font-bold">(813) 945-6736</p>
+                    <p className="text-white text-[14px] font-bold">(813) 323-0291</p>
                   </div>
                 </a>
               </li>

@@ -222,7 +222,7 @@ export function CounterSection() {
 
           {/* CTA Button */}
           <a
-            href="tel:8139456736"
+            href="tel:8133230291"
             style={{
               background: "linear-gradient(135deg, #D69873 0%, #975033 100%)",
               boxShadow: "0 8px 32px rgba(214,152,115,0.35), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",

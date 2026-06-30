@@ -191,10 +191,10 @@ function About() {
                 Request a Free Estimate <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="tel:8139456736"
+                href="tel:8133230291"
                 className="inline-flex items-center gap-2 rounded-full px-8 py-4 border border-charcoal/10 hover:border-charcoal/30 bg-white/50 backdrop-blur hover:bg-white transition-all duration-300 text-charcoal font-bold text-sm hover:scale-[1.02]"
               >
-                Call Us: (813) 945-6736
+                Call Us: (813) 323-0291
               </a>
             </div>
           </div>
@@ -357,13 +357,13 @@ function About() {
               <div className="bg-gradient-brand bg-background text-white p-6 rounded-2xl w-full border border-charcoal/5 shadow-xl">
                 <h4 className="text-sm font-bold text-copper uppercase tracking-wider mb-4">Contact Info</h4>
                 <div className="space-y-4">
-                  <a href="tel:8139456736" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">
+                  <a href="tel:8133230291" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">
                     <div className="bg-white/10 w-9 h-9 rounded-lg flex items-center justify-center text-copper shrink-0">
                       <Phone className="w-4 h-4" />
                     </div>
                     <div>
                       <p className="text-[9px] uppercase tracking-wider text-white/40 leading-none mb-0.5">Phone</p>
-                      <span className="font-bold text-sm">(813) 945-6736</span>
+                      <span className="font-bold text-sm">(813) 323-0291</span>
                     </div>
                   </a>
                   <a href="mailto:revitalizerealestate@gmail.com" className="flex items-center gap-3 text-white/90 hover:text-white hover:underline transition">

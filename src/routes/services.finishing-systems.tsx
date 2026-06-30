@@ -42,7 +42,7 @@ export const Route = createFileRoute("/services/finishing-systems")({
       {
         name: "description",
         content:
-          "Professional finishing & systems services in Tampa, FL. Drywall installation & repair, electrical & plumbing coordination, interior finishes & painting. Licensed & Insured. Free video consult. Call (813) 945-6736.",
+          "Professional finishing & systems services in Tampa, FL. Drywall installation & repair, electrical & plumbing coordination, interior finishes & painting. Licensed & Insured. Free video consult. Call (813) 323-0291.",
       },
     ],
   }),
@@ -650,7 +650,7 @@ function FinishingSystemsPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <Phone className="w-5 h-5 text-brand-orange" />
-                    <span className="font-bold">(813) 945-6736</span>
+                    <span className="font-bold">(813) 323-0291</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-brand-orange" />

@@ -46,7 +46,7 @@ export const Route = createFileRoute("/services/remodeling")({
       {
         name: "description",
         content:
-          "Licensed remodeling contractor in Tampa, FL. Kitchen remodeling, bathroom home improvements, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 945-6736.",
+          "Licensed remodeling contractor in Tampa, FL. Kitchen remodeling, bathroom home improvements, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 323-0291.",
       },
     ],
   }),
@@ -661,7 +661,7 @@ function RemodelingPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
                     <Phone className="w-5 h-5 text-brand-orange" />
-                    <span className="font-bold">(813) 945-6736</span>
+                    <span className="font-bold">(813) 323-0291</span>
                   </div>
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-brand-orange" />

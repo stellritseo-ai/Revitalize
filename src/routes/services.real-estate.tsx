@@ -237,7 +237,7 @@ const faqsList = [
   },
   {
     q: "How do I get started with your team?",
-    a: "Simply call us at (813) 945-6736 or request a free consultation online. We'll schedule a meeting to understand your goals and develop a customized strategy."
+    a: "Simply call us at (813) 323-0291 or request a free consultation online. We'll schedule a meeting to understand your goals and develop a customized strategy."
   },
   {
     q: "What types of financing do you help buyers with?",
@@ -276,7 +276,7 @@ function RealEstateServicesPage() {
     "provider": {
       "@type": "RealEstateAgent",
       "name": "Revitalize Real Estate",
-      "telephone": "+18139456736",
+      "telephone": "+18133230291",
       "email": "revitalizerealestate@gmail.com",
       "address": {
         "@type": "PostalAddress",
@@ -366,10 +366,10 @@ function RealEstateServicesPage() {
                 Get Your Free Consultation <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="tel:8139456736"
+                href="tel:8133230291"
                 className="inline-flex items-center gap-2 font-bold text-charcoal hover:text-copper transition text-sm px-6 py-4"
               >
-                <Phone className="w-4 h-4 text-copper" /> (813) 945-6736
+                <Phone className="w-4 h-4 text-copper" /> (813) 323-0291
               </a>
             </div>
           </div>
@@ -771,13 +771,13 @@ function RealEstateServicesPage() {
               </p>
 
               <div className="w-full space-y-3">
-                <a href="tel:8139456736" className="flex items-center gap-3 text-charcoal hover:text-copper transition w-fit">
+                <a href="tel:8133230291" className="flex items-center gap-3 text-charcoal hover:text-copper transition w-fit">
                   <div className="bg-copper/5 w-9 h-9 rounded-lg flex items-center justify-center text-copper shrink-0 border border-copper/10">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
                     <p className="text-[8px] uppercase tracking-wider text-charcoal-soft/60 font-extrabold leading-none mb-0.5">Call or Text</p>
-                    <span className="font-bold text-sm">(813) 945-6736</span>
+                    <span className="font-bold text-sm">(813) 323-0291</span>
                   </div>
                 </a>
                 
