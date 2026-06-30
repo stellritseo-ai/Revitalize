@@ -43,12 +43,12 @@ import cabinetImg from "@/assets/kitchen/uploaded-cabinets.png";
 
 export const Route = createFileRoute("/services/real-estate")({
   head: () => ({
-    title: "Real Estate Services | Revitalize Real Estate – Tampa Bay's Real Estate & Renovation Experts",
+    title: "Real Estate Sales & Pre-Listing Renovation Services | Revitalize Real Estate",
     meta: [
       {
         name: "description",
         content:
-          "Full-service real estate representation with integrated renovation expertise in Tampa Bay. Buy, sell, or invest with confidence. 20+ years experience. Serving within 50 miles. Free consultation.",
+          "Maximize your home's equity with Revitalize. We offer expert Real Estate Sales & Pre-Listing Renovation Services in Tampa Bay, combining listing representation with high-ROI remodeling.",
       },
     ],
   }),
@@ -95,8 +95,8 @@ const benefits = [
 
 const servicesDetail = [
   {
-    title: "Full-Service Real Estate Representation",
-    desc: "Whether you're buying your first home, selling your current property, or looking for an investment opportunity, our team provides expert guidance from start to finish. Our dual expertise in real estate and renovation means we can help you see the potential in any property—and make it a reality.",
+    title: "Real Estate Sales & Representation",
+    desc: "Whether you're selling your current property, buying your next home, or exploring an investment, our full-service sales team provides expert guidance. Our integrated renovation expertise gives you a distinct advantage, ensuring your listing or purchase is evaluated with professional constructor-level insights.",
     icon: Home,
     image: realEstateImg,
     bullets: [
@@ -106,8 +106,8 @@ const servicesDetail = [
     ],
   },
   {
-    title: "Pre-Listing Home Improvements",
-    desc: "One of our most valuable services is preparing homes for sale. We help sellers maximize their property's value with targeted, strategic improvements that deliver the best return on investment. Many homeowners leave money on the table because their properties aren't market-ready—we ensure yours is positioned for top dollar.",
+    title: "Pre-Listing Renovation Services",
+    desc: "We specialize in preparing homes to sell for maximum profit. Through targeted, strategic improvements, we handle everything from design consultation to complete remodeling. By upgrading high-impact areas like kitchens, bathrooms, and flooring prior to listing, we ensure your home is positioned to command top dollar.",
     icon: Hammer,
     image: kitSix,
     bullets: [
@@ -327,8 +327,8 @@ function RealEstateServicesPage() {
 
       {/* 1. Hero */}
       <PageHero
-        title="Real Estate Services"
-        subtitle="Tampa Bay's Real Estate & Renovation Experts"
+        title="Real Estate Sales & Pre-Listing Renovation Services"
+        subtitle="Tampa Bay's Premiere Full-Service Realty & Construction Partner"
       />
 
       {/* 2. Welcome Intro */}
@@ -342,16 +342,16 @@ function RealEstateServicesPage() {
             </div>
             
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-charcoal mb-6 font-serif leading-tight">
-              Real Estate Services That Go{" "}
-              <span className="text-copper italic font-serif font-bold">Beyond Buying and Selling</span>
+              Unlock Maximum Equity with Integrated{" "}
+              <span className="text-copper italic font-serif font-bold">Real Estate Sales & Pre-Listing Renovation Services</span>
             </h2>
 
             <div className="text-[1.02rem] text-charcoal-soft/85 font-medium space-y-6 leading-relaxed mb-8">
               <p>
-                At Revitalize Real Estate, we understand that real estate is about more than just transactions—it's about finding the right home, maximizing your property's value, and making smart investments for your future. What sets us apart is our unique combination of real estate expertise and in-house renovation capabilities, giving you a powerful advantage whether you're buying, selling, or investing.
+                At <strong className="text-charcoal">Revitalize Real Estate</strong>, we bridge the gap between traditional realty and high-impact property upgrades. Our signature <strong className="text-copper font-bold bg-copper/5 px-2 py-0.5 rounded border border-copper/10 animate-pulse">Real Estate Sales & Pre-Listing Renovation Services</strong> empower homeowners throughout the Tampa Bay area to maximize their equity before hitting the market. By combining seasoned local market expertise with professional, in-house remodeling, we help you sell your home faster and for top dollar.
               </p>
               <p>
-                Founded by <strong className="text-charcoal">Daniel Bustillo</strong>, a licensed realtor and seasoned home renovation expert with over 16 years of hands-on experience in construction, remodeling, and real estate, we bridge the gap between real estate and renovation. Our mission is simple: to help homeowners unlock the full potential of their properties and achieve their real estate goals with confidence.
+                Founded by <strong className="text-charcoal">Daniel Bustillo</strong>, a licensed Realtor® and construction veteran with over 16 years of hands-on remodeling experience, our team provides turn-key solutions. We don't just place a sign in your yard—we evaluate, design, renovate, and market your property to ensure it stands out to active buyers and demands maximum value.
               </p>
               <p className="font-bold text-charcoal">
                 Proudly serving Tampa, FL 33647 and all cities within a 50-mile radius.
