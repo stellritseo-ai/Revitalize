@@ -50,11 +50,13 @@ export function SiteHeader() {
 
   return (
     <header
-      className="relative mx-[15px] mt-[15px] mb-0 rounded-[10px] bg-background shadow-xl border border-gray-100/50"
+      className="sticky top-[15px] z-50 mx-[15px] mt-[15px] mb-0 rounded-[10px] bg-background/95 backdrop-blur-md shadow-xl border border-gray-100/50 transition-all duration-300"
     >
       {/* Top utility bar */}
       <div
-        className="text-white text-xs sm:text-sm rounded-t-[10px] overflow-hidden"
+        className={`text-white text-xs sm:text-sm rounded-t-[10px] overflow-hidden transition-all duration-300 ${
+          isScrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
+        }`}
         style={{ background: "var(--gradient-topbar)" }}
       >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 h-10 flex items-center justify-between gap-4">
@@ -99,12 +101,12 @@ export function SiteHeader() {
 
       {/* Main nav */}
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
-        <div className="flex items-center justify-between gap-4 py-3 lg:py-4">
+        <div className={`flex items-center justify-between gap-4 transition-all duration-300 ${isScrolled ? "py-2 lg:py-2.5" : "py-3 lg:py-4"}`}>
           <Link to="/" className="flex items-center shrink-0">
             <img
               src={logo}
               alt="Revitalize Real Estate"
-              className="h-12 lg:h-16 w-auto object-contain"
+              className={`w-auto object-contain transition-all duration-300 ${isScrolled ? "h-10 lg:h-12" : "h-12 lg:h-16"}`}
             />
           </Link>
 

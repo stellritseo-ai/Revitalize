@@ -167,8 +167,8 @@ function About() {
             </div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-charcoal mb-6 font-serif leading-tight">
-              A Home Improvement Partner Built on{" "}
-              <span className="text-copper italic font-serif font-bold">Trust and Craftsmanship</span>
+              A Real Estate Improvement Partner Built on{" "}
+              <span className="text-copper italic font-serif font-bold">Trust and Craftsmanship.</span>
             </h2>
 
             <div className="text-[1.05rem] text-charcoal-soft/90 font-medium space-y-6 leading-relaxed mb-8">
