@@ -133,7 +133,7 @@ const servicesDetail = [
     desc: "Renovation projects leave behind dust, debris, and construction residue. Our post-construction cleaning ensures your newly remodeled home is ready for move-in, safe, and beautiful.",
     icon: Hammer,
     image: resOne,
-    idealFor: "Homeowners after renovations, contractors, real estate investors, and property flippers.",
+    idealFor: "Homeowners after renovations, builders, real estate investors, and property flippers.",
     bullets: [
       "Dust Removal: Complete dust removal from all surfaces, including walls and ceilings",
       "Debris Removal: Removal of construction debris, packaging, and waste materials",

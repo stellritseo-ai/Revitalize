@@ -163,23 +163,29 @@ function About() {
           <div className={`w-full lg:w-[50%] flex flex-col items-start transition-all duration-700 transform ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
             <div className="inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest mb-6 text-copper">
               <Sparkles className="h-3.5 w-3.5 text-copper animate-pulse" />
-              Who We Are
+              About Revitalize Group
             </div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-charcoal mb-6 font-serif leading-tight">
-              A Real Estate Improvement Partner Built on{" "}
-              <span className="text-copper italic font-serif font-bold">Trust and Craftsmanship.</span>
+              One Team.{" "}
+              <span className="text-copper italic font-serif font-bold">Every Step of Your Home Journey.</span>
             </h2>
 
             <div className="text-[1.05rem] text-charcoal-soft/90 font-medium space-y-6 leading-relaxed mb-8">
               <p className="border-l-4 border-copper/30 pl-4 py-1">
-                For more than twenty years, Revitalize Real Estate has been helping homeowners across Tampa Bay reimagine the spaces they live in. We are more than just a construction company—we are a team of dedicated professionals committed to turning houses into homes worth coming back to, crafted to last.
+                At Revitalize Group, we help homeowners, buyers, sellers, and investors make smarter real estate decisions by combining licensed real estate services with professional home improvement solutions under one roof.
               </p>
               <p>
-                From our base in Tampa, FL 33647, we proudly serve residential clients within a 50-mile radius, including Wesley Chapel, Brandon, St. Petersburg, Clearwater, and beyond. Our reputation is built on a foundation of craftsmanship, clear communication, and a genuine respect for your home and family.
+                Whether you’re buying your first home, preparing to sell, updating your current property, or investing in real estate, our team helps you maximize your property’s value through strategic improvements and experienced guidance.
               </p>
               <p>
-                We know that choosing a contractor is a significant decision. That’s why we focus only on residential work—no commercial projects, no shortcuts. Our team of experienced builders and senior craftsmen handles every project with the same care and attention to detail we would want in our own homes.
+                For more than 20 years, we’ve helped clients across Tampa Bay improve homes, increase equity, prepare properties for the market, and make confident real estate decisions. Our approach is built on honest communication, quality workmanship, and a commitment to delivering results that protect and increase your investment.
+              </p>
+              <p>
+                At Revitalize Group, we believe your home is more than a place to live. It’s one of your greatest investments, and every improvement should add lasting value.
+              </p>
+              <p className="text-xl font-bold text-copper font-serif tracking-wide pt-2">
+                Real Estate. Home Improvements. Results.
               </p>
             </div>
 

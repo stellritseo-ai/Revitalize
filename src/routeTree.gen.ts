@@ -24,10 +24,8 @@ import { Route as ServicesResidentialRouteImport } from './routes/services.resid
 import { Route as ServicesRemodelingRouteImport } from './routes/services.remodeling'
 import { Route as ServicesRealEstateRouteImport } from './routes/services.real-estate'
 import { Route as ServicesKitchenRouteImport } from './routes/services.kitchen'
-import { Route as ServicesFloridaCgcLicenseRouteImport } from './routes/services.florida-cgc-license'
 import { Route as ServicesFinishingSystemsRouteImport } from './routes/services.finishing-systems'
 import { Route as ServicesConstructionRouteImport } from './routes/services.construction'
-import { Route as ServicesCommercialRouteImport } from './routes/services.commercial'
 import { Route as ServicesCleaningRouteImport } from './routes/services.cleaning'
 import { Route as ServicesCabinetsRouteImport } from './routes/services.cabinets'
 import { Route as ServicesBathroomRouteImport } from './routes/services.bathroom'
@@ -112,12 +110,6 @@ const ServicesKitchenRoute = ServicesKitchenRouteImport.update({
   path: '/kitchen',
   getParentRoute: () => ServicesRoute,
 } as any)
-const ServicesFloridaCgcLicenseRoute =
-  ServicesFloridaCgcLicenseRouteImport.update({
-    id: '/florida-cgc-license',
-    path: '/florida-cgc-license',
-    getParentRoute: () => ServicesRoute,
-  } as any)
 const ServicesFinishingSystemsRoute =
   ServicesFinishingSystemsRouteImport.update({
     id: '/finishing-systems',
@@ -127,11 +119,6 @@ const ServicesFinishingSystemsRoute =
 const ServicesConstructionRoute = ServicesConstructionRouteImport.update({
   id: '/construction',
   path: '/construction',
-  getParentRoute: () => ServicesRoute,
-} as any)
-const ServicesCommercialRoute = ServicesCommercialRouteImport.update({
-  id: '/commercial',
-  path: '/commercial',
   getParentRoute: () => ServicesRoute,
 } as any)
 const ServicesCleaningRoute = ServicesCleaningRouteImport.update({
@@ -192,10 +179,8 @@ export interface FileRoutesByFullPath {
   '/services/bathroom': typeof ServicesBathroomRoute
   '/services/cabinets': typeof ServicesCabinetsRoute
   '/services/cleaning': typeof ServicesCleaningRoute
-  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
-  '/services/florida-cgc-license': typeof ServicesFloridaCgcLicenseRoute
   '/services/kitchen': typeof ServicesKitchenRoute
   '/services/real-estate': typeof ServicesRealEstateRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
@@ -219,10 +204,8 @@ export interface FileRoutesByTo {
   '/services/bathroom': typeof ServicesBathroomRoute
   '/services/cabinets': typeof ServicesCabinetsRoute
   '/services/cleaning': typeof ServicesCleaningRoute
-  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
-  '/services/florida-cgc-license': typeof ServicesFloridaCgcLicenseRoute
   '/services/kitchen': typeof ServicesKitchenRoute
   '/services/real-estate': typeof ServicesRealEstateRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
@@ -249,10 +232,8 @@ export interface FileRoutesById {
   '/services/bathroom': typeof ServicesBathroomRoute
   '/services/cabinets': typeof ServicesCabinetsRoute
   '/services/cleaning': typeof ServicesCleaningRoute
-  '/services/commercial': typeof ServicesCommercialRoute
   '/services/construction': typeof ServicesConstructionRoute
   '/services/finishing-systems': typeof ServicesFinishingSystemsRoute
-  '/services/florida-cgc-license': typeof ServicesFloridaCgcLicenseRoute
   '/services/kitchen': typeof ServicesKitchenRoute
   '/services/real-estate': typeof ServicesRealEstateRoute
   '/services/remodeling': typeof ServicesRemodelingRoute
@@ -280,10 +261,8 @@ export interface FileRouteTypes {
     | '/services/bathroom'
     | '/services/cabinets'
     | '/services/cleaning'
-    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
-    | '/services/florida-cgc-license'
     | '/services/kitchen'
     | '/services/real-estate'
     | '/services/remodeling'
@@ -307,10 +286,8 @@ export interface FileRouteTypes {
     | '/services/bathroom'
     | '/services/cabinets'
     | '/services/cleaning'
-    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
-    | '/services/florida-cgc-license'
     | '/services/kitchen'
     | '/services/real-estate'
     | '/services/remodeling'
@@ -336,10 +313,8 @@ export interface FileRouteTypes {
     | '/services/bathroom'
     | '/services/cabinets'
     | '/services/cleaning'
-    | '/services/commercial'
     | '/services/construction'
     | '/services/finishing-systems'
-    | '/services/florida-cgc-license'
     | '/services/kitchen'
     | '/services/real-estate'
     | '/services/remodeling'
@@ -467,13 +442,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesKitchenRouteImport
       parentRoute: typeof ServicesRoute
     }
-    '/services/florida-cgc-license': {
-      id: '/services/florida-cgc-license'
-      path: '/florida-cgc-license'
-      fullPath: '/services/florida-cgc-license'
-      preLoaderRoute: typeof ServicesFloridaCgcLicenseRouteImport
-      parentRoute: typeof ServicesRoute
-    }
     '/services/finishing-systems': {
       id: '/services/finishing-systems'
       path: '/finishing-systems'
@@ -486,13 +454,6 @@ declare module '@tanstack/react-router' {
       path: '/construction'
       fullPath: '/services/construction'
       preLoaderRoute: typeof ServicesConstructionRouteImport
-      parentRoute: typeof ServicesRoute
-    }
-    '/services/commercial': {
-      id: '/services/commercial'
-      path: '/commercial'
-      fullPath: '/services/commercial'
-      preLoaderRoute: typeof ServicesCommercialRouteImport
       parentRoute: typeof ServicesRoute
     }
     '/services/cleaning': {
@@ -579,10 +540,8 @@ interface ServicesRouteChildren {
   ServicesBathroomRoute: typeof ServicesBathroomRoute
   ServicesCabinetsRoute: typeof ServicesCabinetsRoute
   ServicesCleaningRoute: typeof ServicesCleaningRoute
-  ServicesCommercialRoute: typeof ServicesCommercialRoute
   ServicesConstructionRoute: typeof ServicesConstructionRoute
   ServicesFinishingSystemsRoute: typeof ServicesFinishingSystemsRoute
-  ServicesFloridaCgcLicenseRoute: typeof ServicesFloridaCgcLicenseRoute
   ServicesKitchenRoute: typeof ServicesKitchenRoute
   ServicesRealEstateRoute: typeof ServicesRealEstateRoute
   ServicesRemodelingRoute: typeof ServicesRemodelingRoute
@@ -595,10 +554,8 @@ const ServicesRouteChildren: ServicesRouteChildren = {
   ServicesBathroomRoute: ServicesBathroomRoute,
   ServicesCabinetsRoute: ServicesCabinetsRoute,
   ServicesCleaningRoute: ServicesCleaningRoute,
-  ServicesCommercialRoute: ServicesCommercialRoute,
   ServicesConstructionRoute: ServicesConstructionRoute,
   ServicesFinishingSystemsRoute: ServicesFinishingSystemsRoute,
-  ServicesFloridaCgcLicenseRoute: ServicesFloridaCgcLicenseRoute,
   ServicesKitchenRoute: ServicesKitchenRoute,
   ServicesRealEstateRoute: ServicesRealEstateRoute,
   ServicesRemodelingRoute: ServicesRemodelingRoute,

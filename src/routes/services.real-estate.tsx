@@ -338,7 +338,7 @@ function RealEstateServicesPage() {
           <div className={`w-full lg:w-[50%] flex flex-col items-start transition-all duration-700 transform ${isLoaded ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}>
             <div className="inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest mb-6 text-copper">
               <Sparkles className="h-3.5 w-3.5 text-copper animate-pulse" />
-              Realtor + Contractor
+              Realtor + Home Improvement Experts
             </div>
             
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-charcoal mb-6 font-serif leading-tight">

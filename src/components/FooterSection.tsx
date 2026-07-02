@@ -49,7 +49,7 @@ const quickLinks = [
 ];
 
 const seoLinks = [
-  { label: "General Contractor Tampa FL", to: "/services" },
+  { label: "Home Improvement Company Tampa FL", to: "/services" },
   { label: "Residential Remodeling St. Petersburg", to: "/services/construction" },
   { label: "Kitchen Remodeling Clearwater", to: "/services/remodeling" },
   { label: "Real Estate Services Brandon", to: "/services/real-estate" },

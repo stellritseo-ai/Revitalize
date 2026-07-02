@@ -19,8 +19,8 @@ export function WelcomeSection() {
 
             {/* Heading */}
             <h2 className="text-[22px] sm:text-4xl md:text-[40px] md:leading-[50px] font-bold tracking-tight text-charcoal mb-6 font-serif">
-              Crafting Real Estate Worth Coming Back To,
-              <span className="text-copper italic font-serif font-bold"> Built to Last.</span>
+              One Team.
+              <span className="text-copper italic font-serif font-bold"> Every Step of Your Home Journey.</span>
             </h2>
 
             {/* Description */}
@@ -29,13 +29,10 @@ export function WelcomeSection() {
               style={{ lineHeight: "41px" }}
             >
               <p className="w-full lg:w-[115%]">
-                For more than twenty years, Revitalize Group has helped homeowners reimagine the
-                spaces they live in. We're a residential-only home improvement team built on
-                craftsmanship, communication, and a genuine respect for your home.
+                At Revitalize Group, we help homeowners, buyers, sellers, and investors make smarter real estate decisions by combining licensed real estate services with professional home improvement solutions under one roof.
               </p>
               <p className="w-full lg:w-[115%]">
-                From kitchens and baths to whole-home transformations, every project is led by
-                experienced hands and finished to a standard we'd want in our own homes.
+                Whether you’re buying your first home, preparing to sell, updating your current property, or investing in real estate, our team helps you maximize your property’s value through strategic improvements and experienced guidance.
               </p>
             </div>
 
@@ -100,7 +97,7 @@ export function WelcomeSection() {
               {/* Floating Badge 2 - Bottom Right */}
               <div className="absolute bottom-16 -right-6 bg-charcoal/95 backdrop-blur-md border border-white/10 p-3 rounded-xl shadow-lg z-20 transition-transform duration-300 hover:scale-105">
                 <p className="text-white text-sm font-bold leading-none">Premium Quality</p>
-                <p className="text-[8px] text-copper font-black uppercase tracking-wider mt-0.5">100% Residential Only</p>
+                <p className="text-[8px] text-copper font-black uppercase tracking-wider mt-0.5">Real Estate & Home Improvements</p>
               </div>
             </div>
           </div>

@@ -205,7 +205,7 @@ function FinishingSystemsPage() {
               <p className="font-bold text-charcoal">
                 From hanging and finishing drywall to coordinating licensed electricians and
                 plumbers, we ensure every surface is flawless and every system functions perfectly.
-                No gaps, no guesswork, no subcontractor headaches. Just seamless, beautiful results.
+                No gaps, no guesswork, no coordination headaches. Just seamless, beautiful results.
               </p>
             </div>
           </div>
@@ -323,7 +323,7 @@ function FinishingSystemsPage() {
               </h2>
               <div className="flex items-center gap-3 text-white/60 font-bold">
                 <span className="w-12 h-1 bg-brand-orange rounded-full" />
-                <p>We eliminate the headache of managing multiple subcontractors.</p>
+                <p>We eliminate the headache of managing multiple trades.</p>
               </div>
             </div>
           </div>
@@ -568,7 +568,7 @@ function FinishingSystemsPage() {
             {[
               {
                 q: "Do you perform electrical and plumbing work yourselves?",
-                a: "We coordinate all electrical and plumbing work with licensed, insured, and vetted subcontractors. You work only with us — we manage them.",
+                a: "We coordinate all electrical and plumbing work with licensed, insured, and vetted specialists. You work only with us — we manage them.",
               },
               {
                 q: "Are your electricians and plumbers licensed?",

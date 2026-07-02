@@ -46,7 +46,7 @@ export const Route = createFileRoute("/services/remodeling")({
       {
         name: "description",
         content:
-          "Licensed remodeling contractor in Tampa, FL. Kitchen remodeling, bathroom home improvements, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 323-0291.",
+          "Remodeling & home improvement experts in Tampa, FL. Kitchen remodeling, bathroom home improvements, whole home makeovers & more. Licensed & Insured. Free video consult & financing available. Call (813) 323-0291.",
       },
     ],
   }),
@@ -329,7 +329,7 @@ function RemodelingPage() {
               </h2>
               <div className="flex items-center gap-3 text-white/60 font-bold">
                 <span className="w-12 h-1 bg-brand-orange rounded-full" />
-                <p>We eliminate the headache of managing multiple subcontractors.</p>
+                <p>We eliminate the headache of managing multiple trades.</p>
               </div>
             </div>
           </div>
@@ -599,7 +599,7 @@ function RemodelingPage() {
               },
               {
                 q: "How do you handle electrical and plumbing during a remodel?",
-                a: "We coordinate directly with licensed, vetted subcontractors – you work only with us.",
+                a: "We coordinate directly with licensed, vetted specialists – you work only with us.",
               },
               {
                 q: "Where do you source materials?",
