@@ -48,6 +48,17 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
     <header
       className="sticky top-[15px] z-50 mx-[15px] mt-[15px] mb-0 rounded-[10px] bg-background/95 backdrop-blur-md shadow-xl border border-gray-100/50 transition-all duration-300"
@@ -173,7 +184,7 @@ export function SiteHeader() {
 
         {/* Mobile nav */}
         {open && (
-          <div className="lg:hidden pb-4 space-y-1 border-t pt-3">
+          <div className="lg:hidden pb-4 space-y-1 border-t pt-3 max-h-[calc(100vh-140px)] overflow-y-auto scroll-smooth">
             <div className="pb-3 flex flex-col gap-2 border-b border-gray-100/50 mb-3">
               <a
                 href="tel:8133230291"
