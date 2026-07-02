@@ -53,15 +53,15 @@ export function FeaturedServices() {
           <h2
             className="font-extrabold tracking-tight text-charcoal font-serif mb-4 leading-tight text-[27px] sm:text-4xl md:text-[40px] mt-[-6px] sm:mt-[-10px] md:mt-[-15px]"
           >
-            More than a contractor.{" "}
-            <span className="text-copper italic font-serif font-bold">More than a broker.</span>
+            Your Real Estate &{" "}
+            <span className="text-copper italic font-serif font-bold">Home Improvement Partner.</span>
           </h2>
 
           <p
             className="text-charcoal-soft/95 font-sans font-medium leading-relaxed max-w-3xl mx-auto"
             style={{ fontSize: "16px", marginTop: "-7px", marginBottom: "-56px" }}
           >
-            Revitalize Group bridges the gap between elite home renovations and real estate brokerage to help you buy, renovate, sell, and Maximize the value of your property.
+            Revitalize Group combines professional real estate services with expert home improvement solutions to help homeowners, buyers, sellers, and investors buy, improve, sell, and maximize the value of their properties, all under one roof.
           </p>
         </div>
 
