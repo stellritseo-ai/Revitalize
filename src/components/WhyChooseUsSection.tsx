@@ -1,12 +1,11 @@
 import {
   Clock,
-  CircleDollarSign,
   Home,
   Hammer,
   MapPin,
   MessageSquare,
-  Package,
   Sparkles,
+  Briefcase,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import whyChooseUsComposite from "@/assets/why-choose-us-composite.png";
@@ -14,33 +13,33 @@ import whyChooseUsComposite from "@/assets/why-choose-us-composite.png";
 const features = [
   {
     icon: Clock,
-    title: "20+ Years Experience",
-    desc: "Veteran builders, every project.",
+    title: "20+ Years of Experience",
+    desc: "Helping Tampa Bay homeowners improve, prepare, and maximize their properties with confidence.",
   },
   {
-    icon: CircleDollarSign,
-    title: "Free Estimates",
-    desc: "Clear pricing, no obligation.",
+    icon: Briefcase,
+    title: "Real Estate & Home Improvement Expertise",
+    desc: "One team that helps you buy, improve, and sell your home with a clear strategy from start to finish.",
   },
   {
     icon: Home,
     title: "Residential Specialists",
-    desc: "Homes are all we do.",
+    desc: "Focused exclusively on helping homeowners throughout the Tampa Bay area.",
   },
   {
     icon: Hammer,
-    title: "Quality Craftsmanship",
-    desc: "Built to outlast trends.",
-  },
-  {
-    icon: MapPin,
-    title: "Local & Trusted",
-    desc: "Proudly serving 50 miles.",
+    title: "Quality Workmanship",
+    desc: "Professional home improvements designed to enhance your lifestyle while increasing your home’s long-term value.",
   },
   {
     icon: MessageSquare,
     title: "Transparent Communication",
-    desc: "You're informed at every step.",
+    desc: "Clear expectations, honest advice, and consistent updates throughout every project.",
+  },
+  {
+    icon: MapPin,
+    title: "Local & Trusted",
+    desc: "Proudly serving the Tampa Bay community with integrity, experience, and results.",
   },
 ];
 
@@ -72,10 +71,10 @@ export function WhyChooseUsSection() {
           </div>
 
           <h2 className="text-[26px] sm:text-4xl md:text-[46px] md:leading-tight font-bold tracking-tight text-charcoal mb-[20px] font-serif">
-            Why Homeowners Choose Us
+            Why Homeowners Choose Revitalize Group
           </h2>
           <p className="text-base sm:text-lg text-charcoal-soft/95 mb-10 font-sans font-medium">
-            A home improvement partner you can actually trust.
+            A trusted real estate and home improvement company helping homeowners, buyers, sellers, and investors maximize the value of their properties.
           </p>
 
           {/* Features Grid */}
@@ -98,7 +97,7 @@ export function WhyChooseUsSection() {
             to="/contact"
             className="w-fit px-8 py-3.5 rounded-full bg-copper hover:bg-copper-deep text-white font-bold text-sm shadow-lg shadow-copper/20 transition-all duration-300"
           >
-            Get Free Estimate
+            Schedule Your Free Consultation
           </Link>
         </div>
       </div>

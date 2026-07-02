@@ -55,7 +55,7 @@ const ALL_POSTS: BlogPost[] = [
     category: "Tampa Insights",
     date: "April 8, 2026",
     readTime: "4 min read",
-    excerpt: "Building or remodeling in Tampa requires navigating specific local building codes. We explain the permit process, wind mitigation rules, and why hiring a local home improvement company is crucial.",
+    excerpt: "Building or remodeling in Tampa requires navigating specific local building codes. We explain the permit process, wind mitigation rules, and why hiring a local real estate and home improvement company is crucial.",
     content: "Navigating local building permits and codes is one of the most critical aspects of any residential home improvement project in Tampa Bay. Florida's building codes are strict, especially regarding wind load calculations, structural framing, and impact-resistant materials due to hurricane mitigation guidelines. Working with local, licensed home improvement professionals guarantees that your designs adhere to municipal codes in Tampa, Wesley Chapel, St. Petersburg, and Clearwater. Proper permitting protects your home value, ensures safety, and prevents costly project delays."
   },
   {
@@ -92,7 +92,7 @@ const ALL_POSTS: BlogPost[] = [
     date: "March 25, 2026",
     readTime: "6 min read",
     excerpt: "Ensure your peace of mind by asking potential home improvement professionals about licensing, insurance coverage, vetting, and detailed project milestone scopes before signing a contract.",
-    content: "Hiring a home improvement company for your kitchen, bathroom, or whole-home remodeling project is a major decision. Protect your investment by asking vital questions upfront. Verify their credentials, check if they hold active state licensing and general liability insurance, and request references from recent projects. A reputable home improvement team will provide a detailed contract, line-item budget estimates, clear milestone schedules, and a transparent payment structure. Avoid bids that seem too good to be true, as they often lead to subpar work or hidden change orders."
+    content: "Hiring a real estate and home improvement company for your kitchen, bathroom, or whole-home remodeling project is a major decision. Protect your investment by asking vital questions upfront. Verify their credentials, check if they hold active state licensing and general liability insurance, and request references from recent projects. A reputable home improvement team will provide a detailed contract, line-item budget estimates, clear milestone schedules, and a transparent payment structure. Avoid bids that seem too good to be true, as they often lead to subpar work or hidden change orders."
   },
   {
     id: 8,
