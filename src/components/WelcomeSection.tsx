@@ -18,7 +18,7 @@ export function WelcomeSection() {
             </div>
 
             {/* Heading */}
-            <h2 className="text-3xl sm:text-4xl md:text-[40px] md:leading-[50px] font-bold tracking-tight text-charcoal mb-6 font-serif">
+            <h2 className="text-[22px] sm:text-4xl md:text-[40px] md:leading-[50px] font-bold tracking-tight text-charcoal mb-6 font-serif">
               Crafting Real Estate Worth Coming Back To,
               <span className="text-copper italic font-serif font-bold"> Built to Last.</span>
             </h2>

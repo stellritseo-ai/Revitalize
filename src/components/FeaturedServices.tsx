@@ -46,13 +46,12 @@ export function FeaturedServices() {
             Built to Outperform
           </div>
 
-          <h2 className="text-3xl sm:text-4xl md:text-[42px] leading-tight font-extrabold tracking-tight text-charcoal font-serif mb-4">
+          <h2 className="text-[23px] sm:text-4xl md:text-[42px] leading-tight font-extrabold tracking-tight text-charcoal font-serif mb-4">
             Real Estate. Renovations. Results.
           </h2>
 
           <h2
-            className="font-extrabold tracking-tight text-charcoal font-serif mb-4 leading-tight"
-            style={{ fontSize: "40px", marginTop: "-15px" }}
+            className="font-extrabold tracking-tight text-charcoal font-serif mb-4 leading-tight text-[27px] sm:text-4xl md:text-[40px] mt-[-6px] sm:mt-[-10px] md:mt-[-15px]"
           >
             More than a contractor.{" "}
             <span className="text-copper italic font-serif font-bold">More than a broker.</span>

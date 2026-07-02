@@ -71,7 +71,7 @@ export function WhyChooseUsSection() {
             Why Choose Us
           </div>
 
-          <h2 className="text-3xl sm:text-4xl md:text-[46px] md:leading-tight font-bold tracking-tight text-charcoal mb-[20px] font-serif">
+          <h2 className="text-[26px] sm:text-4xl md:text-[46px] md:leading-tight font-bold tracking-tight text-charcoal mb-[20px] font-serif">
             Why Homeowners Choose Us
           </h2>
           <p className="text-base sm:text-lg text-charcoal-soft/95 mb-10 font-sans font-medium">

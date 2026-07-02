@@ -105,7 +105,7 @@ export function ServicesSection() {
               What we build
             </div>
 
-            <h2 className="text-3xl md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif lg:whitespace-nowrap">
+            <h2 className="text-[26px] text-center md:text-left md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif lg:whitespace-nowrap">
               A Full Suite of{" "}
               <span className="text-copper italic font-serif font-bold">
                 Real Estate And Home Improvement

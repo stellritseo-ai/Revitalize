@@ -199,7 +199,7 @@ export function CounterSection() {
           </div>
 
           {/* Heading */}
-          <h2 className="font-serif text-4xl md:text-[44px] md:leading-[54px] font-bold text-white mb-5 tracking-tight">
+          <h2 className="font-serif text-[25px] leading-[37px] sm:text-4xl md:text-[44px] md:leading-[54px] font-bold text-white mb-5 tracking-tight">
             Tampa Bay’s{" "}
             <span
               style={{

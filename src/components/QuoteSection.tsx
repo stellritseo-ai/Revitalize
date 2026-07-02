@@ -145,7 +145,7 @@ export function QuoteSection() {
           </div>
 
           {/* Title */}
-          <h2 className="text-3xl md:text-[38px] font-extrabold text-white text-center mb-10 tracking-tight leading-snug">
+          <h2 className="text-[25px] md:text-[38px] font-extrabold text-white text-center mb-10 tracking-tight leading-snug">
             Ready To Start?{" "}
             <span
               style={{
