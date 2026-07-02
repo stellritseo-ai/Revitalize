@@ -29,13 +29,15 @@ const socials = [
 ];
 
 const services = [
-  { label: "Residential Remodeling", to: "/services/residential" },
-  { label: "Bathroom Remodeling", to: "/services/bathroom" },
+  { label: "Buy & Sell Homes", to: "/services/real-estate" },
+  { label: "Home Renovations", to: "/services/residential" },
   { label: "Kitchen Remodeling", to: "/services/kitchen" },
-  { label: "Floor, Pavers & Carpentry", to: "/services/specialty-trade" },
-  { label: "Real Estate Services", to: "/services/real-estate" },
+  { label: "Bathroom Remodeling", to: "/services/bathroom" },
+  { label: "Flooring", to: "/services/specialty-trade" },
+  { label: "Roofing", to: "/services/specialty-trade" },
   { label: "Professional Cleaning", to: "/services/cleaning" },
-  { label: "Premium Cabinet Sales", to: "/services/cabinets" },
+  { label: "Cabinet Sales", to: "/services/cabinets" },
+  { label: "Investment Properties", to: "/services/real-estate" },
 ];
 
 const quickLinks = [
@@ -91,12 +93,11 @@ export function FooterSection() {
               >
                 Revitalize
               </span>
-              <span className="text-white text-2xl font-black tracking-tight"> Real Estate</span>
+              <span className="text-white text-2xl font-black tracking-tight"> Group</span>
             </div>
 
             <p className="text-white/50 text-[14px] leading-[26px] mb-6 max-w-xs font-medium">
-              Tampa Bay's trusted partner for real estate, remodeling & home improvement.
-              Licensed, insured and serving 14+ cities across the Tampa Bay area.
+              Revitalize Group is a trusted real estate and home improvement company serving homeowners, buyers, sellers, and investors throughout the Tampa Bay area. We combine real estate expertise with professional home improvement solutions to help clients buy, improve, sell, and maximize the value of their homes.
             </p>
 
             {/* Social icons */}
@@ -245,7 +246,7 @@ export function FooterSection() {
 
         {/* ── Bottom Bar ───────────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-white/30 text-[12px] font-medium">
-          <p>© 2026 Revitalize Real Estate. All Rights Reserved.</p>
+          <p>© 2026 Revitalize Group. All Rights Reserved.</p>
           <p>
             Designed &amp; Developed by{" "}
             <a
