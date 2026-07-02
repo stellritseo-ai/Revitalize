@@ -61,7 +61,7 @@ export function FeaturedServices() {
             className="text-charcoal-soft/95 font-sans font-medium leading-relaxed max-w-3xl mx-auto"
             style={{ fontSize: "16px", marginTop: "-7px", marginBottom: "-56px" }}
           >
-            Revitalize Group bridges the gap between elite home renovations and real estate brokerage to help you buy, renovate, sell, and maximize the value of your assets under one roof.
+            Revitalize Group bridges the gap between elite home renovations and real estate brokerage to help you buy, renovate, sell, and Maximize the value of your property.
           </p>
         </div>
 
