@@ -711,7 +711,12 @@ function DashboardPage() {
             <p className="text-[11px] text-slate-400 mt-1 font-medium">
               {activeTab === "overview" && "Monitor and control your business leads and pipeline"}
               {activeTab === "leads" && "Manage customer pipelines and project estimations"}
-              {tab => ""}
+              {activeTab === "reviews" && "Review client testimonials and manage website display"}
+              {activeTab === "emails" && "View details of incoming contact form submissions"}
+              {activeTab === "chat" && "Respond to active website visitor chat messages"}
+              {activeTab === "gallery" && "Manage images showcased on the public website"}
+              {activeTab === "settings" && "Modify administrator login credentials"}
+              {activeTab === "security" && "Create and manage system user accounts"}
             </p>
           </div>
 
