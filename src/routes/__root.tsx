@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, useLocation } from "@tanstack/react-router";
 
 import { SiteHeader } from "@/components/SiteHeader";
 import { FooterSection } from "@/components/FooterSection";
@@ -72,17 +72,20 @@ import { FloatingChat } from "@/components/FloatingChat";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+
+  const isAuthOrDashboard = ["/login", "/dashboard"].includes(location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background">
-        <SiteHeader />
+        {!isAuthOrDashboard && <SiteHeader />}
         <main>
           <Outlet />
         </main>
-        <FooterSection />
+        {!isAuthOrDashboard && <FooterSection />}
         <Toaster />
-        <FloatingChat />
+        {!isAuthOrDashboard && <FloatingChat />}
       </div>
     </QueryClientProvider>
   );
