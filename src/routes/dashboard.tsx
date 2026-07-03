@@ -114,6 +114,21 @@ export const Route = createFileRoute("/dashboard")({
 // Premium copper-themed chart colors
 const COLORS = ["#D69873", "#975033", "#C0A080", "#8C6A53", "#5C4033", "#B58A63"];
 
+// Custom Premium Tooltip for Recharts
+const CustomChartTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#140b07] border border-white/10 rounded-xl p-3.5 shadow-2xl backdrop-blur-md animate-in fade-in duration-150">
+        <p className="text-[10px] uppercase font-bold tracking-[0.15em] text-white/40">{label}</p>
+        <p className="text-sm font-bold text-copper mt-1.5">
+          {payload[0].name}: <span className="text-white font-sans">${Number(payload[0].value).toLocaleString()}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 function DashboardPage() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -552,20 +567,20 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0d0704] flex font-sans text-white/90 selection:bg-copper selection:text-white overflow-hidden">
-      {/* Glow effects */}
-      <div className="absolute top-0 right-[10%] w-[35rem] h-[35rem] rounded-full bg-copper/5 blur-[160px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[20%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-[#975033]/5 blur-[200px] pointer-events-none -z-10" />
+      {/* Dynamic Glow effects */}
+      <div className="absolute top-[-10%] right-[10%] w-[35rem] h-[35rem] rounded-full bg-copper/5 blur-[150px] pointer-events-none -z-10 animate-pulse duration-10000" />
+      <div className="absolute bottom-[10%] left-[20%] w-[45rem] h-[45rem] rounded-full bg-[#975033]/4 blur-[180px] pointer-events-none -z-10 animate-pulse duration-10000" />
 
       {/* Confirmation Modal */}
       {confirmConfig && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-[#160f0a] rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+          <div className="bg-[#140b07] rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-bold text-white mb-2 font-serif">{confirmConfig.title}</h3>
             <p className="text-sm text-white/60 leading-relaxed mb-6">{confirmConfig.message}</p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmConfig(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/5 transition text-white"
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/5 transition text-white/80 hover:text-white"
               >
                 Cancel
               </button>
@@ -574,7 +589,7 @@ function DashboardPage() {
                   confirmConfig.onConfirm();
                   setConfirmConfig(null);
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow transition"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-lg transition"
               >
                 {confirmConfig.confirmText || "Confirm"}
               </button>
@@ -589,7 +604,7 @@ function DashboardPage() {
           onClick={() => setLightboxPhoto(null)}
           className="fixed inset-0 z-[99999] bg-black/95 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200"
         >
-          <img src={lightboxPhoto} alt="Lightbox Enlarged" className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/5" />
+          <img src={lightboxPhoto} alt="Lightbox Enlarged" className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/10" />
           <button className="absolute top-6 right-6 text-white hover:text-gray-300 p-2">
             <X className="w-6 h-6" />
           </button>
@@ -597,90 +612,63 @@ function DashboardPage() {
       )}
 
       {/* Left Sidebar Navigation */}
-      <aside className="w-64 sm:w-72 shrink-0 bg-[#0c0704]/90 backdrop-blur-lg border-r border-white/5 flex flex-col justify-between p-6 sticky top-0 h-screen z-45">
-        <div className="space-y-8 overflow-y-auto pr-1">
+      <aside className="w-64 sm:w-72 shrink-0 bg-[#0c0704]/95 backdrop-blur-xl border-r border-white/[0.05] flex flex-col justify-between p-6 sticky top-0 h-screen z-45">
+        <div className="space-y-8 overflow-y-auto pr-1 scrollbar-none">
           {/* Logo & Branding */}
           <div className="flex items-center gap-3">
             <img src={logo} alt="Revitalize Office" className="h-9 w-auto object-contain bg-white rounded p-0.5" />
             <div>
               <h1 className="font-bold text-sm tracking-wide font-serif leading-none">Revitalize Office</h1>
-              <p className="text-[9px] text-copper font-bold leading-none mt-1.5 uppercase tracking-widest">Control Desk</p>
+              <p className="text-[9px] text-copper font-bold leading-none mt-2.5 uppercase tracking-[0.15em]">Control Desk</p>
             </div>
           </div>
 
           {/* Navigation Links list */}
-          <nav className="flex flex-col gap-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "overview" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 text-copper" /> Analytics Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("leads")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "leads" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Briefcase className="w-4 h-4 text-copper" /> Leads Manager
-            </button>
-            <button
-              onClick={() => setActiveTab("reviews")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "reviews" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Star className="w-4 h-4 text-copper" /> Reviews Board
-            </button>
-            <button
-              onClick={() => setActiveTab("emails")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "emails" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Mail className="w-4 h-4 text-copper" /> Web Inquiries
-            </button>
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "chat" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <MessageCircle className="w-4 h-4 text-copper" /> Live Chats
-            </button>
-            <button
-              onClick={() => setActiveTab("gallery")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "gallery" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <ImageIcon className="w-4 h-4 text-copper" /> Gallery Admin
-            </button>
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                activeTab === "settings" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Settings className="w-4 h-4 text-copper" /> Settings
-            </button>
-            {currentUser?.role === "admin" && (
-              <button
-                onClick={() => setActiveTab("security")}
-                className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-3 transition-all duration-300 ${
-                  activeTab === "security" ? "bg-copper/25 text-white shadow-lg shadow-copper/10 border border-copper/35 font-black" : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Sliders className="w-4 h-4 text-copper" /> Security Users
-              </button>
-            )}
+          <nav className="flex flex-col gap-1.5">
+            {[
+              { id: "overview", label: "Analytics Overview", icon: TrendingUp },
+              { id: "leads", label: "Leads Manager", icon: Briefcase },
+              { id: "reviews", label: "Reviews Board", icon: Star },
+              { id: "emails", label: "Web Inquiries", icon: Mail },
+              { id: "chat", label: "Live Chats", icon: MessageCircle, badge: chatSessions.some(s => s.unread) },
+              { id: "gallery", label: "Gallery Admin", icon: ImageIcon },
+              { id: "settings", label: "Settings", icon: Settings },
+              ...(currentUser?.role === "admin" ? [{ id: "security", label: "Security Users", icon: Sliders }] : [])
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`w-full px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-300 relative group overflow-hidden ${
+                    isActive 
+                      ? "bg-gradient-to-r from-copper/20 to-copper/5 text-white border border-copper/30 shadow-lg shadow-copper/5 font-black" 
+                      : "text-white/60 hover:bg-white/[0.03] hover:text-white border border-transparent"
+                  }`}
+                >
+                  <span className="flex items-center gap-3 relative z-10">
+                    <Icon className={`w-4 h-4 transition-colors ${isActive ? "text-copper" : "text-white/40 group-hover:text-copper"}`} />
+                    {tab.label}
+                  </span>
+                  
+                  {/* Left sliding bar indicator */}
+                  <span className={`absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r bg-copper transition-all duration-300 ${
+                    isActive ? "h-1/2 opacity-100" : "h-0 opacity-0 group-hover:h-1/3 group-hover:opacity-60"
+                  }`} />
+                  
+                  {/* Badge */}
+                  {tab.badge && (
+                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0 animate-pulse relative z-10" />
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
         {/* Sidebar Footer */}
-        <div className="border-t border-white/5 pt-4 space-y-4">
+        <div className="border-t border-white/[0.05] pt-5 space-y-4">
           <div className="flex items-center gap-3 pl-2">
             <div className="w-8 h-8 rounded-full bg-copper/10 border border-copper/20 flex items-center justify-center text-copper text-xs font-black">
               {currentUser?.username.charAt(0).toUpperCase()}
@@ -706,60 +694,41 @@ function DashboardPage() {
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-6 animate-in fade-in duration-300">
               {/* Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-[#140b07]/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between hover:border-copper/20 hover:shadow-copper/5 transition-all duration-300">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Total Leads Logged</span>
-                  <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">{analytics.totalLeads}</span>
-                    <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      <ArrowUpRight className="w-3 h-3" /> Live
-                    </span>
+                {[
+                  { title: "Total Leads Logged", val: analytics.totalLeads, suffix: "Live", isEmerald: true },
+                  { title: "Active Pipeline", val: analytics.activeCount, suffix: "Leads", isCopper: true },
+                  { title: "Estimated Revenue", val: `$${(analytics.totalValue / 1000).toFixed(0)}k`, suffix: "Active", isBlue: true },
+                  { title: "Closed Won Contracts", val: `$${(analytics.wonValue / 1000).toFixed(0)}k`, suffix: "Won", isEmerald: true },
+                  { title: "Close Win Rate", val: `${analytics.winRate}%`, suffix: "Average", isNeutral: true }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx} 
+                    className="bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-5 rounded-2xl border border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] flex flex-col justify-between hover:border-copper/20 hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{item.title}</span>
+                    <div className="flex items-baseline justify-between mt-2">
+                      <span className="text-2xl font-bold text-white tracking-tight">{item.val}</span>
+                      <span className={`text-[9px] font-black border px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                        item.isEmerald ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" :
+                        item.isCopper ? "text-copper bg-copper/10 border-copper/25" :
+                        item.isBlue ? "text-blue-400 bg-blue-500/10 border-blue-500/20" :
+                        "text-white/60 bg-white/5 border-white/10"
+                      }`}>
+                        {item.suffix === "Live" && <ArrowUpRight className="w-3 h-3 animate-bounce" />}
+                        {item.suffix}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="bg-[#140b07]/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between hover:border-copper/20 hover:shadow-copper/5 transition-all duration-300">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Active Pipeline</span>
-                  <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">{analytics.activeCount}</span>
-                    <span className="text-[9px] font-black text-copper bg-copper/10 border border-copper/25 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      Leads
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-[#140b07]/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between hover:border-copper/20 hover:shadow-copper/5 transition-all duration-300">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Estimated Revenue</span>
-                  <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">${(analytics.totalValue / 1000).toFixed(0)}k</span>
-                    <span className="text-[9px] font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      Active
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-[#140b07]/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between hover:border-copper/20 hover:shadow-copper/5 transition-all duration-300">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Closed Won Contracts</span>
-                  <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">${(analytics.wonValue / 1000).toFixed(0)}k</span>
-                    <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      Won
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-[#140b07]/50 backdrop-blur-md p-5 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between hover:border-copper/20 hover:shadow-copper/5 transition-all duration-300">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Close Win Rate</span>
-                  <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">{analytics.winRate}%</span>
-                    <span className="text-[9px] font-black text-white/60 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      Average
-                    </span>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Charts Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Monthly Revenue Chart */}
-                <div className="lg:col-span-8 bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl">
+                <div className="lg:col-span-8 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-xl">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-serif">Revenue & Inquiry Timeline</h3>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
@@ -770,10 +739,10 @@ function DashboardPage() {
                             <stop offset="95%" stopColor="#D69873" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.02)" />
                         <XAxis dataKey="name" stroke="#718096" fontSize={11} tickLine={false} />
                         <YAxis stroke="#718096" fontSize={11} tickLine={false} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: "#1c100b", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} />
+                        <RechartsTooltip content={<CustomChartTooltip />} />
                         <Area type="monotone" dataKey="revenue" stroke="#D69873" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" name="Contract Value ($)" />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -781,7 +750,7 @@ function DashboardPage() {
                 </div>
 
                 {/* Status Pie Chart */}
-                <div className="lg:col-span-4 bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl">
+                <div className="lg:col-span-4 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-xl">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-serif">Leads Pipeline Split</h3>
                   <div className="h-80 flex flex-col items-center justify-center">
                     <div className="w-full h-64">
@@ -800,15 +769,15 @@ function DashboardPage() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <RechartsTooltip contentStyle={{ backgroundColor: "#1c100b", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} />
+                          <RechartsTooltip content={<CustomChartTooltip />} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 w-full text-[10px] font-bold text-white/60">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 w-full text-[10px] font-bold text-white/50">
                       {analytics.statusChart.map((entry, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 truncate">
                           <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                          <span className="truncate">{entry.name}: {entry.value}</span>
+                          <span className="truncate text-white/70">{entry.name}: <span className="text-white font-sans">{entry.value}</span></span>
                         </div>
                       ))}
                     </div>
@@ -816,15 +785,15 @@ function DashboardPage() {
                 </div>
 
                 {/* Project Types Chart */}
-                <div className="lg:col-span-6 bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl">
+                <div className="lg:col-span-6 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-xl">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-serif">Project Distribution Value</h3>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={analytics.projectTypesChart}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.02)" />
                         <XAxis dataKey="name" stroke="#718096" fontSize={10} tickLine={false} />
                         <YAxis stroke="#718096" fontSize={11} tickLine={false} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: "#1c100b", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} />
+                        <RechartsTooltip content={<CustomChartTooltip />} />
                         <Bar dataKey="amount" fill="#975033" radius={[4, 4, 0, 0]} name="Value ($)" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -832,15 +801,15 @@ function DashboardPage() {
                 </div>
 
                 {/* Regions Chart */}
-                <div className="lg:col-span-6 bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl">
+                <div className="lg:col-span-6 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-xl">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-4 font-serif">Tampa Bay Cities Share</h3>
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={analytics.regionChart} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.03)" />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.02)" />
                         <XAxis type="number" stroke="#718096" fontSize={11} tickLine={false} />
                         <YAxis dataKey="name" type="category" stroke="#718096" fontSize={11} tickLine={false} width={80} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: "#1c100b", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: "#140b07", borderColor: "rgba(255,255,255,0.1)", borderRadius: "12px", color: "white" }} />
                         <Bar dataKey="value" fill="#D69873" radius={[0, 4, 4, 0]} name="Leads Count" />
                       </BarChart>
                     </ResponsiveContainer>
@@ -852,9 +821,9 @@ function DashboardPage() {
 
           {/* TAB 2: LEADS */}
           {activeTab === "leads" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-6 animate-in fade-in duration-300">
               {/* Tools Header */}
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#120804]/50 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-4 rounded-2xl border border-white/[0.05] shadow-xl">
                 <div className="relative w-full sm:max-w-xs">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <input
@@ -903,11 +872,11 @@ function DashboardPage() {
               </div>
 
               {/* Leads List Table */}
-              <div className="bg-[#120804]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+              <div className="bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md rounded-2xl border border-white/[0.05] shadow-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black uppercase tracking-wider text-white/40">
+                      <tr className="bg-white/[0.02] border-b border-white/[0.05] text-[10px] font-black uppercase tracking-wider text-white/40">
                         <th className="p-4 pl-6">Client Name</th>
                         <th className="p-4">Contact Info</th>
                         <th className="p-4">City</th>
@@ -917,7 +886,7 @@ function DashboardPage() {
                         <th className="p-4 pr-6 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-xs">
+                    <tbody className="divide-y divide-white/[0.03] text-xs">
                       {filteredLeads.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="text-center p-12 text-white/30">
@@ -926,7 +895,7 @@ function DashboardPage() {
                         </tr>
                       ) : (
                         filteredLeads.map((lead) => (
-                          <tr key={lead.id} className="hover:bg-white/[0.01] transition">
+                          <tr key={lead.id} className="hover:bg-white/[0.01] transition-colors duration-200">
                             <td className="p-4 pl-6 font-bold text-white">{lead.name}</td>
                             <td className="p-4 text-white/60 font-medium">
                               <div>{lead.phone}</div>
@@ -935,15 +904,15 @@ function DashboardPage() {
                             <td className="p-4 text-white/70 font-medium">
                               {lead.address.split(",").slice(-3, -2)[0]?.trim() || "Tampa"}
                             </td>
-                            <td className="p-4 font-semibold text-white/80">
+                            <td className="p-4 font-semibold text-white/85">
                               <span className="capitalize">{lead.projectType.replace("-", " ")}</span>
                             </td>
-                            <td className="p-4 font-bold text-copper">
+                            <td className="p-4 font-bold text-copper font-sans">
                               ${lead.estimatedValue.toLocaleString()}
                             </td>
                             <td className="p-4">
                               <span
-                                className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-block border ${
+                                className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center border ${
                                   lead.status === "new" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
                                   lead.status === "contacted" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
                                   lead.status === "consultation_scheduled" ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
@@ -952,6 +921,9 @@ function DashboardPage() {
                                   "bg-rose-500/10 text-rose-400 border-rose-500/20"
                                 }`}
                               >
+                                {lead.status === "new" && (
+                                  <span className="w-1 h-1 rounded-full bg-blue-400 mr-1.5 animate-pulse inline-block" />
+                                )}
                                 {lead.status.replace("_", " ")}
                               </span>
                             </td>
@@ -982,7 +954,7 @@ function DashboardPage() {
                 <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                   <div className="w-full max-w-lg bg-[#140b07] h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between border-l border-white/5 animate-in slide-in-from-right duration-250">
                     <div className="space-y-6">
-                      <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                      <div className="flex items-center justify-between border-b border-white/[0.05] pb-4">
                         <div>
                           <h3 className="text-lg font-bold text-white font-serif">{selectedLead.name}</h3>
                           <p className="text-[10px] text-copper font-bold uppercase tracking-wider mt-0.5">Lead Details Profile</p>
@@ -1024,7 +996,7 @@ function DashboardPage() {
                       </div>
 
                       {/* Edit Form */}
-                      <div className="border-t border-white/5 pt-4 space-y-4">
+                      <div className="border-t border-white/[0.05] pt-4 space-y-4">
                         <h4 className="text-xs font-black uppercase tracking-wider text-white font-serif">Management Controls</h4>
 
                         <div className="space-y-1.5">
@@ -1066,10 +1038,10 @@ function DashboardPage() {
                       </div>
 
                       {/* Photos Upload Section */}
-                      <div className="border-t border-white/5 pt-4 space-y-3">
+                      <div className="border-t border-white/[0.05] pt-4 space-y-3">
                         <div className="flex items-center justify-between">
                           <h4 className="text-xs font-black uppercase tracking-wider text-white font-serif">Project Site Photos</h4>
-                          <label className="bg-white/5 hover:bg-copper/20 hover:text-white border border-white/10 hover:border-copper/20 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition">
+                          <label className="bg-white/5 hover:bg-copper/20 hover:text-white border border-white/10 hover:border-copper/25 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition">
                             <Upload className="w-3.5 h-3.5" /> Upload File
                             <input
                               type="file"
@@ -1244,11 +1216,11 @@ function DashboardPage() {
 
           {/* TAB 3: REVIEWS */}
           {activeTab === "reviews" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-6 animate-in fade-in duration-300">
               {/* Reviews list */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {reviews.map((rev) => (
-                  <div key={rev.id} className="bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl flex flex-col justify-between space-y-4 hover:border-copper/20 transition duration-300">
+                  <div key={rev.id} className="bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-6 rounded-2xl border border-white/[0.05] shadow-xl flex flex-col justify-between space-y-4 hover:border-copper/20 hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300">
                     <div>
                       <div className="flex items-start justify-between">
                         <div>
@@ -1274,7 +1246,7 @@ function DashboardPage() {
                       )}
                     </div>
 
-                    <div className="border-t border-white/5 pt-4 flex items-center justify-between gap-2">
+                    <div className="border-t border-white/[0.05] pt-4 flex items-center justify-between gap-2">
                       <button
                         onClick={() => handleToggleReviewFeatured(rev.id)}
                         className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition duration-300 ${
@@ -1354,13 +1326,13 @@ function DashboardPage() {
 
           {/* TAB 4: EMAILS */}
           {activeTab === "emails" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-6 animate-in fade-in duration-300">
               {/* Inquiries list */}
-              <div className="bg-[#120804]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl overflow-hidden">
+              <div className="bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md rounded-2xl border border-white/[0.05] shadow-xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-white/[0.02] border-b border-white/5 text-[10px] font-black uppercase tracking-wider text-white/40">
+                      <tr className="bg-white/[0.02] border-b border-white/[0.05] text-[10px] font-black uppercase tracking-wider text-white/40">
                         <th className="p-4 pl-6">Sender Details</th>
                         <th className="p-4">Requested Service</th>
                         <th className="p-4">Message Body</th>
@@ -1368,7 +1340,7 @@ function DashboardPage() {
                         <th className="p-4 pr-6 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-xs">
+                    <tbody className="divide-y divide-white/[0.03] text-xs">
                       {webEmails.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="text-center p-12 text-white/30">
@@ -1377,7 +1349,7 @@ function DashboardPage() {
                         </tr>
                       ) : (
                         webEmails.map((email) => (
-                          <tr key={email.id} className="hover:bg-white/[0.01] transition">
+                          <tr key={email.id} className="hover:bg-white/[0.01] transition-colors duration-200">
                             <td className="p-4 pl-6">
                               <div className="font-bold text-white">{email.name}</div>
                               <div className="text-[10px] text-white/40 mt-0.5">{email.email} · {email.phone}</div>
@@ -1422,52 +1394,62 @@ function DashboardPage() {
 
           {/* TAB 5: CHAT */}
           {activeTab === "chat" && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[500px] items-stretch animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[520px] items-stretch animate-in fade-in duration-300">
               {/* Sidebar list */}
-              <div className="lg:col-span-4 bg-[#120804]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl overflow-hidden flex flex-col">
-                <div className="p-4 border-b border-white/5 bg-white/[0.01]">
+              <div className="lg:col-span-4 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md rounded-2xl border border-white/[0.05] shadow-xl overflow-hidden flex flex-col">
+                <div className="p-4 border-b border-white/[0.05] bg-white/[0.01]">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-white font-serif">Active Sessions</h4>
                 </div>
-                <div className="flex-1 overflow-y-auto divide-y divide-white/5">
-                  {chatSessions.map((session) => (
-                    <button
-                      key={session.id}
-                      onClick={() => handleSelectChat(session.id)}
-                      className={`w-full text-left p-4 flex items-center justify-between transition ${
-                        activeSessionId === session.id ? "bg-copper/10 border-l-4 border-copper" : "hover:bg-white/[0.01]"
-                      }`}
-                    >
-                      <div className="truncate pr-2">
-                        <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                          {session.clientName}
-                          {session.unread && (
-                            <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0 animate-pulse" />
-                          )}
+                <div className="flex-1 overflow-y-auto divide-y divide-white/[0.03]">
+                  {chatSessions.map((session) => {
+                    const initials = session.clientName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+                    return (
+                      <button
+                        key={session.id}
+                        onClick={() => handleSelectChat(session.id)}
+                        className={`w-full text-left p-4 flex items-center justify-between transition-colors duration-200 ${
+                          activeSessionId === session.id ? "bg-copper/10 border-l-4 border-copper" : "hover:bg-white/[0.01]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 truncate pr-2">
+                          <div className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-xs font-black text-white shrink-0">
+                            {initials}
+                          </div>
+                          <div className="truncate">
+                            <div className="font-bold text-xs text-white flex items-center gap-1.5">
+                              {session.clientName}
+                              {session.unread && (
+                                <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0 animate-pulse" />
+                              )}
+                            </div>
+                            <p className="text-[10px] text-white/40 mt-1 truncate">{session.lastMessage}</p>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-white/40 mt-1 truncate">{session.lastMessage}</p>
-                      </div>
-                      <span className="text-[9px] text-white/30 shrink-0 font-medium">
-                        {formatChatTime(session.lastMessageTime)}
-                      </span>
-                    </button>
-                  ))}
+                        <span className="text-[9px] text-white/30 shrink-0 font-medium font-sans">
+                          {formatChatTime(session.lastMessageTime)}
+                        </span>
+                      </button>
+                    );
+                  })}
                   {chatSessions.length === 0 && (
                     <div className="text-center py-12 text-white/30 text-xs">
                       No active chat sessions found.
-                  </div>
-                )}
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Conversation Window */}
-              <div className="lg:col-span-8 bg-[#120804]/50 backdrop-blur-md rounded-2xl border border-white/5 shadow-xl overflow-hidden flex flex-col h-full">
+              <div className="lg:col-span-8 bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md rounded-2xl border border-white/[0.05] shadow-xl overflow-hidden flex flex-col h-full">
                 {activeChatSession ? (
                   <>
                     {/* Active Header */}
-                    <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                    <div className="p-4 border-b border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
                       <div>
                         <h4 className="font-bold text-xs text-white font-serif leading-none">{activeChatSession.clientName}</h4>
-                        <p className="text-[10px] text-white/40 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
+                        <p className="text-[9px] text-white/40 font-medium leading-none mt-1.5">
+                          Wesley Chapel, FL · <span className="text-copper">Chrome · Mobile Device</span>
+                        </p>
                       </div>
                     </div>
 
@@ -1481,14 +1463,14 @@ function DashboardPage() {
                           }`}
                         >
                           <div
-                            className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                            className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
                               msg.sender === "admin"
-                                ? "bg-copper text-white rounded-tr-none shadow-sm"
-                                : "bg-[#18110d] text-white/95 border border-white/5 rounded-tl-none shadow-sm"
+                                ? "bg-copper text-white rounded-tr-none shadow-md"
+                                : "bg-[#1d1410] text-white/95 border border-white/5 rounded-tl-none shadow-md"
                             }`}
                           >
                             <p>{msg.text}</p>
-                            <span className={`text-[8px] mt-1 block text-right font-medium ${
+                            <span className={`text-[8px] mt-1.5 block text-right font-medium font-sans ${
                               msg.sender === "admin" ? "text-white/60" : "text-white/30"
                             }`}>
                               {formatChatTime(msg.timestamp)}
@@ -1500,18 +1482,18 @@ function DashboardPage() {
                     </div>
 
                     {/* Active Input Reply */}
-                    <form onSubmit={handleSendChatReply} className="p-3 border-t border-white/5 flex items-center gap-2 bg-[#120804]">
+                    <form onSubmit={handleSendChatReply} className="p-3 border-t border-white/[0.05] flex items-center gap-2 bg-[#120804]">
                       <input
                         type="text"
                         placeholder="Type admin response..."
                         value={adminReplyText}
                         onChange={(e) => setAdminReplyText(e.target.value)}
-                        className="flex-1 bg-white/[0.02] border border-white/10 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-xs font-medium text-white"
+                        className="flex-1 bg-white/[0.02] border border-white/10 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-3 text-xs font-medium text-white placeholder-white/20"
                       />
                       <button
                         type="submit"
                         disabled={!adminReplyText.trim()}
-                        className="bg-copper hover:bg-copper-deep text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-copper/20 transition disabled:opacity-50"
+                        className="bg-copper hover:bg-copper-deep text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-copper/20 transition duration-300 disabled:opacity-50"
                       >
                         <Send className="w-3.5 h-3.5" />
                       </button>
@@ -1529,15 +1511,15 @@ function DashboardPage() {
 
           {/* TAB 6: GALLERY */}
           {activeTab === "gallery" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-6 animate-in fade-in duration-300">
               {/* Gallery Upload bar */}
-              <div className="flex items-center justify-between bg-[#120804]/50 backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-xl">
+              <div className="flex items-center justify-between bg-gradient-to-br from-[#18100b]/80 to-[#120804]/90 backdrop-blur-md p-4 rounded-2xl border border-white/[0.05] shadow-xl">
                 <div>
                   <h3 className="text-sm font-bold text-white font-serif leading-none">Photo Gallery manager</h3>
                   <p className="text-[10px] text-white/40 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
                 </div>
 
-                <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-md shadow-copper/20 hover:-translate-y-0.5 active:translate-y-0 transition cursor-pointer">
+                <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-md shadow-copper/20 hover:-translate-y-0.5 active:translate-y-0 transition cursor-pointer">
                   <Upload className="w-4 h-4" /> Add Photo
                   <input
                     type="file"
@@ -1551,7 +1533,7 @@ function DashboardPage() {
               {/* Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {galleryPhotos.map((photo) => (
-                  <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-white/5 shadow bg-[#120804]">
+                  <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-white/[0.05] shadow bg-[#120804]">
                     <img
                       src={photo.url}
                       alt="Gallery item"
@@ -1582,7 +1564,7 @@ function DashboardPage() {
 
           {/* TAB 7: SETTINGS */}
           {activeTab === "settings" && (
-            <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-200">
+            <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-300">
               <div className="bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl space-y-4">
                 <div>
                   <h3 className="text-sm font-bold text-white font-serif leading-none">Security Settings</h3>
@@ -1614,7 +1596,7 @@ function DashboardPage() {
 
                   <button
                     type="submit"
-                    className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-copper/20 cursor-pointer"
+                    className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-copper/20 cursor-pointer animate-in fade-in"
                   >
                     Update Credentials
                   </button>
@@ -1625,7 +1607,7 @@ function DashboardPage() {
 
           {/* TAB 8: SECURITY */}
           {activeTab === "security" && currentUser?.role === "admin" && (
-            <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
+            <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                 {/* Account Creator */}
                 <div className="bg-[#120804]/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-xl space-y-4">
@@ -1674,7 +1656,7 @@ function DashboardPage() {
 
                     <button
                       type="submit"
-                      className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-copper/25 cursor-pointer"
+                      className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-copper/25 cursor-pointer animate-in"
                     >
                       Add Portal Account
                     </button>
