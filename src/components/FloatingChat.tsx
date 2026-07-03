@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Sparkles, Phone, Calendar, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import favIcon from "@/assets/fav.png";
 
 interface Message {
   id: string;
@@ -89,8 +90,8 @@ export function FloatingChat() {
           <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between shadow-md">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                  <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-white/20 overflow-hidden shrink-0">
+                  <img src={favIcon} alt="Revitalize Logo" className="w-7 h-7 object-contain" />
                 </div>
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
               </div>
@@ -210,13 +211,13 @@ export function FloatingChat() {
       {/* Floating Bubble Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-full bg-gradient-to-tr from-copper to-[#975033] hover:scale-110 active:scale-95 text-white flex items-center justify-center shadow-xl cursor-pointer hover:shadow-2xl transition duration-300 relative group"
+        className="w-14 h-14 rounded-full bg-white hover:scale-110 active:scale-95 flex items-center justify-center shadow-xl cursor-pointer hover:shadow-2xl transition duration-300 relative group border border-charcoal/10"
         style={{
-          boxShadow: "0 8px 30px rgba(214, 152, 115, 0.4)",
+          boxShadow: "0 8px 30px rgba(214, 152, 115, 0.35)",
         }}
       >
-        <span className="absolute inset-0 rounded-full bg-copper/30 animate-ping -z-10 group-hover:animate-none" />
-        <MessageCircle className="w-6 h-6" />
+        <span className="absolute inset-0 rounded-full bg-copper/15 animate-ping -z-10 group-hover:opacity-0 transition-opacity duration-300" />
+        <img src={favIcon} alt="Chat Logo" className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300" />
 
         {/* Unread notification badge */}
         {unreadCount > 0 && !isOpen && (
