@@ -576,11 +576,11 @@ function DashboardPage() {
           <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-full bg-copper text-white flex items-center justify-center font-black text-sm shadow-sm">
-                {currentUser?.username.charAt(0).toUpperCase()}
+                {currentUser?.username?.charAt(0)?.toUpperCase() || "A"}
               </div>
               <div className="leading-tight">
-                <p className="text-xs font-bold text-slate-800">{currentUser?.username}</p>
-                <p className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]">{currentUser?.username}@revitalizegroup.com</p>
+                <p className="text-xs font-bold text-slate-800">{currentUser?.username || "Admin"}</p>
+                <p className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]">{(currentUser?.username || "admin")}@revitalizegroup.com</p>
               </div>
             </div>
             <ChevronDown className="w-3 h-3 text-slate-400" />
@@ -1016,7 +1016,7 @@ function DashboardPage() {
                               {lead.status.replace("_", " ")}
                             </span>
                           </td>
-                          <td className="p-4 text-slate-600 font-medium">{lead.address.split(",")[0] || "Tampa"}</td>
+                          <td className="p-4 text-slate-600 font-medium">{lead.address?.split(",")?.[0] || "Tampa"}</td>
                           <td className="p-4 pr-6 text-right space-x-1.5">
                             <button
                               onClick={() => handleEditLead(lead)}
@@ -1117,7 +1117,7 @@ function DashboardPage() {
                             <div className="text-[10px] text-slate-400 mt-0.5">{lead.email}</div>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">
-                            {lead.address.split(",").slice(-3, -2)[0]?.trim() || "Tampa"}
+                            {lead.address?.split(",")?.slice(-3, -2)?.[0]?.trim() || "Tampa"}
                           </td>
                           <td className="p-4 font-semibold text-slate-800">
                             <span className="capitalize">{lead.projectType.replace("-", " ")}</span>

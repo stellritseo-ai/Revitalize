@@ -636,11 +636,12 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
   // 3. Regional distribution (cities)
   const cityCounts: Record<string, number> = {};
   leads.forEach(l => {
-    const parts = l.address.split(",");
+    const addressStr = l.address || "";
+    const parts = addressStr.split(",");
     let city = "Tampa";
     if (parts.length >= 2) {
       const cityPart = parts[parts.length - 2].trim();
-      city = cityPart;
+      city = cityPart || "Tampa";
     }
     cityCounts[city] = (cityCounts[city] || 0) + 1;
   });
@@ -660,7 +661,9 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
   };
 
   leads.forEach(l => {
+    if (!l.createdAt) return;
     const date = new Date(l.createdAt);
+    if (isNaN(date.getTime())) return;
     const month = date.toLocaleString("en-US", { month: "short" });
     if (monthlyData[month]) {
       monthlyData[month].count += 1;
