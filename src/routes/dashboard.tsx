@@ -567,7 +567,7 @@ function DashboardPage() {
           {/* Header branding */}
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Revitalize Office" className="h-12 w-auto object-contain bg-[#1a1f36] rounded p-1" />
+              <img src={logo} alt="Revitalize Office" className="h-12 w-auto object-contain" />
             </div>
             <button className="text-[#a0aec0] hover:text-[#4f566b]">
               <ChevronDown className="w-3.5 h-3.5" />
