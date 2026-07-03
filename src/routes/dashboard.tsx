@@ -578,19 +578,7 @@ function DashboardPage() {
             </button>
           </div>
 
-          {/* User Widget */}
-          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-copper text-white flex items-center justify-center font-black text-sm shadow-sm">
-                {currentUser?.username?.charAt(0)?.toUpperCase() || "A"}
-              </div>
-              <div className="leading-tight">
-                <p className="text-xs font-bold text-slate-800">{currentUser?.username || "Admin"}</p>
-                <p className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]">{(currentUser?.username || "admin")}@revitalizegroup.com</p>
-              </div>
-            </div>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
-          </div>
+
 
           {/* Main Menu Links */}
           <div className="space-y-1">
