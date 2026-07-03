@@ -259,6 +259,12 @@ function DashboardPage() {
     return getAnalyticsData(leads, reviews);
   }, [leads, reviews]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("revitalize-session-token");
+    setIsAuthenticated(false);
+    navigate({ to: "/login" });
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
