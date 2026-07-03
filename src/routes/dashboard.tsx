@@ -614,31 +614,7 @@ function DashboardPage() {
             })}
           </div>
 
-          {/* Integrations (Collapsible structure) */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between px-3 mb-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Integrations</p>
-              <Plus className="w-3 h-3 text-slate-400 cursor-pointer" />
-            </div>
-            
-            {/* MLS Listings */}
-            <div className="px-3.5 py-2 flex items-center justify-between rounded-xl hover:bg-slate-50 text-xs font-bold text-slate-500 cursor-pointer">
-              <span className="flex items-center gap-3">
-                <Globe className="w-4 h-4 text-slate-400" />
-                MLS Channels
-              </span>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-            
-            {/* Subcontractor Sync */}
-            <div className="px-3.5 py-2 flex items-center justify-between rounded-xl hover:bg-slate-50 text-xs font-bold text-slate-500 cursor-pointer">
-              <span className="flex items-center gap-3">
-                <Layers className="w-4 h-4 text-slate-400" />
-                Contractor Hub
-              </span>
-              <ChevronDown className="w-3 h-3" />
-            </div>
-          </div>
+
 
           {/* Unlock More Features promo card */}
           <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 space-y-3">
