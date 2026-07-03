@@ -68,6 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 import { Toaster } from "@/components/ui/sonner";
+import { FloatingChat } from "@/components/FloatingChat";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -81,6 +82,7 @@ function RootComponent() {
         </main>
         <FooterSection />
         <Toaster />
+        <FloatingChat />
       </div>
     </QueryClientProvider>
   );
