@@ -1,0 +1,1698 @@
+import { useState, useEffect, useMemo, useRef } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  TrendingUp,
+  Briefcase,
+  Users,
+  DollarSign,
+  MapPin,
+  Star,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Trash2,
+  Edit2,
+  Plus,
+  Phone,
+  Mail,
+  FileText,
+  Settings,
+  LogOut,
+  MessageSquare,
+  Calendar,
+  ChevronRight,
+  Filter,
+  Search,
+  MessageCircle,
+  User,
+  ThumbsUp,
+  Sliders,
+  Bell,
+  ArrowUpRight,
+  ShieldAlert,
+  Info,
+  Image as ImageIcon,
+  Eye,
+  X,
+  Send,
+  Upload
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
+} from "recharts";
+import {
+  getLeads,
+  getReviews,
+  getWebEmails,
+  getChatSessions,
+  getGalleryPhotos,
+  getPortalUsers,
+  getAnalyticsData,
+  updateLeadStatus,
+  updateLeadDetails,
+  deleteLead,
+  addCustomLead,
+  uploadLeadPhoto,
+  removeLeadPhoto,
+  toggleReviewFeatured,
+  replyToReview,
+  addReview,
+  sendChatMessage,
+  markChatAsRead,
+  deleteWebEmail,
+  uploadGalleryPhoto,
+  removeGalleryPhoto,
+  updateUserCredentials,
+  createPortalUser,
+  deletePortalUser,
+  verifyAdminToken,
+  Lead,
+  Review,
+  WebEmail,
+  ChatSession,
+  GalleryPhoto,
+  PortalUser
+} from "@/lib/leads-store";
+import { toast } from "sonner";
+import logo from "@/assets/logo.png";
+
+const formatChatTime = (timestamp: string) => {
+  if (!timestamp) return "";
+  try {
+    const d = new Date(timestamp);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    return timestamp;
+  } catch {
+    return timestamp;
+  }
+};
+
+export const Route = createFileRoute("/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Revitalize Office — Admin Dashboard" },
+      { name: "description", content: "Internal business management console for Revitalize Group." }
+    ],
+  }),
+  component: DashboardPage,
+});
+
+const COLORS = ["#D69873", "#975033", "#4A5568", "#718096", "#A0AEC0", "#E2E8F0"];
+
+function DashboardPage() {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; username: string; role: string } | null>(null);
+
+  // Check auth
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("revitalize-session-token");
+      if (!token) {
+        setIsAuthenticated(false);
+        navigate({ to: "/login" });
+        return;
+      }
+      try {
+        const res = await verifyAdminToken(token);
+        if (res.valid) {
+          setIsAuthenticated(true);
+          setCurrentUser({
+            id: res.id || "",
+            username: res.username || "",
+            role: res.role || "admin"
+          });
+        } else {
+          localStorage.removeItem("revitalize-session-token");
+          setIsAuthenticated(false);
+          navigate({ to: "/login" });
+        }
+      } catch (e) {
+        console.error("Token verification failed:", e);
+        setIsAuthenticated(false);
+        navigate({ to: "/login" });
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "reviews" | "settings" | "chat" | "gallery" | "emails" | "security">("overview");
+
+  // Portal Security States
+  const [portalUsers, setPortalUsers] = useState<PortalUser[]>([]);
+  const [updateUsername, setUpdateUsername] = useState("");
+  const [updatePassword, setUpdatePassword] = useState("");
+  const [addUsername, setAddUsername] = useState("");
+  const [addPassword, setAddPassword] = useState("");
+  const [addRole, setAddRole] = useState<"admin" | "editor" | "viewer">("viewer");
+
+  // Store data states
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [webEmails, setWebEmails] = useState<WebEmail[]>([]);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [adminReplyText, setAdminReplyText] = useState("");
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  // Lead editing state
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isEditingLead, setIsEditingLead] = useState(false);
+  const [editEstimatedValue, setEditEstimatedValue] = useState(0);
+  const [editNotes, setEditNotes] = useState("");
+  const [editStatus, setEditStatus] = useState<Lead["status"]>("new");
+
+  // Add Custom Lead Form States
+  const [isAddingLead, setIsAddingLead] = useState(false);
+  const [newLeadName, setNewLeadName] = useState("");
+  const [newLeadEmail, setNewLeadEmail] = useState("");
+  const [newLeadPhone, setNewLeadPhone] = useState("");
+  const [newLeadAddress, setNewLeadAddress] = useState("");
+  const [newLeadType, setNewLeadType] = useState("remodeling");
+  const [newLeadDesc, setNewLeadDesc] = useState("");
+  const [newLeadVal, setNewLeadVal] = useState(15000);
+
+  // Review reply state
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [reviewReplyText, setReviewReplyText] = useState("");
+
+  // Confirmation Modal
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const triggerConfirm = (config: {
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm: () => void;
+  }) => {
+    setConfirmConfig(config);
+  };
+
+  // Prefill profile input
+  useEffect(() => {
+    if (currentUser) {
+      setUpdateUsername(currentUser.username);
+    }
+  }, [currentUser]);
+
+  // Load active tab data
+  useEffect(() => {
+    if (isAuthenticated) {
+      getLeads().then(setLeads);
+      getReviews().then(setReviews);
+      getWebEmails().then(setWebEmails);
+      getChatSessions().then(setChatSessions);
+      getGalleryPhotos().then(setGalleryPhotos);
+      if (currentUser?.role === "admin") {
+        getPortalUsers().then(setPortalUsers);
+      }
+    }
+  }, [isAuthenticated, activeTab, currentUser]);
+
+  const activeChatSession = useMemo(() => {
+    return chatSessions.find((s) => s.id === activeSessionId) || null;
+  }, [chatSessions, activeSessionId]);
+
+  // Auto scroll chat
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [activeChatSession?.messages]);
+
+  // Calculate analytics
+  const analytics = useMemo(() => {
+    return getAnalyticsData(leads, reviews);
+  }, [leads, reviews]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    try {
+      const res = await updateUserCredentials(currentUser.id, updateUsername, updatePassword);
+      if (res.success) {
+        toast.success("Credentials updated successfully!");
+        setCurrentUser((prev) => prev ? { ...prev, username: res.username } : null);
+        setUpdatePassword("");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update profile");
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addUsername.trim() || !addPassword.trim()) {
+      toast.error("Username and password are required.");
+      return;
+    }
+    try {
+      const res = await createPortalUser(addUsername, addPassword, addRole);
+      if (res.success) {
+        toast.success(`User '${res.username}' added.`);
+        setAddUsername("");
+        setAddPassword("");
+        setAddRole("viewer");
+        getPortalUsers().then(setPortalUsers);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create portal user.");
+    }
+  };
+
+  const handleDeleteUser = (userId: string, username: string) => {
+    if (username === "admin") {
+      toast.error("The primary administrator account 'admin' cannot be deleted.");
+      return;
+    }
+    if (currentUser && userId === currentUser.id) {
+      toast.error("You cannot delete the account you are currently logged in with.");
+      return;
+    }
+    triggerConfirm({
+      title: "Delete Account",
+      message: `Are you sure you want to delete user '${username}'?`,
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const res = await deletePortalUser(userId);
+          if (res.success) {
+            toast.success("Portal account deleted.");
+            getPortalUsers().then(setPortalUsers);
+          }
+        } catch (err: any) {
+          toast.error("Failed to delete user.");
+        }
+      }
+    });
+  };
+
+  // Lead Handlers
+  const handleEditLead = (lead: Lead) => {
+    setSelectedLead(lead);
+    setEditEstimatedValue(lead.estimatedValue);
+    setEditStatus(lead.status);
+    setEditNotes(lead.notes || "");
+    setIsEditingLead(true);
+  };
+
+  const handleSaveLeadDetails = async () => {
+    if (!selectedLead) return;
+    try {
+      const updated = await updateLeadDetails(selectedLead.id, {
+        estimatedValue: editEstimatedValue,
+        status: editStatus,
+        notes: editNotes
+      });
+      if (updated) {
+        setLeads(updated);
+        toast.success("Lead details updated.");
+        setIsEditingLead(false);
+        setSelectedLead(null);
+      }
+    } catch {
+      toast.error("Failed to update lead details.");
+    }
+  };
+
+  const handleDeleteLead = (id: string, name: string) => {
+    triggerConfirm({
+      title: "Delete Lead",
+      message: `Are you sure you want to delete the lead for ${name}?`,
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const updated = await deleteLead(id);
+          setLeads(updated);
+          toast.success("Lead deleted successfully.");
+          setIsEditingLead(false);
+          setSelectedLead(null);
+        } catch {
+          toast.error("Failed to delete lead.");
+        }
+      }
+    });
+  };
+
+  const handleAddCustomLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLeadName.trim()) return;
+    try {
+      await addCustomLead({
+        name: newLeadName,
+        email: newLeadEmail,
+        phone: newLeadPhone,
+        address: newLeadAddress,
+        projectType: newLeadType,
+        description: newLeadDesc,
+        status: "new",
+        estimatedValue: newLeadVal,
+        contactTime: "anytime"
+      });
+      toast.success("Lead created successfully.");
+      setIsAddingLead(false);
+      setNewLeadName("");
+      setNewLeadEmail("");
+      setNewLeadPhone("");
+      setNewLeadAddress("");
+      setNewLeadDesc("");
+      setNewLeadVal(15000);
+      getLeads().then(setLeads);
+    } catch {
+      toast.error("Failed to create lead.");
+    }
+  };
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>, leadId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      try {
+        const updated = await uploadLeadPhoto(leadId, base64);
+        setLeads(updated);
+        const current = updated.find(l => l.id === leadId);
+        if (current) setSelectedLead(current);
+        toast.success("Photo added successfully.");
+      } catch {
+        toast.error("Failed to upload photo.");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = async (leadId: string, index: number) => {
+    try {
+      const updated = await removeLeadPhoto(leadId, index);
+      setLeads(updated);
+      const current = updated.find(l => l.id === leadId);
+      if (current) setSelectedLead(current);
+      toast.success("Photo removed.");
+    } catch {
+      toast.error("Failed to remove photo.");
+    }
+  };
+
+  // Review Handlers
+  const handleToggleReviewFeatured = async (id: string) => {
+    try {
+      const updated = await toggleReviewFeatured(id);
+      setReviews(updated);
+      toast.success("Review visibility toggled.");
+    } catch {
+      toast.error("Failed to toggle review.");
+    }
+  };
+
+  const handleSaveReviewReply = async () => {
+    if (!selectedReview) return;
+    try {
+      const updated = await replyToReview(selectedReview.id, reviewReplyText);
+      setReviews(updated);
+      toast.success("Admin reply saved.");
+      setSelectedReview(null);
+      setReviewReplyText("");
+    } catch {
+      toast.error("Failed to save reply.");
+    }
+  };
+
+  // Email Handlers
+  const handleDeleteEmail = (id: string) => {
+    triggerConfirm({
+      title: "Delete Email Message",
+      message: "Are you sure you want to delete this contact submission?",
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const updated = await deleteWebEmail(id);
+          setWebEmails(updated);
+          toast.success("Inquiry deleted.");
+        } catch {
+          toast.error("Failed to delete inquiry.");
+        }
+      }
+    });
+  };
+
+  // Chat Handlers
+  const handleSelectChat = async (id: string) => {
+    setActiveSessionId(id);
+    const updated = await markChatAsRead(id);
+    setChatSessions(updated);
+  };
+
+  const handleSendChatReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeSessionId || !adminReplyText.trim()) return;
+    try {
+      const updated = await sendChatMessage(activeSessionId, "admin", adminReplyText);
+      if (updated) {
+        setChatSessions(prev => prev.map(s => s.id === activeSessionId ? updated : s));
+        setAdminReplyText("");
+      }
+    } catch {
+      toast.error("Failed to send reply.");
+    }
+  };
+
+  // Gallery Handlers
+  const handleUploadGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      try {
+        const updated = await uploadGalleryPhoto(base64);
+        setGalleryPhotos(updated);
+        toast.success("Gallery photo uploaded.");
+      } catch {
+        toast.error("Failed to upload photo.");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteGallery = (id: string) => {
+    triggerConfirm({
+      title: "Delete Gallery Photo",
+      message: "Are you sure you want to remove this photo from the gallery page?",
+      confirmText: "Remove",
+      onConfirm: async () => {
+        try {
+          const updated = await removeGalleryPhoto(id);
+          setGalleryPhotos(updated);
+          toast.success("Photo removed.");
+        } catch {
+          toast.error("Failed to remove photo.");
+        }
+      }
+    });
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("revitalize-session-token");
+    localStorage.removeItem("revitalize-session-user");
+    toast.info("Logged out successfully.");
+    navigate({ to: "/login" });
+  };
+
+  // Filtering leads
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      const matchesSearch =
+        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.phone.includes(searchTerm);
+      const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+      const matchesType = typeFilter === "all" || lead.projectType === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [leads, searchTerm, statusFilter, typeFilter]);
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-charcoal font-sans">
+        <div className="text-center">
+          <div className="h-8 w-8 rounded-full border-2 border-copper border-t-transparent animate-spin mx-auto mb-4"></div>
+          <p className="text-xs uppercase font-bold tracking-widest text-charcoal-soft">Loading Console...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-charcoal relative">
+      {/* Confirmation Modal */}
+      {confirmConfig && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-charcoal/5 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-charcoal mb-2 font-serif">{confirmConfig.title}</h3>
+            <p className="text-sm text-charcoal-soft leading-relaxed mb-6">{confirmConfig.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmConfig(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-charcoal/10 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmConfig.onConfirm();
+                  setConfirmConfig(null);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow transition"
+              >
+                {confirmConfig.confirmText || "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {lightboxPhoto && (
+        <div 
+          onClick={() => setLightboxPhoto(null)}
+          className="fixed inset-0 z-[99999] bg-black/90 flex items-center justify-center p-4 cursor-pointer animate-in fade-in duration-200"
+        >
+          <img src={lightboxPhoto} alt="Lightbox Enlarged" className="max-w-full max-h-[85vh] object-contain rounded shadow-2xl" />
+          <button className="absolute top-6 right-6 text-white hover:text-gray-300 p-2">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+      )}
+
+      {/* Navigation Header */}
+      <header className="bg-charcoal text-white shadow border-b border-charcoal-soft/30 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Revitalize Office" className="h-9 w-auto object-contain bg-white rounded p-0.5" />
+          <div>
+            <h1 className="font-bold text-sm tracking-wide font-serif leading-none">Revitalize Office</h1>
+            <p className="text-[10px] text-white/50 leading-none mt-1 uppercase font-bold tracking-widest">Business Control Desk</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:block text-right">
+            <p className="text-xs font-bold text-white/90">{currentUser?.username}</p>
+            <p className="text-[9px] text-white/55 uppercase font-bold tracking-widest leading-none mt-0.5">{currentUser?.role}</p>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white/70 hover:text-white hover:bg-white/10 border border-white/10 transition"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Sub header Navigation bar */}
+      <div className="bg-white border-b border-charcoal/5 px-6 py-2 overflow-x-auto flex gap-1 scrollbar-none sticky top-[69px] z-30 shadow-sm">
+        <button
+          onClick={() => setActiveTab("overview")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "overview" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <TrendingUp className="w-3.5 h-3.5" /> Analytics Overview
+        </button>
+        <button
+          onClick={() => setActiveTab("leads")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "leads" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <Briefcase className="w-3.5 h-3.5" /> Leads Manager
+        </button>
+        <button
+          onClick={() => setActiveTab("reviews")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "reviews" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <Star className="w-3.5 h-3.5" /> Reviews & Feedback
+        </button>
+        <button
+          onClick={() => setActiveTab("emails")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "emails" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5" /> Web Inquiries
+        </button>
+        <button
+          onClick={() => setActiveTab("chat")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "chat" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <MessageCircle className="w-3.5 h-3.5" /> Live Chats
+        </button>
+        <button
+          onClick={() => setActiveTab("gallery")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "gallery" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <ImageIcon className="w-3.5 h-3.5" /> Gallery Admin
+        </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+            activeTab === "settings" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+          }`}
+        >
+          <Settings className="w-3.5 h-3.5" /> Profile Settings
+        </button>
+        {currentUser?.role === "admin" && (
+          <button
+            onClick={() => setActiveTab("security")}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors ${
+              activeTab === "security" ? "bg-copper/10 text-copper font-black" : "text-charcoal-soft hover:bg-gray-50"
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" /> Portal Security
+          </button>
+        )}
+      </div>
+
+      {/* Main Workspace Body */}
+      <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
+        {/* TAB 1: OVERVIEW */}
+        {activeTab === "overview" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Total Leads Logged</span>
+                <div className="flex items-baseline justify-between mt-2">
+                  <span className="text-2xl font-bold text-neutral-900">{analytics.totalLeads}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    <ArrowUpRight className="w-3 h-3" /> Live
+                  </span>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Active Pipeline</span>
+                <div className="flex items-baseline justify-between mt-2">
+                  <span className="text-2xl font-bold text-neutral-900">{analytics.activeCount}</span>
+                  <span className="text-[10px] font-bold text-copper bg-copper/5 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    Leads
+                  </span>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Estimated Revenue</span>
+                <div className="flex items-baseline justify-between mt-2">
+                  <span className="text-2xl font-bold text-neutral-900">${(analytics.totalValue / 1000).toFixed(0)}k</span>
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    Active
+                  </span>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Closed Won Contracts</span>
+                <div className="flex items-baseline justify-between mt-2">
+                  <span className="text-2xl font-bold text-neutral-900">${(analytics.wonValue / 1000).toFixed(0)}k</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    Won
+                  </span>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Close Win Rate</span>
+                <div className="flex items-baseline justify-between mt-2">
+                  <span className="text-2xl font-bold text-neutral-900">{analytics.winRate}%</span>
+                  <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                    Average
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Monthly Revenue Chart */}
+              <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal mb-4 font-serif">Revenue & Inquiry Timeline</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analytics.timelineChart}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#D69873" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#D69873" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis dataKey="name" stroke="#A0AEC0" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#A0AEC0" fontSize={11} tickLine={false} />
+                      <RechartsTooltip />
+                      <Area type="monotone" dataKey="revenue" stroke="#D69873" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" name="Contract Value ($)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Status Pie Chart */}
+              <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal mb-4 font-serif">Leads Pipeline Split</h3>
+                <div className="h-80 flex flex-col items-center justify-center">
+                  <div className="w-full h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={analytics.statusChart}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {analytics.statusChart.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 w-full text-[10px] font-semibold text-charcoal-soft">
+                    {analytics.statusChart.map((entry, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                        <span className="truncate">{entry.name}: {entry.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Project Types Chart */}
+              <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal mb-4 font-serif">Project Distribution Value</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.projectTypesChart}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis dataKey="name" stroke="#A0AEC0" fontSize={10} tickLine={false} />
+                      <YAxis stroke="#A0AEC0" fontSize={11} tickLine={false} />
+                      <RechartsTooltip />
+                      <Bar dataKey="amount" fill="#975033" radius={[4, 4, 0, 0]} name="Value ($)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Regions Chart */}
+              <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-charcoal mb-4 font-serif">Tampa Bay Cities Share</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={analytics.regionChart} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                      <XAxis type="number" stroke="#A0AEC0" fontSize={11} tickLine={false} />
+                      <YAxis dataKey="name" type="category" stroke="#A0AEC0" fontSize={11} tickLine={false} width={80} />
+                      <RechartsTooltip />
+                      <Bar dataKey="value" fill="#D69873" radius={[0, 4, 4, 0]} name="Leads Count" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: LEADS */}
+        {activeTab === "leads" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Tools Header */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-charcoal/5 shadow-sm">
+              <div className="relative w-full sm:max-w-xs">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search leads by name, email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-charcoal/10 rounded-xl text-xs focus:ring-1 focus:ring-copper focus:border-copper focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-white border border-charcoal/10 rounded-xl px-3 py-2 text-xs focus:outline-none w-1/2 sm:w-auto font-semibold"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="consultation_scheduled">Consultation Scheduled</option>
+                  <option value="proposal_sent">Proposal Sent</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="bg-white border border-charcoal/10 rounded-xl px-3 py-2 text-xs focus:outline-none w-1/2 sm:w-auto font-semibold"
+                >
+                  <option value="all">All Services</option>
+                  <option value="remodeling">Home Remodeling</option>
+                  <option value="real-estate">Real Estate</option>
+                  <option value="kitchen">Kitchen Remodel</option>
+                  <option value="bathroom">Bath Remodel</option>
+                  <option value="cleaning">Cleaning</option>
+                  <option value="cabinets">Cabinets</option>
+                </select>
+                <button
+                  onClick={() => setIsAddingLead(true)}
+                  className="bg-copper hover:bg-copper-deep text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-md shadow-copper/10 hover:-translate-y-0.5 active:translate-y-0 transition cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Add Lead
+                </button>
+              </div>
+            </div>
+
+            {/* Leads List Table */}
+            <div className="bg-white rounded-2xl border border-charcoal/5 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-charcoal/5 text-[10px] font-black uppercase tracking-wider text-charcoal-soft/80">
+                      <th className="p-4 pl-6">Client Name</th>
+                      <th className="p-4">Contact Info</th>
+                      <th className="p-4">City</th>
+                      <th className="p-4">Service</th>
+                      <th className="p-4">Estimated Value</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 pr-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-charcoal/5 text-xs">
+                    {filteredLeads.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-center p-12 text-neutral-400">
+                          No leads found matching your search filters.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredLeads.map((lead) => (
+                        <tr key={lead.id} className="hover:bg-gray-50/50 transition">
+                          <td className="p-4 pl-6 font-bold text-neutral-900">{lead.name}</td>
+                          <td className="p-4 text-neutral-500 font-medium">
+                            <div>{lead.phone}</div>
+                            <div className="text-[10px] text-neutral-400 mt-0.5">{lead.email}</div>
+                          </td>
+                          <td className="p-4 text-neutral-600 font-medium">
+                            {lead.address.split(",").slice(-3, -2)[0]?.trim() || "Tampa"}
+                          </td>
+                          <td className="p-4 font-semibold text-charcoal">
+                            <span className="capitalize">{lead.projectType.replace("-", " ")}</span>
+                          </td>
+                          <td className="p-4 font-bold text-neutral-800">
+                            ${lead.estimatedValue.toLocaleString()}
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block ${
+                                lead.status === "new" ? "bg-blue-50 text-blue-700" :
+                                lead.status === "contacted" ? "bg-amber-50 text-amber-700" :
+                                lead.status === "consultation_scheduled" ? "bg-purple-50 text-purple-700" :
+                                lead.status === "proposal_sent" ? "bg-indigo-50 text-indigo-700" :
+                                lead.status === "won" ? "bg-emerald-50 text-emerald-700" :
+                                "bg-rose-50 text-rose-700"
+                              }`}
+                            >
+                              {lead.status.replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="p-4 pr-6 text-right space-x-1 whitespace-nowrap">
+                            <button
+                              onClick={() => handleEditLead(lead)}
+                              className="p-2 bg-gray-50 hover:bg-copper/5 hover:text-copper border border-charcoal/10 hover:border-copper/20 rounded-lg text-charcoal-soft transition inline-flex items-center"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLead(lead.id, lead.name)}
+                              className="p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition inline-flex items-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Edit / Details Drawer */}
+            {isEditingLead && selectedLead && (
+              <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="w-full max-w-lg bg-white h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between border-l border-charcoal/5 animate-in slide-in-from-right duration-250">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-charcoal/10 pb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-neutral-900 font-serif">{selectedLead.name}</h3>
+                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider mt-0.5">Lead Details Profile</p>
+                      </div>
+                      <button 
+                        onClick={() => { setIsEditingLead(false); setSelectedLead(null); }}
+                        className="p-1 rounded-full hover:bg-gray-150 transition"
+                      >
+                        <X className="w-5 h-5 text-neutral-500" />
+                      </button>
+                    </div>
+
+                    {/* Metadata list */}
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Email Address</span>
+                        <a href={`mailto:${selectedLead.email}`} className="font-semibold text-copper hover:underline mt-0.5 block">{selectedLead.email}</a>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Phone Number</span>
+                        <a href={`tel:${selectedLead.phone}`} className="font-semibold text-copper hover:underline mt-0.5 block">{selectedLead.phone}</a>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Property Address</span>
+                        <p className="font-semibold text-neutral-800 mt-0.5">{selectedLead.address}</p>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Project Category</span>
+                        <p className="font-semibold text-neutral-800 capitalize mt-0.5">{selectedLead.projectType.replace("-", " ")}</p>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Created At</span>
+                        <p className="font-semibold text-neutral-800 mt-0.5">{new Date(selectedLead.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <div className="col-span-2 bg-gray-50/60 border border-charcoal/5 p-3 rounded-xl">
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wide block">Project Scope Description</span>
+                        <p className="text-neutral-700 font-medium leading-relaxed mt-1">{selectedLead.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Edit Form */}
+                    <div className="border-t border-charcoal/5 pt-4 space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-charcoal font-serif">Management Controls</h4>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide block">Pipeline Stage</label>
+                        <select
+                          value={editStatus}
+                          onChange={(e) => setEditStatus(e.target.value as Lead["status"])}
+                          className="w-full bg-white border border-charcoal/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-copper focus:border-copper focus:outline-none"
+                        >
+                          <option value="new">New Lead</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="consultation_scheduled">Consultation Scheduled</option>
+                          <option value="proposal_sent">Proposal Sent</option>
+                          <option value="won">Won (Contract Signed)</option>
+                          <option value="lost">Lost (Archived)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide block">Estimated Contract Value ($)</label>
+                        <input
+                          type="number"
+                          value={editEstimatedValue}
+                          onChange={(e) => setEditEstimatedValue(Number(e.target.value))}
+                          className="w-full bg-white border border-charcoal/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-copper focus:border-copper focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide block">Internal Project Notes</label>
+                        <textarea
+                          rows={3}
+                          value={editNotes}
+                          onChange={(e) => setEditNotes(e.target.value)}
+                          placeholder="Add details about estimates, phone calls, or scheduled on-site inspections..."
+                          className="w-full bg-white border border-charcoal/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-copper focus:border-copper focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Photos Upload Section */}
+                    <div className="border-t border-charcoal/5 pt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-charcoal font-serif">Project Site Photos</h4>
+                        <label className="bg-gray-50 hover:bg-copper/5 hover:text-copper border border-charcoal/10 hover:border-copper/20 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition">
+                          <Upload className="w-3.5 h-3.5" /> Upload File
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUploadPhoto(e, selectedLead.id)}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        {selectedLead.photos && selectedLead.photos.map((photo, pIdx) => (
+                          <div key={pIdx} className="relative group aspect-square rounded-xl overflow-hidden border border-charcoal/5">
+                            <img
+                              src={photo}
+                              alt={`Lead Site ${pIdx + 1}`}
+                              className="w-full h-full object-cover cursor-zoom-in"
+                              onClick={() => setLightboxPhoto(photo)}
+                            />
+                            <button
+                              onClick={() => handleRemovePhoto(selectedLead.id, pIdx)}
+                              className="absolute top-1 right-1 p-1 bg-red-600/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition shadow"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                        {(!selectedLead.photos || selectedLead.photos.length === 0) && (
+                          <div className="col-span-3 text-center py-6 bg-gray-50 rounded-xl border border-dashed border-charcoal/10 text-neutral-400 text-xs font-medium">
+                            No site photos uploaded yet.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-charcoal/10 pt-4 flex gap-3">
+                    <button
+                      onClick={() => { setIsEditingLead(false); setSelectedLead(null); }}
+                      className="w-1/2 border border-charcoal/10 rounded-xl py-3 text-xs font-bold hover:bg-gray-50 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveLeadDetails}
+                      className="w-1/2 bg-copper hover:bg-copper-deep text-white rounded-xl py-3 text-xs font-bold shadow-md shadow-copper/10 transition"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Add Custom Lead Dialog */}
+            {isAddingLead && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-charcoal/5 animate-in zoom-in-95 duration-200">
+                  <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
+                    <h3 className="font-bold text-sm leading-tight font-serif">Create New Business Lead</h3>
+                    <button 
+                      onClick={() => setIsAddingLead(false)}
+                      className="text-white/80 hover:text-white p-1 rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddCustomLead} className="p-6 space-y-4 text-xs text-left">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Client Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={newLeadName}
+                          onChange={(e) => setNewLeadName(e.target.value)}
+                          placeholder="e.g. John Doe"
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Estimated Value ($)</label>
+                        <input
+                          type="number"
+                          value={newLeadVal}
+                          onChange={(e) => setNewLeadVal(Number(e.target.value))}
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Phone Number</label>
+                        <input
+                          type="text"
+                          required
+                          value={newLeadPhone}
+                          onChange={(e) => setNewLeadPhone(e.target.value)}
+                          placeholder="(813) 555-0100"
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Email Address</label>
+                        <input
+                          type="email"
+                          required
+                          value={newLeadEmail}
+                          onChange={(e) => setNewLeadEmail(e.target.value)}
+                          placeholder="client@domain.com"
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Address</label>
+                        <input
+                          type="text"
+                          required
+                          value={newLeadAddress}
+                          onChange={(e) => setNewLeadAddress(e.target.value)}
+                          placeholder="e.g. 104 Oak Dr, Tampa, FL 33602"
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Project Type</label>
+                        <select
+                          value={newLeadType}
+                          onChange={(e) => setNewLeadType(e.target.value)}
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        >
+                          <option value="remodeling">Home Remodeling</option>
+                          <option value="real-estate">Real Estate Brokerage</option>
+                          <option value="kitchen">Kitchen Remodel</option>
+                          <option value="bathroom">Bath Remodel</option>
+                          <option value="cleaning">Cleaning</option>
+                          <option value="cabinets">Cabinets Sales</option>
+                        </select>
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Project Scope Description</label>
+                        <textarea
+                          rows={3}
+                          value={newLeadDesc}
+                          onChange={(e) => setNewLeadDesc(e.target.value)}
+                          placeholder="Describe the requested work details..."
+                          className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingLead(false)}
+                        className="w-1/2 border border-charcoal/10 rounded-xl py-3 font-bold hover:bg-gray-50 transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="w-1/2 bg-copper hover:bg-copper-deep text-white rounded-xl py-3 font-bold shadow-md shadow-copper/10 transition"
+                      >
+                        Create Lead
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: REVIEWS */}
+        {activeTab === "reviews" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Reviews list */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {reviews.map((rev) => (
+                <div key={rev.id} className="bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-bold text-sm text-neutral-900 font-serif leading-tight">{rev.title}</h4>
+                        <p className="text-[10px] text-neutral-400 font-semibold mt-0.5">{rev.author} · {rev.location}</p>
+                      </div>
+                      <div className="flex items-center gap-0.5 text-amber-400 shrink-0">
+                        {Array.from({ length: rev.rating }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-charcoal-soft/95 leading-relaxed font-medium mt-3 italic">
+                      "{rev.text}"
+                    </p>
+
+                    {rev.replyText && (
+                      <div className="mt-3 bg-amber-50/50 border border-amber-200/40 rounded-xl p-3 text-xs leading-relaxed text-charcoal">
+                        <span className="font-black text-[9px] uppercase tracking-wider text-copper block mb-0.5">Revitalize Response</span>
+                        "{rev.replyText}"
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-charcoal/5 pt-4 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => handleToggleReviewFeatured(rev.id)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition ${
+                        rev.featured
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          : "bg-gray-50 text-neutral-500 border-charcoal/10 hover:bg-gray-100"
+                      }`}
+                    >
+                      {rev.featured ? "Featured on Site" : "Hidden from Site"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedReview(rev);
+                        setReviewReplyText(rev.replyText || "");
+                      }}
+                      className="px-3 py-1.5 bg-copper hover:bg-copper-deep text-white rounded-lg text-[10px] font-bold flex items-center gap-1 hover:scale-103 active:scale-97 transition cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> Reply
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Reply Dialog */}
+            {selectedReview && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-charcoal/5 animate-in zoom-in-95 duration-200">
+                  <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
+                    <h3 className="font-bold text-sm leading-tight font-serif">Reply to Review</h3>
+                    <button 
+                      onClick={() => setSelectedReview(null)}
+                      className="text-white/80 hover:text-white p-1 rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-4 text-xs text-left">
+                    <div className="p-3 bg-gray-50 rounded-xl border border-charcoal/5 text-neutral-600 italic">
+                      "{selectedReview.text}"
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Response Message</label>
+                      <textarea
+                        rows={4}
+                        value={reviewReplyText}
+                        onChange={(e) => setReviewReplyText(e.target.value)}
+                        placeholder="Write a response showing appreciation or addressing project highlights..."
+                        className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedReview(null)}
+                        className="w-1/2 border border-charcoal/10 rounded-xl py-3 font-bold hover:bg-gray-50 transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveReviewReply}
+                        className="w-1/2 bg-copper hover:bg-copper-deep text-white rounded-xl py-3 font-bold shadow-md shadow-copper/10 transition"
+                      >
+                        Submit Response
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: EMAILS */}
+        {activeTab === "emails" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Inquiries list */}
+            <div className="bg-white rounded-2xl border border-charcoal/5 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-charcoal/5 text-[10px] font-black uppercase tracking-wider text-charcoal-soft/80">
+                      <th className="p-4 pl-6">Sender Details</th>
+                      <th className="p-4">Requested Service</th>
+                      <th className="p-4">Message Body</th>
+                      <th className="p-4">Sent At</th>
+                      <th className="p-4 pr-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-charcoal/5 text-xs">
+                    {webEmails.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-12 text-neutral-400">
+                          No contact form submissions recorded yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      webEmails.map((email) => (
+                        <tr key={email.id} className="hover:bg-gray-50/50 transition">
+                          <td className="p-4 pl-6">
+                            <div className="font-bold text-neutral-900">{email.name}</div>
+                            <div className="text-[10px] text-neutral-400 mt-0.5">{email.email} · {email.phone}</div>
+                          </td>
+                          <td className="p-4 font-semibold text-charcoal truncate max-w-[120px]">
+                            {email.service || "General Inquiry"}
+                          </td>
+                          <td className="p-4 text-neutral-600 font-medium leading-relaxed max-w-sm truncate">
+                            {email.message}
+                          </td>
+                          <td className="p-4 text-neutral-400 font-medium whitespace-nowrap">
+                            {new Date(email.createdAt).toLocaleString()}
+                          </td>
+                          <td className="p-4 pr-6 text-right space-x-1 whitespace-nowrap">
+                            <button
+                              onClick={() => triggerConfirm({
+                                title: "Read Submission",
+                                message: `Message from ${email.name}:\n\n"${email.message}"`,
+                                confirmText: "Okay",
+                                onConfirm: () => {}
+                              })}
+                              className="p-2 bg-gray-50 hover:bg-copper/5 hover:text-copper border border-charcoal/10 hover:border-copper/20 rounded-lg text-charcoal-soft transition inline-flex items-center"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEmail(email.id)}
+                              className="p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition inline-flex items-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: CHAT */}
+        {activeTab === "chat" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[500px] items-stretch animate-in fade-in duration-200">
+            {/* Sidebar list */}
+            <div className="lg:col-span-4 bg-white rounded-2xl border border-charcoal/5 shadow-sm overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-charcoal/10 bg-gray-50/50">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-charcoal font-serif">Active Sessions</h4>
+              </div>
+              <div className="flex-1 overflow-y-auto divide-y divide-charcoal/5">
+                {chatSessions.map((session) => (
+                  <button
+                    key={session.id}
+                    onClick={() => handleSelectChat(session.id)}
+                    className={`w-full text-left p-4 flex items-center justify-between transition ${
+                      activeSessionId === session.id ? "bg-copper/5 border-l-4 border-copper" : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="truncate pr-2">
+                      <div className="font-bold text-xs text-neutral-900 flex items-center gap-1.5">
+                        {session.clientName}
+                        {session.unread && (
+                          <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-[10px] text-neutral-400 mt-1 truncate">{session.lastMessage}</p>
+                    </div>
+                    <span className="text-[9px] text-neutral-400 shrink-0 font-medium">
+                      {formatChatTime(session.lastMessageTime)}
+                    </span>
+                  </button>
+                ))}
+                {chatSessions.length === 0 && (
+                  <div className="text-center py-12 text-neutral-400 text-xs">
+                    No active chat sessions found.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Conversation Window */}
+            <div className="lg:col-span-8 bg-white rounded-2xl border border-charcoal/5 shadow-sm overflow-hidden flex flex-col h-full">
+              {activeChatSession ? (
+                <>
+                  {/* Active Header */}
+                  <div className="p-4 border-b border-charcoal/10 flex items-center justify-between bg-gray-50/50">
+                    <div>
+                      <h4 className="font-bold text-xs text-neutral-900 font-serif leading-none">{activeChatSession.clientName}</h4>
+                      <p className="text-[10px] text-neutral-400 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
+                    </div>
+                  </div>
+
+                  {/* Active Messages */}
+                  <div className="flex-1 p-4 overflow-y-auto bg-gray-50/20 space-y-4">
+                    {activeChatSession.messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex gap-2 max-w-[80%] ${
+                          msg.sender === "admin" ? "ml-auto flex-row-reverse" : "mr-auto"
+                        }`}
+                      >
+                        <div
+                          className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                            msg.sender === "admin"
+                              ? "bg-copper text-white rounded-tr-none shadow-sm"
+                              : "bg-white text-charcoal border border-charcoal/5 rounded-tl-none shadow-sm"
+                          }`}
+                        >
+                          <p>{msg.text}</p>
+                          <span className={`text-[8px] mt-1 block text-right font-medium ${
+                            msg.sender === "admin" ? "text-white/60" : "text-neutral-400"
+                          }`}>
+                            {formatChatTime(msg.timestamp)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  {/* Active Input Reply */}
+                  <form onSubmit={handleSendChatReply} className="p-3 border-t border-charcoal/10 flex items-center gap-2 bg-white">
+                    <input
+                      type="text"
+                      placeholder="Type admin response..."
+                      value={adminReplyText}
+                      onChange={(e) => setAdminReplyText(e.target.value)}
+                      className="flex-1 bg-gray-50 border border-charcoal/10 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-xs font-medium"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!adminReplyText.trim()}
+                      className="bg-copper hover:bg-copper-deep text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow transition disabled:opacity-50"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-neutral-400 text-xs gap-2">
+                  <MessageCircle className="w-8 h-8 text-neutral-300" />
+                  Select a chat session from the list to respond in real-time.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: GALLERY */}
+        {activeTab === "gallery" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Gallery Upload bar */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-charcoal/5 shadow-sm">
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900 font-serif leading-none">Photo Gallery manager</h3>
+                <p className="text-[10px] text-neutral-400 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
+              </div>
+
+              <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-md shadow-copper/10 hover:-translate-y-0.5 active:translate-y-0 transition cursor-pointer">
+                <Upload className="w-4 h-4" /> Add Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUploadGallery}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {galleryPhotos.map((photo) => (
+                <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-charcoal/5 shadow bg-white">
+                  <img
+                    src={photo.url}
+                    alt="Gallery item"
+                    className="w-full h-full object-cover cursor-zoom-in"
+                    onClick={() => setLightboxPhoto(photo.url)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
+                    <span className="text-[8px] text-white/80 font-medium">
+                      Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteGallery(photo.id)}
+                      className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {galleryPhotos.length === 0 && (
+                <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-charcoal/10 text-neutral-400 text-xs">
+                  No gallery photos found. Click 'Add Photo' to upload.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: SETTINGS */}
+        {activeTab === "settings" && (
+          <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-200">
+            <div className="bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900 font-serif leading-none">Security Settings</h3>
+                <p className="text-[10px] text-neutral-400 font-medium leading-none mt-1">Change your portal login credentials</p>
+              </div>
+
+              <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs text-left">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Username</label>
+                  <input
+                    type="text"
+                    required
+                    value={updateUsername}
+                    onChange={(e) => setUpdateUsername(e.target.value)}
+                    className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">New Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter new password (optional)"
+                    value={updatePassword}
+                    onChange={(e) => setUpdatePassword(e.target.value)}
+                    className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="bg-charcoal hover:bg-charcoal/90 text-white font-bold py-3 px-6 rounded-xl transition shadow"
+                >
+                  Update Credentials
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 8: SECURITY */}
+        {activeTab === "security" && currentUser?.role === "admin" && (
+          <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              {/* Account Creator */}
+              <div className="bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm space-y-4">
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-serif leading-none">Register New Account</h3>
+                  <p className="text-[10px] text-neutral-400 font-medium leading-none mt-1">Add sub-accounts for other staff/members</p>
+                </div>
+
+                <form onSubmit={handleCreateUser} className="space-y-4 text-xs text-left">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Username</label>
+                    <input
+                      type="text"
+                      required
+                      value={addUsername}
+                      onChange={(e) => setAddUsername(e.target.value)}
+                      placeholder="e.g. jiten"
+                      className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">Password</label>
+                    <input
+                      type="password"
+                      required
+                      value={addPassword}
+                      onChange={(e) => setAddPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider block">User Role Permission</label>
+                    <select
+                      value={addRole}
+                      onChange={(e) => setAddRole(e.target.value as any)}
+                      className="w-full bg-neutral-50/50 hover:bg-neutral-50 border border-charcoal/10 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                    >
+                      <option value="viewer">Viewer (Read-only)</option>
+                      <option value="editor">Editor (CRUD access)</option>
+                      <option value="admin">Administrator (Full permissions)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow shadow-copper/10"
+                  >
+                    Add Portal Account
+                  </button>
+                </form>
+              </div>
+
+              {/* Accounts List */}
+              <div className="bg-white p-6 rounded-2xl border border-charcoal/5 shadow-sm space-y-4">
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900 font-serif leading-none">Registered Accounts</h3>
+                  <p className="text-[10px] text-neutral-400 font-medium leading-none mt-1">Management of portal users list</p>
+                </div>
+
+                <div className="divide-y divide-charcoal/5 text-xs text-left">
+                  {portalUsers.map((user) => (
+                    <div key={user.id} className="py-3 flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-neutral-800">{user.username}</div>
+                        <div className="text-[10px] text-neutral-400 uppercase font-black tracking-wider mt-0.5">{user.role}</div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteUser(user.id, user.username)}
+                        className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
