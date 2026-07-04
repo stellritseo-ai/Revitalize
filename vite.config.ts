@@ -18,5 +18,8 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist",
+    rollupOptions: {
+      external: ["mongodb", "dns", "aws4", "snappy", "kerberos", "tls", "net", "node:async_hooks", "async_hooks"],
+    },
   },
 });
