@@ -214,11 +214,13 @@ function DashboardPage() {
         const res = await verifyAdminToken(token);
         if (res.valid) {
           setIsAuthenticated(true);
-          setCurrentUser({
+          const activeUser = {
             id: res.id || "",
             username: res.username || "",
             role: res.role || "admin"
-          });
+          };
+          setCurrentUser(activeUser);
+          setUpdateUsername(activeUser.username);
         } else {
           localStorage.removeItem("revitalize-session-token");
           setIsAuthenticated(false);
@@ -1391,13 +1393,36 @@ function DashboardPage() {
           {/* TAB 7: SETTINGS */}
           {activeTab === "settings" && (
             <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-200">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              
+              {/* Profile Avatar Header Card */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-copper/10 text-copper flex items-center justify-center font-extrabold text-xl shadow-inner border border-copper/20 shrink-0">
+                  {currentUser?.username?.charAt(0).toUpperCase() || "A"}
+                </div>
+                <div className="text-left">
+                  <h3 className="text-base font-bold text-slate-850 leading-none capitalize">
+                    {currentUser?.username || "Admin Profile"}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <span className="text-[10px] bg-slate-100 border border-slate-200 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+                      Role: {currentUser?.role || "admin"}
+                    </span>
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="text-[10px] text-slate-400 font-medium">Session Sync Active</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Credentials Card */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs text-left">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 leading-none">Security Settings</h3>
-                  <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Change your portal login credentials</p>
+                  <h3 className="text-sm font-bold text-slate-850 flex items-center gap-1.5">
+                    <User className="w-4 h-4 text-copper" /> Account Credentials
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium leading-none mt-1">Configure your login username and change security keys</p>
                 </div>
 
-                <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs text-left">
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Username</label>
                     <input
@@ -1405,29 +1430,75 @@ function DashboardPage() {
                       required
                       value={updateUsername}
                       onChange={(e) => setUpdateUsername(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-semibold text-slate-850 text-xs"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">New Password</label>
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">New Security Password</label>
                     <input
                       type="password"
-                      placeholder="Enter new password (optional)"
+                      placeholder="Leave empty to preserve existing password"
                       value={updatePassword}
                       onChange={(e) => setUpdatePassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow"
+                    className="w-full bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow flex items-center justify-center gap-1.5 cursor-pointer text-xs"
                   >
-                    Update Credentials
+                    <Sliders className="w-3.5 h-3.5" /> Save Portal Profile Settings
                   </button>
                 </form>
               </div>
+
+              {/* Preferences Configuration Card */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs text-left">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-850 flex items-center gap-1.5">
+                    <Globe className="w-4 h-4 text-copper" /> Regional & Preferences
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Configure language, sync rules, and alerts</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
+                    <div>
+                      <div className="font-bold text-slate-800">Primary Language</div>
+                      <div className="text-xs text-slate-400 font-medium">Select localized translations layout</div>
+                    </div>
+                    <select className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-copper">
+                      <option>English (United States)</option>
+                      <option>Spanish (Español)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
+                    <div>
+                      <div className="font-bold text-slate-800">Auto Refresh Interval</div>
+                      <div className="text-xs text-slate-400 font-medium">Inquiry queue polling frequency</div>
+                    </div>
+                    <select className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-copper">
+                      <option>Real-Time Push</option>
+                      <option>Every 5 minutes</option>
+                      <option>Manual Refresh Only</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <div className="font-bold text-slate-800">Visual Workspace Mode</div>
+                      <div className="text-xs text-slate-400 font-medium">Display profile accent theme</div>
+                    </div>
+                    <span className="text-xs bg-[#faf7f5] text-copper px-3 py-1.5 border border-[#f5ebdf] rounded-xl font-bold uppercase tracking-wider">
+                      Tampa Copper Light
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 
