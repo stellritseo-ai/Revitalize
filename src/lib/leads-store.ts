@@ -1,5 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
-
 export interface Lead {
   id: string;
   name: string;
@@ -63,6 +61,12 @@ export interface PortalUser {
   id: string;
   username: string;
   role: string;
+}
+
+export interface GalleryPhoto {
+  id: string;
+  url: string;
+  uploadedAt: string;
 }
 
 // ── INITIAL PRE-SEEDS CUSTOMIZED FOR TAMPA / REVITALIZE ──
@@ -218,25 +222,62 @@ export const INITIAL_EMAILS: WebEmail[] = [
 
 const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin" };
 
-// ── SERVER ROUTING ENGINE (Bypasses Static Analysis) ──
-async function getDbServer(): Promise<any> {
-  const path = "./db.server";
-  return import(/* @vite-ignore */ path);
+// ── LOCAL STORAGE FALLBACK HELPERS ──
+const getStorageItem = <T>(key: string, defaultValue: T): T => {
+  if (typeof window === "undefined") return defaultValue;
+  const stored = localStorage.getItem(key);
+  if (!stored) {
+    localStorage.setItem(key, JSON.stringify(defaultValue));
+    return defaultValue;
+  }
+  try {
+    return JSON.parse(stored) as T;
+  } catch {
+    return defaultValue;
+  }
+};
+
+const setStorageItem = <T>(key: string, value: T): void => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+};
+
+// ── GENERIC API FETCH HELPER ──
+async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
+  const options: RequestInit = { method };
+  if (body !== undefined) {
+    options.headers = { "content-type": "application/json" };
+    options.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.error || `HTTP error ${res.status}`);
+  }
+  return res.json() as Promise<T>;
 }
 
-// ── SERVER FUNCTIONS (RPC endpoints) ──
+// ── LEADS ──
+export const getLeads = async (): Promise<Lead[]> => {
+  try {
+    const leads = await apiCall<Lead[]>("/api/leads", "GET");
+    setStorageItem("revitalize-leads", leads);
+    return leads;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage leads:", err);
+    return getStorageItem<Lead[]>("revitalize-leads", INITIAL_LEADS);
+  }
+};
 
-const getLeadsServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetLeads } = await getDbServer();
-    return dbGetLeads(INITIAL_LEADS);
-  });
-
-const addLeadServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: Omit<Lead, "id" | "status" | "estimatedValue" | "createdAt"> }) => {
-    const { dbAddLead } = await getDbServer();
+export const addLead = async (leadData: Omit<Lead, "id" | "status" | "estimatedValue" | "createdAt">): Promise<Lead> => {
+  try {
+    return await apiCall<Lead>("/api/leads", "POST", { leadData });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
     let estimatedValue = 15000;
-    switch (data.projectType) {
+    switch (leadData.projectType) {
       case "remodeling": estimatedValue = 45000; break;
       case "kitchen": estimatedValue = 85000; break;
       case "bathroom": estimatedValue = 25000; break;
@@ -245,328 +286,183 @@ const addLeadServer = createServerFn({ method: "POST" })
       case "cabinets": estimatedValue = 15000; break;
     }
     const newLead: Lead = {
-      ...data,
+      ...leadData,
       id: "lead-" + Math.random().toString(36).substr(2, 9),
       status: "new",
       estimatedValue,
       createdAt: new Date().toISOString(),
       photos: []
     };
-    return dbAddLead(newLead);
-  });
+    leads.push(newLead);
+    setStorageItem("revitalize-leads", leads);
+    return newLead;
+  }
+};
 
-const addCustomLeadServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: Omit<Lead, "id" | "createdAt"> }) => {
-    const { dbAddLead } = await getDbServer();
+export const addCustomLead = async (lead: Omit<Lead, "id" | "createdAt">): Promise<Lead> => {
+  try {
+    return await apiCall<Lead>("/api/leads", "POST", { custom: true, lead });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
     const newLead: Lead = {
-      ...data,
+      ...lead,
       id: "lead-" + Math.random().toString(36).substr(2, 9),
       createdAt: new Date().toISOString()
     };
-    return dbAddLead(newLead);
-  });
+    leads.push(newLead);
+    setStorageItem("revitalize-leads", leads);
+    return newLead;
+  }
+};
 
-const updateLeadStatusServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string; status: Lead["status"] } }) => {
-    const { dbUpdateLead } = await getDbServer();
-    return dbUpdateLead(data.id, { status: data.status });
-  });
+export const updateLeadStatus = async (id: string, status: Lead["status"]): Promise<Lead[] | null> => {
+  try {
+    return await apiCall<Lead[]>("/api/leads", "PUT", { id, updates: { status } });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
+    const updated = leads.map(l => l.id === id ? { ...l, status } : l);
+    setStorageItem("revitalize-leads", updated);
+    return updated;
+  }
+};
 
-const updateLeadDetailsServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string; updates: Partial<Pick<Lead, "estimatedValue" | "notes" | "status">> } }) => {
-    const { dbUpdateLead } = await getDbServer();
-    return dbUpdateLead(data.id, data.updates);
-  });
+export const updateLeadDetails = async (id: string, updates: Partial<Pick<Lead, "estimatedValue" | "notes" | "status">>): Promise<Lead[] | null> => {
+  try {
+    return await apiCall<Lead[]>("/api/leads", "PUT", { id, updates });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
+    const updated = leads.map(l => l.id === id ? { ...l, ...updates } : l);
+    setStorageItem("revitalize-leads", updated);
+    return updated;
+  }
+};
 
-const deleteLeadServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string } }) => {
-    const { dbDeleteLead } = await getDbServer();
-    return dbDeleteLead(data.id);
-  });
+export const deleteLead = async (id: string): Promise<Lead[]> => {
+  try {
+    return await apiCall<Lead[]>("/api/leads", "DELETE", { id });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
+    const filtered = leads.filter(l => l.id !== id);
+    setStorageItem("revitalize-leads", filtered);
+    return filtered;
+  }
+};
 
-const uploadLeadPhotoServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { leadId: string; base64Photo: string } }) => {
-    const { getDb } = await getDbServer();
-    const db = await getDb();
-    const leadsCol = db.collection("leads");
-    await leadsCol.updateOne({ id: data.leadId }, { $push: { photos: data.base64Photo } } as any);
-    const docs = await leadsCol.find({}).toArray();
-    return docs.map((d: any) => ({ ...d, id: d.id || String(d._id), _id: undefined })) as any;
-  });
+export const uploadLeadPhoto = async (leadId: string, base64Photo: string): Promise<Lead[]> => {
+  try {
+    return await apiCall<Lead[]>("/api/leads/photos", "POST", { leadId, base64Photo });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
+    const updated = leads.map(l => {
+      if (l.id === leadId) {
+        const photos = l.photos || [];
+        return { ...l, photos: [...photos, base64Photo] };
+      }
+      return l;
+    });
+    setStorageItem("revitalize-leads", updated);
+    return updated;
+  }
+};
 
-const removeLeadPhotoServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { leadId: string; photoIndex: number } }) => {
-    const { getDb } = await getDbServer();
-    const db = await getDb();
-    const leadsCol = db.collection("leads");
-    const lead = await leadsCol.findOne({ id: data.leadId });
-    if (lead && lead.photos) {
-      const photos = [...lead.photos];
-      photos.splice(data.photoIndex, 1);
-      await leadsCol.updateOne({ id: data.leadId }, { $set: { photos } });
-    }
-    const docs = await leadsCol.find({}).toArray();
-    return docs.map((d: any) => ({ ...d, id: d.id || String(d._id), _id: undefined })) as any;
-  });
+export const removeLeadPhoto = async (leadId: string, photoIndex: number): Promise<Lead[]> => {
+  try {
+    return await apiCall<Lead[]>("/api/leads/photos", "DELETE", { leadId, photoIndex });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const leads = await getLeads();
+    const updated = leads.map(l => {
+      if (l.id === leadId && l.photos) {
+        const photos = [...l.photos];
+        photos.splice(photoIndex, 1);
+        return { ...l, photos };
+      }
+      return l;
+    });
+    setStorageItem("revitalize-leads", updated);
+    return updated;
+  }
+};
 
-const getReviewsServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetReviews } = await getDbServer();
-    return dbGetReviews(INITIAL_REVIEWS);
-  });
+// ── REVIEWS ──
+export const getReviews = async (): Promise<Review[]> => {
+  try {
+    const reviews = await apiCall<Review[]>("/api/reviews", "GET");
+    setStorageItem("revitalize-reviews", reviews);
+    return reviews;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage reviews:", err);
+    return getStorageItem<Review[]>("revitalize-reviews", INITIAL_REVIEWS);
+  }
+};
 
-const addReviewServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: Omit<Review, "id" | "featured" | "createdAt"> & { newReviewPhoto?: string } }) => {
-    const { dbAddReview } = await getDbServer();
+export const addReview = async (reviewData: Omit<Review, "id" | "featured" | "createdAt"> & { newReviewPhoto?: string }): Promise<Review> => {
+  try {
+    return await apiCall<Review>("/api/reviews", "POST", reviewData);
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const reviews = await getReviews();
     const photos: string[] = [];
-    if (data.newReviewPhoto) {
-      photos.push(data.newReviewPhoto);
+    if (reviewData.newReviewPhoto) {
+      photos.push(reviewData.newReviewPhoto);
     }
     const newReview: Review = {
-      title: data.title,
-      text: data.text,
-      author: data.author,
-      location: data.location,
-      rating: data.rating,
+      ...reviewData,
       id: "review-" + Math.random().toString(36).substr(2, 9),
       featured: true,
       createdAt: new Date().toISOString(),
       photos
     };
-    return dbAddReview(newReview);
-  });
-
-const toggleReviewFeaturedServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string } }) => {
-    const { getDb, dbUpdateReview } = await getDbServer();
-    const db = await getDb();
-    const review = await db.collection("reviews").findOne({ id: data.id });
-    const featured = review ? !review.featured : false;
-    return dbUpdateReview(data.id, { featured });
-  });
-
-const replyToReviewServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string; replyText: string } }) => {
-    const { dbUpdateReview } = await getDbServer();
-    return dbUpdateReview(data.id, { replyText: data.replyText });
-  });
-
-const getChatSessionsServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetChatSessions } = await getDbServer();
-    return dbGetChatSessions(INITIAL_CHATS);
-  });
-
-const createChatSessionServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { clientName: string; clientCity: string; clientEmail?: string; clientPhone?: string } }) => {
-    const { dbSaveChatSession } = await getDbServer();
-    const newSession: ChatSession = {
-      id: "session-" + Math.random().toString(36).substr(2, 9),
-      clientName: data.clientName,
-      clientCity: data.clientCity || "Tampa",
-      clientEmail: data.clientEmail,
-      clientPhone: data.clientPhone,
-      lastMessage: "Chat session initialized",
-      lastMessageTime: new Date().toISOString(),
-      unread: true,
-      messages: []
-    };
-    await dbSaveChatSession(newSession);
-    return newSession;
-  });
-
-const sendChatMessageServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { sessionId: string; sender: "client" | "admin"; text: string } }) => {
-    const { getDb, dbSaveChatSession } = await getDbServer();
-    const db = await getDb();
-    const session = await db.collection("chat_sessions").findOne({ id: data.sessionId });
-    if (!session) return null;
-    const newMsg: ChatMessage = {
-      id: "msg-" + Math.random().toString(36).substr(2, 9),
-      sender: data.sender,
-      text: data.text,
-      timestamp: new Date().toISOString()
-    };
-    const updatedSession: ChatSession = {
-      ...session,
-      messages: [...(session.messages || []), newMsg],
-      lastMessage: data.text,
-      lastMessageTime: newMsg.timestamp,
-      unread: data.sender === "client"
-    } as any;
-    await dbSaveChatSession(updatedSession);
-    return updatedSession;
-  });
-
-const markChatAsReadServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { sessionId: string } }) => {
-    const { getDb } = await getDbServer();
-    const db = await getDb();
-    await db.collection("chat_sessions").updateOne({ id: data.sessionId }, { $set: { unread: false } });
-    const docs = await db.collection("chat_sessions").find({}).toArray();
-    return docs.map((d: any) => ({ ...d, id: d.id || String(d._id), _id: undefined })) as any;
-  });
-
-const getWebEmailsServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetWebEmails } = await getDbServer();
-    return dbGetWebEmails(INITIAL_EMAILS);
-  });
-
-const addWebEmailServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: Omit<WebEmail, "id" | "createdAt"> }) => {
-    const { dbAddWebEmail } = await getDbServer();
-    const newEmail: WebEmail = {
-      ...data,
-      id: "email-" + Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString()
-    };
-    return dbAddWebEmail(newEmail);
-  });
-
-const deleteWebEmailServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string } }) => {
-    const { dbDeleteWebEmail } = await getDbServer();
-    return dbDeleteWebEmail(data.id);
-  });
-
-const getGalleryPhotosServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetGalleryPhotos } = await getDbServer();
-    return dbGetGalleryPhotos([
-      { id: "photo-1", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c", uploadedAt: new Date().toISOString() }
-    ]);
-  });
-
-const uploadGalleryPhotoServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { base64Photo: string } }) => {
-    const { dbAddGalleryPhoto } = await getDbServer();
-    const newPhoto = {
-      id: "photo-" + Math.random().toString(36).substr(2, 9),
-      url: data.base64Photo,
-      uploadedAt: new Date().toISOString()
-    };
-    return dbAddGalleryPhoto(newPhoto);
-  });
-
-const removeGalleryPhotoServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { id: string } }) => {
-    const { dbRemoveGalleryPhoto } = await getDbServer();
-    return dbRemoveGalleryPhoto(data.id);
-  });
-
-const loginAdminServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { username: string; password: string } }) => {
-    const { dbGetPortalUsers } = await getDbServer();
-    const accounts = await dbGetPortalUsers(DEFAULT_ADMIN);
-    const user = accounts.find((a: any) => a.username.toLowerCase() === data.username.toLowerCase() && a.password === data.password);
-    if (user) {
-      return { success: true, user: { id: user.id, username: user.username, role: user.role } };
-    }
-    throw new Error("Invalid username or password.");
-  });
-
-const getPortalUsersServer = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { dbGetPortalUsers } = await getDbServer();
-    const users = await dbGetPortalUsers(DEFAULT_ADMIN);
-    return users.map((u: any) => ({ id: u.id, username: u.username, role: u.role }));
-  });
-
-const createPortalUserServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { username: string; password: string; role: string } }) => {
-    const { dbGetPortalUsers, dbAddPortalUser } = await getDbServer();
-    const accounts = await dbGetPortalUsers(DEFAULT_ADMIN);
-    if (accounts.some((a: any) => a.username.toLowerCase() === data.username.toLowerCase())) {
-      throw new Error("Username already exists.");
-    }
-    const newUser = {
-      id: "admin-" + Math.random().toString(36).substr(2, 9),
-      username: data.username,
-      password: data.password,
-      role: data.role
-    };
-    await dbAddPortalUser(newUser);
-    return { success: true, id: newUser.id, username: newUser.username, role: newUser.role };
-  });
-
-const deletePortalUserServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { userId: string } }) => {
-    const { dbDeletePortalUser } = await getDbServer();
-    await dbDeletePortalUser(data.userId);
-    return { success: true };
-  });
-
-const updateUserCredentialsServer = createServerFn({ method: "POST" })
-  .handler(async ({ data }: { data: { userId: string; username?: string; password?: string } }) => {
-    const { dbUpdatePortalUser } = await getDbServer();
-    const updates: any = {};
-    if (data.username) updates.username = data.username;
-    if (data.password) updates.password = data.password;
-    const users = await dbUpdatePortalUser(data.userId, updates);
-    const updatedUser = users.find((u: any) => u.id === data.userId);
-    return { success: true, username: updatedUser ? updatedUser.username : (data.username || "") };
-  });
-
-// ── EXPORTED DATABASE INTERFACE METHODS (Graceful routing) ──
-
-export const getLeads = async (): Promise<Lead[]> => {
-  return getLeadsServer();
-};
-
-export const addLead = async (leadData: Omit<Lead, "id" | "status" | "estimatedValue" | "createdAt">): Promise<Lead> => {
-  return addLeadServer({ data: leadData });
-};
-
-export const addCustomLead = async (lead: Omit<Lead, "id" | "createdAt">): Promise<Lead> => {
-  return addCustomLeadServer({ data: lead });
-};
-
-export const updateLeadStatus = async (id: string, status: Lead["status"]): Promise<Lead[] | null> => {
-  return updateLeadStatusServer({ data: { id, status } });
-};
-
-export const updateLeadDetails = async (id: string, updates: Partial<Pick<Lead, "estimatedValue" | "notes" | "status">>): Promise<Lead[] | null> => {
-  return updateLeadDetailsServer({ data: { id, updates } });
-};
-
-export const deleteLead = async (id: string): Promise<Lead[]> => {
-  return deleteLeadServer({ data: { id } });
-};
-
-export const uploadLeadPhoto = async (leadId: string, base64Photo: string): Promise<Lead[]> => {
-  return uploadLeadPhotoServer({ data: { leadId, base64Photo } });
-};
-
-export const removeLeadPhoto = async (leadId: string, photoIndex: number): Promise<Lead[]> => {
-  return removeLeadPhotoServer({ data: { leadId, photoIndex } });
-};
-
-// Reviews
-export const getReviews = async (): Promise<Review[]> => {
-  return getReviewsServer();
-};
-
-export const addReview = async (reviewData: Omit<Review, "id" | "featured" | "createdAt"> & { newReviewPhoto?: string }): Promise<Review> => {
-  return addReviewServer({ data: reviewData });
+    reviews.unshift(newReview);
+    setStorageItem("revitalize-reviews", reviews);
+    return newReview;
+  }
 };
 
 export const toggleReviewFeatured = async (id: string): Promise<Review[]> => {
-  return toggleReviewFeaturedServer({ data: { id } });
+  try {
+    return await apiCall<Review[]>("/api/reviews", "PUT", { id, action: "featured" });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const reviews = await getReviews();
+    const updated = reviews.map(r => r.id === id ? { ...r, featured: !r.featured } : r);
+    setStorageItem("revitalize-reviews", updated);
+    return updated;
+  }
 };
 
 export const replyToReview = async (id: string, replyText: string): Promise<Review[]> => {
-  return replyToReviewServer({ data: { id, replyText } });
+  try {
+    return await apiCall<Review[]>("/api/reviews", "PUT", { id, replyText, action: "reply" });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const reviews = await getReviews();
+    const updated = reviews.map(r => r.id === id ? { ...r, replyText } : r);
+    setStorageItem("revitalize-reviews", updated);
+    return updated;
+  }
 };
 
-// Chats
+// ── CHATS ──
 export const getChatSessions = async (): Promise<ChatSession[]> => {
-  return getChatSessionsServer();
+  try {
+    const chats = await apiCall<ChatSession[]>("/api/chats", "GET");
+    setStorageItem("revitalize-chats", chats);
+    return chats;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage chats:", err);
+    return getStorageItem<ChatSession[]>("revitalize-chats", INITIAL_CHATS);
+  }
 };
 
 export const getChatSessionById = async (sessionId: string): Promise<ChatSession | null> => {
-  const sessions = await getChatSessions();
-  return sessions.find(s => s.id === sessionId) || null;
+  const chats = await getChatSessions();
+  return chats.find(c => c.id === sessionId) || null;
 };
 
 export const createChatSession = async (
@@ -575,53 +471,178 @@ export const createChatSession = async (
   clientEmail?: string,
   clientPhone?: string
 ): Promise<ChatSession> => {
-  return createChatSessionServer({ data: { clientName, clientCity, clientEmail, clientPhone } });
+  try {
+    return await apiCall<ChatSession>("/api/chats", "POST", { action: "create", clientName, clientCity, clientEmail, clientPhone });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const chats = await getChatSessions();
+    const newSession: ChatSession = {
+      id: "session-" + Math.random().toString(36).substr(2, 9),
+      clientName,
+      clientCity,
+      clientEmail,
+      clientPhone,
+      lastMessage: "Chat session initialized",
+      lastMessageTime: new Date().toISOString(),
+      unread: true,
+      messages: []
+    };
+    chats.push(newSession);
+    setStorageItem("revitalize-chats", chats);
+    return newSession;
+  }
 };
 
 export const sendChatMessage = async (sessionId: string, sender: "client" | "admin", text: string): Promise<ChatSession | null> => {
-  return sendChatMessageServer({ data: { sessionId, sender, text } });
+  try {
+    return await apiCall<ChatSession | null>("/api/chats", "POST", { action: "message", sessionId, sender, text });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const chats = await getChatSessions();
+    let updatedSession: ChatSession | null = null;
+    const updatedChats = chats.map(c => {
+      if (c.id === sessionId) {
+        const newMsg: ChatMessage = {
+          id: "msg-" + Math.random().toString(36).substr(2, 9),
+          sender,
+          text,
+          timestamp: new Date().toISOString()
+        };
+        updatedSession = {
+          ...c,
+          messages: [...c.messages, newMsg],
+          lastMessage: text,
+          lastMessageTime: newMsg.timestamp,
+          unread: sender === "client"
+        };
+        return updatedSession;
+      }
+      return c;
+    });
+    setStorageItem("revitalize-chats", updatedChats);
+    return updatedSession;
+  }
 };
 
 export const markChatAsRead = async (sessionId: string): Promise<ChatSession[]> => {
-  return markChatAsReadServer({ data: { sessionId } });
+  try {
+    return await apiCall<ChatSession[]>("/api/chats", "POST", { action: "read", sessionId });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const chats = await getChatSessions();
+    const updated = chats.map(c => c.id === sessionId ? { ...c, unread: false } : c);
+    setStorageItem("revitalize-chats", updated);
+    return updated;
+  }
 };
 
-// Emails
+// ── EMAILS ──
 export const getWebEmails = async (): Promise<WebEmail[]> => {
-  return getWebEmailsServer();
+  try {
+    const emails = await apiCall<WebEmail[]>("/api/emails", "GET");
+    setStorageItem("revitalize-emails", emails);
+    return emails;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage emails:", err);
+    return getStorageItem<WebEmail[]>("revitalize-emails", INITIAL_EMAILS);
+  }
 };
 
 export const addWebEmail = async (emailData: Omit<WebEmail, "id" | "createdAt">): Promise<WebEmail> => {
-  return addWebEmailServer({ data: emailData });
+  try {
+    return await apiCall<WebEmail>("/api/emails", "POST", { emailData });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const emails = await getWebEmails();
+    const newEmail: WebEmail = {
+      ...emailData,
+      id: "email-" + Math.random().toString(36).substr(2, 9),
+      createdAt: new Date().toISOString()
+    };
+    emails.unshift(newEmail);
+    setStorageItem("revitalize-emails", emails);
+    return newEmail;
+  }
 };
 
 export const deleteWebEmail = async (id: string): Promise<WebEmail[]> => {
-  return deleteWebEmailServer({ data: { id } });
+  try {
+    return await apiCall<WebEmail[]>("/api/emails", "DELETE", { id });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const emails = await getWebEmails();
+    const filtered = emails.filter(e => e.id !== id);
+    setStorageItem("revitalize-emails", filtered);
+    return filtered;
+  }
 };
 
-// Gallery
+// ── GALLERY PHOTOS ──
 export const getGalleryPhotos = async (): Promise<GalleryPhoto[]> => {
-  return getGalleryPhotosServer();
+  try {
+    const photos = await apiCall<GalleryPhoto[]>("/api/gallery", "GET");
+    setStorageItem("revitalize-gallery-photos", photos);
+    return photos;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage gallery:", err);
+    return getStorageItem<GalleryPhoto[]>("revitalize-gallery-photos", [
+      { id: "photo-1", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c", uploadedAt: new Date().toISOString() }
+    ]);
+  }
 };
 
 export const uploadGalleryPhoto = async (base64Photo: string): Promise<GalleryPhoto[]> => {
-  return uploadGalleryPhotoServer({ data: { base64Photo } });
+  try {
+    return await apiCall<GalleryPhoto[]>("/api/gallery", "POST", { base64Photo });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const photos = await getGalleryPhotos();
+    const newPhoto: GalleryPhoto = {
+      id: "photo-" + Math.random().toString(36).substr(2, 9),
+      url: base64Photo,
+      uploadedAt: new Date().toISOString()
+    };
+    photos.unshift(newPhoto);
+    setStorageItem("revitalize-gallery-photos", photos);
+    return photos;
+  }
 };
 
 export const removeGalleryPhoto = async (id: string): Promise<GalleryPhoto[]> => {
-  return removeGalleryPhotoServer({ data: { id } });
+  try {
+    return await apiCall<GalleryPhoto[]>("/api/gallery", "DELETE", { id });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const photos = await getGalleryPhotos();
+    const filtered = photos.filter(p => p.id !== id);
+    setStorageItem("revitalize-gallery-photos", filtered);
+    return filtered;
+  }
 };
 
-// Auth & Portal Users
+// ── PORTAL SECURITY & AUTH ──
 export const loginAdmin = async (username: string, password: string): Promise<{ success: boolean; token: string }> => {
-  const res = await loginAdminServer({ data: { username, password } });
-  if (res.success && typeof window !== "undefined") {
-    const token = "token-" + res.user.id + "-" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("revitalize-session-token", token);
-    localStorage.setItem("revitalize-session-user", JSON.stringify(res.user));
-    return { success: true, token };
+  try {
+    const res = await apiCall<{ success: boolean; user: any }>("/api/users", "POST", { action: "login", username, password });
+    if (res.success && typeof window !== "undefined") {
+      const token = "token-" + res.user.id + "-" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("revitalize-session-token", token);
+      localStorage.setItem("revitalize-session-user", JSON.stringify(res.user));
+      return { success: true, token };
+    }
+    throw new Error("Invalid credentials");
+  } catch (err) {
+    console.warn("MongoDB offline, checking local storage accounts:", err);
+    const accounts = getStorageItem<any[]>("revitalize-admin-accounts", [DEFAULT_ADMIN]);
+    const user = accounts.find(a => a.username.toLowerCase() === username.toLowerCase() && a.password === password);
+    if (user) {
+      const token = "token-" + user.id + "-" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("revitalize-session-token", token);
+      localStorage.setItem("revitalize-session-user", JSON.stringify({ id: user.id, username: user.username, role: user.role }));
+      return { success: true, token };
+    }
+    throw new Error("Invalid username or password.");
   }
-  throw new Error("Invalid username or password.");
 };
 
 export const verifyAdminToken = async (token: string): Promise<{ valid: boolean; id?: string; username?: string; role?: string }> => {
@@ -636,30 +657,89 @@ export const verifyAdminToken = async (token: string): Promise<{ valid: boolean;
 };
 
 export const getPortalUsers = async (): Promise<PortalUser[]> => {
-  return getPortalUsersServer();
+  try {
+    return await apiCall<PortalUser[]>("/api/users", "GET");
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const accounts = getStorageItem<any[]>("revitalize-admin-accounts", [DEFAULT_ADMIN]);
+    return accounts.map(a => ({ id: a.id, username: a.username, role: a.role }));
+  }
 };
 
 export const createPortalUser = async (username: string, password: string, role: string): Promise<{ success: boolean; id: string; username: string; role: string }> => {
-  return createPortalUserServer({ data: { username, password, role } });
+  try {
+    return await apiCall<{ success: boolean; id: string; username: string; role: string }>("/api/users", "POST", { action: "create", username, password, role });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const accounts = getStorageItem<any[]>("revitalize-admin-accounts", [DEFAULT_ADMIN]);
+    if (accounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+      throw new Error("Username already exists.");
+    }
+    const newUser = {
+      id: "admin-" + Math.random().toString(36).substr(2, 9),
+      username,
+      password,
+      role
+    };
+    accounts.push(newUser);
+    setStorageItem("revitalize-admin-accounts", accounts);
+    return { success: true, id: newUser.id, username: newUser.username, role: newUser.role };
+  }
 };
 
 export const deletePortalUser = async (userId: string): Promise<{ success: boolean }> => {
-  return deletePortalUserServer({ data: { userId } });
+  try {
+    return await apiCall<{ success: boolean }>("/api/users", "POST", { action: "delete", userId });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const accounts = getStorageItem<any[]>("revitalize-admin-accounts", [DEFAULT_ADMIN]);
+    const filtered = accounts.filter(a => a.id !== userId);
+    setStorageItem("revitalize-admin-accounts", filtered);
+    return { success: true };
+  }
 };
 
 export const updateUserCredentials = async (userId: string, username?: string, password?: string): Promise<{ success: boolean; username: string }> => {
-  const res = await updateUserCredentialsServer({ data: { userId, username, password } });
-  if (res.success && typeof window !== "undefined") {
+  try {
+    const res = await apiCall<{ success: boolean; username: string }>("/api/users", "POST", { action: "update", userId, username, password });
+    if (res.success && typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("revitalize-session-user");
+      if (storedUser) {
+        const u = JSON.parse(storedUser);
+        if (u.id === userId) {
+          u.username = res.username;
+          localStorage.setItem("revitalize-session-user", JSON.stringify(u));
+        }
+      }
+    }
+    return res;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const accounts = getStorageItem<any[]>("revitalize-admin-accounts", [DEFAULT_ADMIN]);
+    let updatedUsername = "";
+    const updated = accounts.map(a => {
+      if (a.id === userId) {
+        updatedUsername = username || a.username;
+        return {
+          ...a,
+          username: username || a.username,
+          password: password || a.password
+        };
+      }
+      return a;
+    });
+    setStorageItem("revitalize-admin-accounts", updated);
+
     const storedUser = localStorage.getItem("revitalize-session-user");
     if (storedUser) {
       const u = JSON.parse(storedUser);
       if (u.id === userId) {
-        u.username = res.username;
+        u.username = updatedUsername;
         localStorage.setItem("revitalize-session-user", JSON.stringify(u));
       }
     }
+    return { success: true, username: updatedUsername };
   }
-  return res;
 };
 
 // Analytics calculator helper (preserved exactly)
@@ -779,9 +859,3 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
     timelineChart
   };
 };
-
-export interface GalleryPhoto {
-  id: string;
-  url: string;
-  uploadedAt: string;
-}

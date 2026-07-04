@@ -15,6 +15,26 @@ export default defineConfig({
     tsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
+    {
+      name: "api-server",
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url && req.url.startsWith("/api/")) {
+            try {
+              const { handleNodeApiRequest } = await import("./src/lib/api-handler.server");
+              const handled = await handleNodeApiRequest(req, res);
+              if (handled) return;
+            } catch (err) {
+              console.error("Vite dev API error:", err);
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: String(err) }));
+              return;
+            }
+          }
+          next();
+        });
+      },
+    },
   ],
   build: {
     outDir: "dist",
