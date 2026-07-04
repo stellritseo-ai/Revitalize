@@ -578,7 +578,7 @@ function DashboardPage() {
 
           {/* Main Menu Links */}
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">Main Menu</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">Main Menu</p>
             {[
               { id: "overview", label: "Overview & Stats", icon: TrendingUp },
               { id: "leads", label: "Leads Manager", icon: Briefcase },
@@ -595,7 +595,7 @@ function DashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-250 flex items-center justify-between relative group ${
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250 flex items-center justify-between relative group ${
                     isActive 
                       ? "bg-[#faf7f5] text-[#1a1f36]" 
                       : "text-slate-500 hover:bg-[#faf7f5]/45 hover:text-slate-800"
@@ -662,10 +662,10 @@ function DashboardPage() {
         {/* Top Header Bar */}
         <header className="bg-white border-b border-[#e3e6f0] px-6 py-4 flex items-center justify-between sticky top-0 z-30">
           <div>
-            <h1 className="font-bold text-lg text-slate-800 font-serif leading-none capitalize">
+            <h1 className="font-bold text-xl text-slate-800 font-serif leading-none capitalize">
               {activeTab === "overview" ? "Dashboard" : activeTab.replace("-", " ")}
             </h1>
-            <p className="text-[11px] text-slate-400 mt-1 font-medium">
+            <p className="text-xs text-slate-500 mt-1.5 font-medium">
               {activeTab === "overview" && "Monitor and control your business leads and pipeline"}
               {activeTab === "leads" && "Manage customer pipelines and project estimations"}
               {activeTab === "reviews" && "Review client testimonials and manage website display"}
@@ -713,10 +713,10 @@ function DashboardPage() {
               {/* Overview Cards Row (Exactly 4 cards from mockup) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
-                {/* Card 1: Total Devices -> Total Leads */}
+                {/* Card 1: Total Leads */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                       Total Leads <Info className="w-3 h-3 text-slate-300" />
                     </span>
                     <span className="w-6 h-6 rounded-lg bg-copper/10 text-copper flex items-center justify-center">
@@ -725,16 +725,16 @@ function DashboardPage() {
                   </div>
                   <div className="flex items-baseline justify-between mt-3">
                     <span className="text-3xl font-extrabold text-slate-800 tracking-tight">{leads.length}</span>
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5">
                       <ArrowUpRight className="w-3 h-3" /> +12% from last month
                     </span>
                   </div>
                 </div>
 
-                {/* Card 2: Online Devices -> Active Renovations */}
+                {/* Card 2: Active Renovations */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                       Active Projects <Info className="w-3 h-3 text-slate-300" />
                     </span>
                     <span className="w-6 h-6 rounded-lg bg-indigo-55/15 text-indigo-600 flex items-center justify-center">
@@ -745,16 +745,16 @@ function DashboardPage() {
                     <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
                       {leads.filter(l => ["contacted", "consultation_scheduled", "proposal_sent"].includes(l.status)).length}
                     </span>
-                    <span className="text-[10px] font-bold text-[#0061ff] flex items-center gap-0.5">
+                    <span className="text-xs font-bold text-[#0061ff] flex items-center gap-0.5">
                       94.5% On Schedule
                     </span>
                   </div>
                 </div>
 
-                {/* Card 3: Data Usage -> Contract Value */}
+                {/* Card 3: Contract Value */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                       Contract Value <Info className="w-3 h-3 text-slate-300" />
                     </span>
                     <span className="w-6 h-6 rounded-lg bg-emerald-55/15 text-emerald-600 flex items-center justify-center">
@@ -765,16 +765,16 @@ function DashboardPage() {
                     <span className="text-3xl font-extrabold text-slate-800 tracking-tight font-sans">
                       ${(analytics.totalValue / 1000).toFixed(0)}k
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500">
+                    <span className="text-xs font-bold text-slate-500">
                       78% of quarterly goal
                     </span>
                   </div>
                 </div>
 
-                {/* Card 4: Active Alerts -> Pending Reviews */}
+                {/* Card 4: Pending Reviews */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
                       Pending Reviews <Info className="w-3 h-3 text-slate-300" />
                     </span>
                     <span className="w-6 h-6 rounded-lg bg-rose-55/15 text-rose-600 flex items-center justify-center">
@@ -785,7 +785,7 @@ function DashboardPage() {
                     <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
                       {reviews.filter(r => !r.featured).length}
                     </span>
-                    <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1">
+                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" /> 2 requiring attention
                     </span>
                   </div>
@@ -949,9 +949,9 @@ function DashboardPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
-                      <tr className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-black uppercase tracking-wider text-slate-400">
                         <th className="p-4 pl-6">Client Name</th>
                         <th className="p-4">Requested Service</th>
                         <th className="p-4">Pipeline Status</th>
@@ -965,7 +965,7 @@ function DashboardPage() {
                           <td className="p-4 pl-6 font-bold text-slate-800">{lead.name}</td>
                           <td className="p-4 text-slate-500 font-medium capitalize">{lead.projectType.replace("-", " ")}</td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-block ${
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block ${
                               lead.status === "won" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
                               lead.status === "lost" ? "bg-rose-50 text-rose-700 border border-rose-100" :
                               "bg-amber-50 text-amber-700 border border-amber-100"
@@ -1053,9 +1053,9 @@ function DashboardPage() {
               {/* Table */}
               <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <tr className="bg-slate-50 border-b border-slate-100 text-xs font-black uppercase tracking-wider text-slate-400">
                         <th className="p-4 pl-6">Client Name</th>
                         <th className="p-4">Contact Info</th>
                         <th className="p-4">City</th>
@@ -1065,13 +1065,13 @@ function DashboardPage() {
                         <th className="p-4 pr-6 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-150 text-xs">
+                    <tbody className="divide-y divide-slate-150 text-sm">
                       {filteredLeads.map((lead) => (
                         <tr key={lead.id} className="hover:bg-slate-50/50 transition">
                           <td className="p-4 pl-6 font-bold text-slate-800">{lead.name}</td>
                           <td className="p-4 text-slate-500 font-medium">
                             <div>{lead.phone}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">{lead.email}</div>
+                            <div className="text-xs text-slate-400 mt-0.5">{lead.email}</div>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">
                             {lead.address?.split(",")?.slice(-3, -2)?.[0]?.trim() || "Tampa"}
@@ -1084,7 +1084,7 @@ function DashboardPage() {
                           </td>
                           <td className="p-4">
                             <span
-                              className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-block border ${
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block border ${
                                 lead.status === "won" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
                                 lead.status === "lost" ? "bg-rose-50 text-rose-700 border-rose-100" :
                                 "bg-amber-50 text-amber-700 border-amber-100"
@@ -1126,7 +1126,7 @@ function DashboardPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h4 className="font-bold text-sm text-slate-800 font-serif leading-tight">{rev.title}</h4>
-                          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{rev.author} · {rev.location}</p>
+                          <p className="text-xs text-slate-500 font-semibold mt-0.5">{rev.author} · {rev.location}</p>
                         </div>
                         <div className="flex items-center gap-0.5 text-copper shrink-0">
                           {Array.from({ length: rev.rating }).map((_, i) => (
@@ -1135,13 +1135,13 @@ function DashboardPage() {
                         </div>
                       </div>
 
-                      <p className="text-xs text-slate-600 leading-relaxed font-medium mt-3 italic">
+                      <p className="text-sm text-slate-650 leading-relaxed font-medium mt-3 italic">
                         "{rev.text}"
                       </p>
 
                       {rev.replyText && (
-                        <div className="mt-3 bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs leading-relaxed text-slate-700">
-                          <span className="font-black text-[9px] uppercase tracking-wider text-copper block mb-0.5">Revitalize Response</span>
+                        <div className="mt-3 bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-sm leading-relaxed text-slate-700">
+                          <span className="font-black text-xs uppercase tracking-wider text-copper block mb-0.5">Revitalize Response</span>
                           "{rev.replyText}"
                         </div>
                       )}
@@ -1150,7 +1150,7 @@ function DashboardPage() {
                     <div className="border-t border-slate-100 pt-4 flex items-center justify-between gap-2">
                       <button
                         onClick={() => handleToggleReviewFeatured(rev.id)}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
                           rev.featured
                             ? "bg-emerald-50 text-emerald-700 border-emerald-250 hover:bg-emerald-100"
                             : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
@@ -1164,7 +1164,7 @@ function DashboardPage() {
                           setSelectedReview(rev);
                           setReviewReplyText(rev.replyText || "");
                         }}
-                        className="px-3 py-1.5 bg-[#1a1f36] hover:bg-[#1a1f36]/90 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 transition"
+                        className="px-3 py-1.5 bg-[#1a1f36] hover:bg-[#1a1f36]/90 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition"
                       >
                         <MessageSquare className="w-3.5 h-3.5" /> Reply
                       </button>
@@ -1180,9 +1180,9 @@ function DashboardPage() {
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      <tr className="bg-slate-50 border-b border-slate-100 text-xs font-black uppercase tracking-wider text-slate-400">
                         <th className="p-4 pl-6">Sender Details</th>
                         <th className="p-4">Requested Service</th>
                         <th className="p-4">Message Body</th>
@@ -1190,12 +1190,12 @@ function DashboardPage() {
                         <th className="p-4 pr-6 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-150 text-xs">
+                    <tbody className="divide-y divide-slate-150 text-sm">
                       {webEmails.map((email) => (
                         <tr key={email.id} className="hover:bg-slate-50/50 transition">
                           <td className="p-4 pl-6">
                             <div className="font-bold text-slate-800">{email.name}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">{email.email} · {email.phone}</div>
+                            <div className="text-xs text-slate-400 mt-0.5">{email.email} · {email.phone}</div>
                           </td>
                           <td className="p-4 font-semibold text-slate-800 truncate max-w-[120px]">
                             {email.service || "General Inquiry"}
@@ -1252,15 +1252,15 @@ function DashboardPage() {
                       }`}
                     >
                       <div className="truncate pr-2">
-                        <div className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                        <div className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                           {session.clientName}
                           {session.unread && (
                             <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0" />
                           )}
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-1 truncate">{session.lastMessage}</p>
+                        <p className="text-xs text-slate-400 mt-1 truncate">{session.lastMessage}</p>
                       </div>
-                      <span className="text-[9px] text-slate-400 shrink-0 font-medium">
+                      <span className="text-xs text-slate-400 shrink-0 font-medium">
                         {formatChatTime(session.lastMessageTime)}
                       </span>
                     </button>
@@ -1274,8 +1274,8 @@ function DashboardPage() {
                   <>
                     <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                       <div>
-                        <h4 className="font-bold text-xs text-slate-800 font-serif leading-none">{activeChatSession.clientName}</h4>
-                        <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
+                        <h4 className="font-bold text-sm text-slate-800 font-serif leading-none">{activeChatSession.clientName}</h4>
+                        <p className="text-xs text-slate-400 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
                       </div>
                     </div>
 
@@ -1288,14 +1288,14 @@ function DashboardPage() {
                           }`}
                         >
                           <div
-                            className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                            className={`p-3 rounded-2xl text-sm leading-relaxed ${
                               msg.sender === "admin"
                                 ? "bg-copper text-white rounded-tr-none shadow-sm"
                                 : "bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-sm"
                             }`}
                           >
                             <p>{msg.text}</p>
-                            <span className={`text-[8px] mt-1 block text-right font-medium ${
+                            <span className={`text-[10px] mt-1 block text-right font-medium ${
                               msg.sender === "admin" ? "text-white/70" : "text-slate-400"
                             }`}>
                               {formatChatTime(msg.timestamp)}
@@ -1312,7 +1312,7 @@ function DashboardPage() {
                         placeholder="Type admin response..."
                         value={adminReplyText}
                         onChange={(e) => setAdminReplyText(e.target.value)}
-                        className="flex-1 bg-slate-50 border border-slate-200 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-xs font-medium"
+                        className="flex-1 bg-slate-50 border border-slate-200 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-sm font-medium"
                       />
                       <button
                         type="submit"
@@ -1338,11 +1338,11 @@ function DashboardPage() {
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Photo Gallery manager</h3>
-                  <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
+                  <h3 className="text-base font-bold text-slate-800 font-serif leading-none">Photo Gallery Manager</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
                 </div>
 
-                <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition cursor-pointer">
+                <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1.5 shrink-0 shadow transition cursor-pointer">
                   <Upload className="w-4 h-4" /> Add Photo
                   <input
                     type="file"
@@ -1363,7 +1363,7 @@ function DashboardPage() {
                       onClick={() => setLightboxPhoto(photo.url)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
-                      <span className="text-[8px] text-white/80 font-medium">
+                      <span className="text-xs text-white/80 font-medium">
                         Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
                       </span>
                       <button
