@@ -741,8 +741,8 @@ function DashboardPage() {
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in fade-in duration-200">
               
-              {/* Overview Cards Row (Exactly 4 cards from mockup) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Overview Cards Row (Exactly 5 cards: Leads, Projects, Contracts, Reviews, Visitors) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 {/* Card 1: Total Leads */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
@@ -818,6 +818,26 @@ function DashboardPage() {
                     </span>
                     <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" /> 2 requiring attention
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card 5: Website Visitors */}
+                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      Website Visitors <Info className="w-3 h-3 text-slate-300" />
+                    </span>
+                    <span className="w-6 h-6 rounded-lg bg-emerald-55/15 text-emerald-600 flex items-center justify-center">
+                      <Users className="w-3.5 h-3.5 text-copper" />
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between mt-3">
+                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                      8,429
+                    </span>
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5">
+                      <ArrowUpRight className="w-3 h-3" /> +18.4% vs last week
                     </span>
                   </div>
                 </div>
