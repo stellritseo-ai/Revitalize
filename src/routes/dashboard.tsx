@@ -185,6 +185,17 @@ function DashboardPage() {
   const [selectedEmail, setSelectedEmail] = useState<WebEmail | null>(null);
   const [isViewingEmail, setIsViewingEmail] = useState(false);
 
+  // Portal & Site Config States from Mockup
+  const [alertEmail, setAlertEmail] = useState(() => localStorage.getItem("rev_settings_alertEmail") || "robertsa210@icloud.com");
+  const [officePhone, setOfficePhone] = useState(() => localStorage.getItem("rev_settings_officePhone") || "(210) 429-5526");
+  const [smsTemplate, setSmsTemplate] = useState(() => localStorage.getItem("rev_settings_smsTemplate") || "Hi {Name}, thank you for contacting Revitalize Group! Daniel Thompson will contact you during the {Time} to discuss your {Type} project.");
+  const [emailAlert, setEmailAlert] = useState(() => localStorage.getItem("rev_settings_emailAlert") !== "false");
+  const [smsAlert, setSmsAlert] = useState(() => localStorage.getItem("rev_settings_smsAlert") !== "false");
+  const [maintenanceMode, setMaintenanceMode] = useState(() => localStorage.getItem("rev_settings_maintenanceMode") === "true");
+  const [weekdays, setWeekdays] = useState(() => localStorage.getItem("rev_settings_weekdays") || "8:00 AM - 5:00 PM");
+  const [saturdays, setSaturdays] = useState(() => localStorage.getItem("rev_settings_saturdays") || "8:00 AM - 5:00 PM");
+  const [sundays, setSundays] = useState(() => localStorage.getItem("rev_settings_sundays") || "Closed (Emergency 24/7)");
+
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
     message: string;
@@ -283,6 +294,20 @@ function DashboardPage() {
     } catch (err: any) {
       toast.error(err.message || "Failed to update profile");
     }
+  };
+
+  const handleSaveConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem("rev_settings_alertEmail", alertEmail);
+    localStorage.setItem("rev_settings_officePhone", officePhone);
+    localStorage.setItem("rev_settings_smsTemplate", smsTemplate);
+    localStorage.setItem("rev_settings_emailAlert", String(emailAlert));
+    localStorage.setItem("rev_settings_smsAlert", String(smsAlert));
+    localStorage.setItem("rev_settings_maintenanceMode", String(maintenanceMode));
+    localStorage.setItem("rev_settings_weekdays", weekdays);
+    localStorage.setItem("rev_settings_saturdays", saturdays);
+    localStorage.setItem("rev_settings_sundays", sundays);
+    toast.success("Configurations saved successfully!");
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -1392,113 +1417,175 @@ function DashboardPage() {
 
           {/* TAB 7: SETTINGS */}
           {activeTab === "settings" && (
-            <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-200">
-              
-              {/* Profile Avatar Header Card */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-copper/10 text-copper flex items-center justify-center font-extrabold text-xl shadow-inner border border-copper/20 shrink-0">
-                  {currentUser?.username?.charAt(0).toUpperCase() || "A"}
-                </div>
-                <div className="text-left">
-                  <h3 className="text-base font-bold text-slate-850 leading-none capitalize">
-                    {currentUser?.username || "Admin Profile"}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-[10px] bg-slate-100 border border-slate-200 text-slate-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
-                      Role: {currentUser?.role || "admin"}
-                    </span>
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] text-slate-400 font-medium">Session Sync Active</span>
-                  </div>
-                </div>
+            <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-200 text-left bg-white p-8 rounded-2xl border border-slate-200/80 shadow-sm">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Portal & Site configurations</h2>
+                <p className="text-xs text-slate-500 mt-1 font-medium">Set contact alerts, office calendar variables, and SMS automation triggers.</p>
               </div>
 
-              {/* Account Credentials Card */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs text-left">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-850 flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-copper" /> Account Credentials
-                  </h3>
-                  <p className="text-xs text-slate-400 font-medium leading-none mt-1">Configure your login username and change security keys</p>
-                </div>
+              <form onSubmit={handleSaveConfig} className="space-y-6 pt-4">
+                {/* Row 1: Alert Email & Contact Line */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5 relative">
+                    <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Inquiry Alert Email Address</label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        required
+                        value={alertEmail}
+                        onChange={(e) => setAlertEmail(e.target.value)}
+                        className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-sm font-semibold text-slate-800"
+                      />
+                      <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-600" />
+                    </div>
+                  </div>
 
-                <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Username</label>
+                    <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Primary Office Contact Line</label>
                     <input
                       type="text"
                       required
-                      value={updateUsername}
-                      onChange={(e) => setUpdateUsername(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-semibold text-slate-850 text-xs"
+                      value={officePhone}
+                      onChange={(e) => setOfficePhone(e.target.value)}
+                      className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-sm font-semibold text-slate-800"
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">New Security Password</label>
-                    <input
-                      type="password"
-                      placeholder="Leave empty to preserve existing password"
-                      value={updatePassword}
-                      onChange={(e) => setUpdatePassword(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs"
-                    />
+                {/* Row 2: Customer Template */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Automated Customer Text/SMS Template</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={smsTemplate}
+                    onChange={(e) => setSmsTemplate(e.target.value)}
+                    className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-sm font-medium text-slate-800 resize-none leading-relaxed"
+                  />
+                  <span className="text-[10px] text-slate-400 font-medium block mt-1">Variables auto-populated: {'{Name}'}, {'{Time}'}, {'{Type}'}</span>
+                </div>
+
+                <hr className="border-slate-100" />
+
+                {/* Row 3: Three alert cards with toggles */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Toggle Card 1 */}
+                  <div className="bg-[#fdfdfd] border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div>
+                      <div className="font-bold text-slate-800 text-xs">Automated Email Alert</div>
+                      <div className="text-[10px] text-slate-400 font-medium mt-0.5">Send receipt copies to Robert</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEmailAlert(!emailAlert)}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
+                        emailAlert ? "bg-[#3f5c49]" : "bg-slate-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
+                          emailAlert ? "right-[3px]" : "left-[3px]"
+                        }`}
+                      />
+                    </button>
                   </div>
 
+                  {/* Toggle Card 2 */}
+                  <div className="bg-[#fdfdfd] border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                    <div>
+                      <div className="font-bold text-slate-800 text-xs">Immediate SMS Alert</div>
+                      <div className="text-[10px] text-slate-400 font-medium mt-0.5">Send welcome message to client phone</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSmsAlert(!smsAlert)}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
+                        smsAlert ? "bg-[#3f5c49]" : "bg-slate-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
+                          smsAlert ? "right-[3px]" : "left-[3px]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Toggle Card 3 */}
+                  <div className="bg-[#fdfdfd] border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-sm border-red-50/50">
+                    <div>
+                      <div className="font-bold text-red-700 text-xs">Maintenance Mode</div>
+                      <div className="text-[10px] text-red-400/90 font-medium mt-0.5">Put frontend offline (admin remains live)</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setMaintenanceMode(!maintenanceMode)}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
+                        maintenanceMode ? "bg-[#3f5c49]" : "bg-slate-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
+                          maintenanceMode ? "right-[3px]" : "left-[3px]"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <hr className="border-slate-100" />
+
+                {/* Row 4: Business Calendar Schedule */}
+                <div className="space-y-4">
+                  <h4 className="text-[11px] font-extrabold uppercase tracking-widest text-slate-700">Business Calendar Schedule</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-slate-450 font-bold uppercase tracking-wider block">Weekdays</label>
+                      <input
+                        type="text"
+                        required
+                        value={weekdays}
+                        onChange={(e) => setWeekdays(e.target.value)}
+                        className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs font-semibold text-slate-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-slate-450 font-bold uppercase tracking-wider block">Saturdays</label>
+                      <input
+                        type="text"
+                        required
+                        value={saturdays}
+                        onChange={(e) => setSaturdays(e.target.value)}
+                        className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs font-semibold text-slate-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-slate-450 font-bold uppercase tracking-wider block">Sundays</label>
+                      <input
+                        type="text"
+                        required
+                        value={sundays}
+                        onChange={(e) => setSundays(e.target.value)}
+                        className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs font-semibold text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Button Row */}
+                <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="w-full bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow flex items-center justify-center gap-1.5 cursor-pointer text-xs"
+                    className="bg-[#120f0e] hover:bg-[#201d1c] text-white font-bold py-3.5 px-8 rounded-full text-xs uppercase tracking-wider shadow-lg transition cursor-pointer"
                   >
-                    <Sliders className="w-3.5 h-3.5" /> Save Portal Profile Settings
+                    Save Configurations
                   </button>
-                </form>
-              </div>
-
-              {/* Preferences Configuration Card */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs text-left">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-850 flex items-center gap-1.5">
-                    <Globe className="w-4 h-4 text-copper" /> Regional & Preferences
-                  </h3>
-                  <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Configure language, sync rules, and alerts</p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <div>
-                      <div className="font-bold text-slate-800">Primary Language</div>
-                      <div className="text-xs text-slate-400 font-medium">Select localized translations layout</div>
-                    </div>
-                    <select className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-copper">
-                      <option>English (United States)</option>
-                      <option>Spanish (Español)</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                    <div>
-                      <div className="font-bold text-slate-800">Auto Refresh Interval</div>
-                      <div className="text-xs text-slate-400 font-medium">Inquiry queue polling frequency</div>
-                    </div>
-                    <select className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-copper">
-                      <option>Real-Time Push</option>
-                      <option>Every 5 minutes</option>
-                      <option>Manual Refresh Only</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center justify-between py-2">
-                    <div>
-                      <div className="font-bold text-slate-800">Visual Workspace Mode</div>
-                      <div className="text-xs text-slate-400 font-medium">Display profile accent theme</div>
-                    </div>
-                    <span className="text-xs bg-[#faf7f5] text-copper px-3 py-1.5 border border-[#f5ebdf] rounded-xl font-bold uppercase tracking-wider">
-                      Tampa Copper Light
-                    </span>
-                  </div>
-                </div>
-              </div>
-
+              </form>
             </div>
           )}
 
