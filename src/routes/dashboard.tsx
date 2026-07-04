@@ -745,100 +745,113 @@ function DashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 {/* Card 1: Total Leads */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      Total Leads <Info className="w-3 h-3 text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                      Total Leads
                     </span>
-                    <span className="w-6 h-6 rounded-lg bg-copper/10 text-copper flex items-center justify-center">
-                      <Briefcase className="w-3.5 h-3.5" />
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-copper/5 border border-copper/10 text-copper flex items-center justify-center shadow-sm">
+                      <Briefcase className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">{leads.length}</span>
-                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5">
-                      <ArrowUpRight className="w-3 h-3" /> +12% from last month
-                    </span>
+                  <div className="mt-3 text-left">
+                    <div className="text-3xl font-black text-slate-805 tracking-tight">{leads.length}</div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold flex items-center gap-0.5">
+                        <ArrowUpRight className="w-2.5 h-2.5" /> +12%
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">from last month</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Card 2: Active Renovations */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                {/* Card 2: Active Projects */}
+                <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      Active Projects <Info className="w-3 h-3 text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                      Active Projects
                     </span>
-                    <span className="w-6 h-6 rounded-lg bg-indigo-55/15 text-indigo-600 flex items-center justify-center">
-                      <Home className="w-3.5 h-3.5 text-copper" />
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                      <Home className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                  <div className="mt-3 text-left">
+                    <div className="text-3xl font-black text-slate-855 tracking-tight">
                       {leads.filter(l => ["contacted", "consultation_scheduled", "proposal_sent"].includes(l.status)).length}
-                    </span>
-                    <span className="text-xs font-bold text-[#0061ff] flex items-center gap-0.5">
-                      94.5% On Schedule
-                    </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold">
+                        94.5%
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">On Schedule</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Card 3: Contract Value */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      Contract Value <Info className="w-3 h-3 text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                      Contract Value
                     </span>
-                    <span className="w-6 h-6 rounded-lg bg-emerald-55/15 text-emerald-600 flex items-center justify-center">
-                      <DollarSign className="w-3.5 h-3.5 text-copper" />
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                  <div className="mt-3 text-left">
+                    <div className="text-3xl font-black text-slate-855 tracking-tight">
                       ${(analytics.totalValue / 1000).toFixed(0)}k
-                    </span>
-                    <span className="text-xs font-bold text-slate-500">
-                      78% of quarterly goal
-                    </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold">
+                        78%
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">of quarterly goal</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Card 4: Pending Reviews */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      Pending Reviews <Info className="w-3 h-3 text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                      Pending Reviews
                     </span>
-                    <span className="w-6 h-6 rounded-lg bg-rose-55/15 text-rose-600 flex items-center justify-center">
-                      <Star className="w-3.5 h-3.5 text-copper" />
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-100 text-amber-500 flex items-center justify-center shadow-sm">
+                      <Star className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                  <div className="mt-3 text-left">
+                    <div className="text-3xl font-black text-slate-855 tracking-tight">
                       {reviews.filter(r => !r.featured).length}
-                    </span>
-                    <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> 2 requiring attention
-                    </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="bg-rose-50 text-rose-600 border border-rose-100 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold flex items-center gap-0.5">
+                        <AlertTriangle className="w-3.5 h-3.5" /> 2 Alert
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">requiring attention</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Card 5: Website Visitors */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all">
+                <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                      Website Visitors <Info className="w-3 h-3 text-slate-300" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                      Website Visitors
                     </span>
-                    <span className="w-6 h-6 rounded-lg bg-emerald-55/15 text-emerald-600 flex items-center justify-center">
-                      <Users className="w-3.5 h-3.5 text-copper" />
-                    </span>
+                    <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+                      <Users className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
-                      8,429
-                    </span>
-                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5">
-                      <ArrowUpRight className="w-3 h-3" /> +18.4% vs last week
-                    </span>
+                  <div className="mt-3 text-left">
+                    <div className="text-3xl font-black text-slate-855 tracking-tight">8,429</div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold flex items-center gap-0.5">
+                        <ArrowUpRight className="w-2.5 h-2.5" /> +18.4%
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">vs last week</span>
+                    </div>
                   </div>
                 </div>
 
