@@ -546,7 +546,7 @@ function DashboardPage() {
     });
   }, [leads, searchTerm, statusFilter, typeFilter]);
 
-  if (loading) {
+  if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] text-slate-800 font-inter">
         <div className="text-center space-y-4">
