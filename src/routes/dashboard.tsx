@@ -546,11 +546,11 @@ function DashboardPage() {
     });
   }, [leads, searchTerm, statusFilter, typeFilter]);
 
-  if (isAuthenticated === null) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] text-slate-800 font-sans">
-        <div className="text-center">
-          <div className="h-8 w-8 rounded-full border-2 border-copper border-t-transparent animate-spin mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] text-slate-800 font-inter">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-4 border-copper border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-xs uppercase font-bold tracking-widest text-slate-400">Loading Workspace...</p>
         </div>
       </div>
@@ -558,7 +558,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex font-sans text-[#1a1f36] antialiased selection:bg-copper selection:text-white">
+    <div className="min-h-screen bg-[#f8f9fa] flex font-inter text-[#1a1f36] antialiased selection:bg-copper selection:text-white">
       
       {/* Left Sidebar Navigation (Matching exact Connexio structure but for Revitalize Group) */}
       <aside className="w-64 sm:w-72 bg-white border-r border-[#e3e6f0] flex flex-col justify-between p-5 sticky top-0 h-screen z-40">
@@ -662,7 +662,7 @@ function DashboardPage() {
         {/* Top Header Bar */}
         <header className="bg-white border-b border-[#e3e6f0] px-6 py-4 flex items-center justify-between sticky top-0 z-30">
           <div>
-            <h1 className="font-bold text-xl text-slate-800 font-serif leading-none capitalize">
+            <h1 className="font-bold text-xl text-slate-800 leading-none capitalize">
               {activeTab === "overview" ? "Dashboard" : activeTab.replace("-", " ")}
             </h1>
             <p className="text-xs text-slate-500 mt-1.5 font-medium">
@@ -762,7 +762,7 @@ function DashboardPage() {
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between mt-3">
-                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight font-sans">
+                    <span className="text-3xl font-extrabold text-slate-800 tracking-tight">
                       ${(analytics.totalValue / 1000).toFixed(0)}k
                     </span>
                     <span className="text-xs font-bold text-slate-500">
@@ -799,7 +799,7 @@ function DashboardPage() {
                 {/* Chart 1: Devices Usage Analytics -> Lead Acquisition Analytics */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-800 font-serif uppercase tracking-wide">Lead Acquisition Analytics</h3>
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Lead Acquisition Analytics</h3>
                     <div className="flex gap-2">
                       <select className="bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold px-2 py-1 focus:outline-none">
                         <option>Last 1 Years</option>
@@ -827,7 +827,7 @@ function DashboardPage() {
                 {/* Chart 2: Temperature Monitoring -> Renovation Project Progress */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-800 font-serif uppercase tracking-wide">Project Progress Timeline</h3>
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Project Progress Timeline</h3>
                     <div className="flex gap-2">
                       <select className="bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold px-2 py-1 focus:outline-none">
                         <option>Last 24 Hours</option>
@@ -863,7 +863,7 @@ function DashboardPage() {
                 {/* Chart 3: Energy Consumption -> Business Revenue & Cost */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-800 font-serif uppercase tracking-wide">Revenue vs Cost Breakdown</h3>
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Revenue vs Cost Breakdown</h3>
                     <div className="flex gap-2">
                       <select className="bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold px-2 py-1 focus:outline-none">
                         <option>Last 24 Hours</option>
@@ -892,7 +892,7 @@ function DashboardPage() {
                 {/* Chart 4: Device Distribution -> Service Distribution (Horizontal columns) */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-800 font-serif uppercase tracking-wide">Service Distribution</h3>
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Service Distribution</h3>
                   </div>
                   <div className="h-64 flex flex-col justify-between">
                     <div>
@@ -925,7 +925,7 @@ function DashboardPage() {
               <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-800 font-serif uppercase tracking-wide">Renovations & Leads Status</h3>
+                    <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">Renovations & Leads Status</h3>
                   </div>
 
                   <div className="flex gap-2 w-full sm:w-auto">
@@ -1125,7 +1125,7 @@ function DashboardPage() {
                     <div>
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-bold text-sm text-slate-800 font-serif leading-tight">{rev.title}</h4>
+                          <h4 className="font-bold text-sm text-slate-800 leading-tight">{rev.title}</h4>
                           <p className="text-xs text-slate-500 font-semibold mt-0.5">{rev.author} · {rev.location}</p>
                         </div>
                         <div className="flex items-center gap-0.5 text-copper shrink-0">
@@ -1240,7 +1240,7 @@ function DashboardPage() {
               {/* Sidebar */}
               <div className="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 font-serif">Active Sessions</h4>
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700">Active Sessions</h4>
                 </div>
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
                   {chatSessions.map((session) => (
@@ -1274,7 +1274,7 @@ function DashboardPage() {
                   <>
                     <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                       <div>
-                        <h4 className="font-bold text-sm text-slate-800 font-serif leading-none">{activeChatSession.clientName}</h4>
+                        <h4 className="font-bold text-sm text-slate-800 leading-none">{activeChatSession.clientName}</h4>
                         <p className="text-xs text-slate-400 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
                       </div>
                     </div>
@@ -1338,7 +1338,7 @@ function DashboardPage() {
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
-                  <h3 className="text-base font-bold text-slate-800 font-serif leading-none">Photo Gallery Manager</h3>
+                  <h3 className="text-base font-bold text-slate-800 leading-none">Photo Gallery Manager</h3>
                   <p className="text-xs text-slate-500 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
                 </div>
 
@@ -1384,7 +1384,7 @@ function DashboardPage() {
             <div className="space-y-6 max-w-xl mx-auto animate-in fade-in duration-200">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Security Settings</h3>
+                  <h3 className="text-sm font-bold text-slate-800 leading-none">Security Settings</h3>
                   <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Change your portal login credentials</p>
                 </div>
 
@@ -1429,7 +1429,7 @@ function DashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Register New Account</h3>
+                      <h3 className="text-sm font-bold text-slate-800 leading-none">Register New Account</h3>
                       <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Add sub-accounts for other staff/members</p>
                     </div>
 
@@ -1482,7 +1482,7 @@ function DashboardPage() {
 
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Registered Accounts</h3>
+                      <h3 className="text-sm font-bold text-slate-800 leading-none">Registered Accounts</h3>
                       <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Management of portal users list</p>
                     </div>
 
@@ -1511,7 +1511,7 @@ function DashboardPage() {
                   <ShieldAlert className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 text-sm font-serif">Admin Permission Required</h3>
+                  <h3 className="font-bold text-slate-800 text-sm">Admin Permission Required</h3>
                   <p className="text-xs text-slate-505 mt-2 leading-relaxed">
                     Access to system user accounts, privilege management, and portal credentials list is restricted to the primary Administrator account.
                   </p>
@@ -1529,7 +1529,7 @@ function DashboardPage() {
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800 font-serif">{selectedLead.name}</h3>
+                  <h3 className="text-lg font-bold text-slate-800">{selectedLead.name}</h3>
                   <p className="text-[10px] text-copper font-bold uppercase tracking-wider mt-0.5">Lead Details Profile</p>
                 </div>
                 <button 
@@ -1570,7 +1570,7 @@ function DashboardPage() {
 
               {/* Edit inputs */}
               <div className="border-t border-slate-100 pt-4 space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 font-serif">Management Controls</h4>
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-700">Management Controls</h4>
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wide block">Pipeline Stage</label>
@@ -1613,7 +1613,7 @@ function DashboardPage() {
               {/* Photos */}
               <div className="border-t border-slate-100 pt-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 font-serif">Project Site Photos</h4>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-700">Project Site Photos</h4>
                   <label className="bg-slate-50 hover:bg-copper/10 hover:text-copper border border-slate-200 hover:border-copper/25 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 cursor-pointer transition">
                     <Upload className="w-3.5 h-3.5" /> Upload File
                     <input
@@ -1674,7 +1674,7 @@ function DashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 text-xs text-left">
             <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
-              <h3 className="font-bold text-sm leading-tight font-serif">Create New Business Lead</h3>
+              <h3 className="font-bold text-sm leading-tight">Create New Business Lead</h3>
               <button 
                 onClick={() => setIsAddingLead(false)}
                 className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10"
@@ -1790,7 +1790,7 @@ function DashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-250 animate-in zoom-in-95 duration-200 text-xs text-left">
             <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
-              <h3 className="font-bold text-sm leading-tight font-serif">Reply to Review</h3>
+              <h3 className="font-bold text-sm leading-tight">Reply to Review</h3>
               <button 
                 onClick={() => setSelectedReview(null)}
                 className="text-white/80 hover:text-white p-1 rounded-full"
