@@ -226,9 +226,30 @@ export async function dbGetPortalUsers(defaultAdmin: any): Promise<any[]> {
   const accountsCol = db.collection("portal_users");
   const count = await accountsCol.countDocuments();
   if (count === 0) {
-    await accountsCol.insertOne(defaultAdmin);
-    return [defaultAdmin];
+    const { hashPassword } = await import("./crypto.server");
+    const hashedPassword = await hashPassword(defaultAdmin.password);
+    const seededAdmin = { ...defaultAdmin, password: hashedPassword };
+    await accountsCol.insertOne(seededAdmin);
+    return [seededAdmin];
   }
+
+  // Ensure default admin exists and has the correct password hashed
+  const existingDefaultAdmin = await accountsCol.findOne({ username: defaultAdmin.username });
+  if (!existingDefaultAdmin) {
+    const { hashPassword } = await import("./crypto.server");
+    const hashedPassword = await hashPassword(defaultAdmin.password);
+    const seededAdmin = { ...defaultAdmin, password: hashedPassword };
+    await accountsCol.insertOne(seededAdmin);
+  } else {
+    // If it exists but has the old plaintext password "admin", let's update it to "admin123" hashed
+    const isOldPlaintext = existingDefaultAdmin.password === "admin";
+    if (isOldPlaintext) {
+      const { hashPassword } = await import("./crypto.server");
+      const hashedPassword = await hashPassword(defaultAdmin.password);
+      await accountsCol.updateOne({ id: existingDefaultAdmin.id }, { $set: { password: hashedPassword } });
+    }
+  }
+
   const docs = await accountsCol.find({}).toArray();
   return docs.map(mapDoc);
 }

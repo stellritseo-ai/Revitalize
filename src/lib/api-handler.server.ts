@@ -27,7 +27,7 @@ import {
   INITIAL_EMAILS
 } from "./leads-store";
 
-const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin" };
+const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin123" };
 
 // Helper to construct JSON responses
 function jsonResponse(data: any, status = 200) {
@@ -291,9 +291,13 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const body = await request.json();
         if (body.action === "login") {
           const accounts = await dbGetPortalUsers(DEFAULT_ADMIN);
-          const user = accounts.find(a => a.username.toLowerCase() === body.username.toLowerCase() && a.password === body.password);
+          const user = accounts.find(a => a.username.toLowerCase() === body.username.toLowerCase());
           if (user) {
-            return jsonResponse({ success: true, user: { id: user.id, username: user.username, role: user.role } });
+            const { verifyPassword } = await import("./crypto.server");
+            const isValid = await verifyPassword(body.password, user.password);
+            if (isValid) {
+              return jsonResponse({ success: true, user: { id: user.id, username: user.username, role: user.role } });
+            }
           }
           return jsonResponse({ error: "Invalid username or password" }, 401);
         }
@@ -302,10 +306,12 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           if (accounts.some(a => a.username.toLowerCase() === body.username.toLowerCase())) {
             return jsonResponse({ error: "Username already exists" }, 400);
           }
+          const { hashPassword } = await import("./crypto.server");
+          const hashedPassword = await hashPassword(body.password);
           const newUser = {
             id: "admin-" + Math.random().toString(36).substr(2, 9),
             username: body.username,
-            password: body.password,
+            password: hashedPassword,
             role: body.role
           };
           await dbAddPortalUser(newUser);
@@ -318,7 +324,10 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         if (body.action === "update") {
           const updates: any = {};
           if (body.username) updates.username = body.username;
-          if (body.password) updates.password = body.password;
+          if (body.password) {
+            const { hashPassword } = await import("./crypto.server");
+            updates.password = await hashPassword(body.password);
+          }
           const users = await dbUpdatePortalUser(body.userId, updates);
           const updatedUser = users.find(u => u.id === body.userId);
           return jsonResponse({ success: true, username: updatedUser ? updatedUser.username : (body.username || "") });
