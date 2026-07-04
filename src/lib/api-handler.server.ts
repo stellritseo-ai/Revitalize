@@ -104,11 +104,18 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
       const leadsCol = db.collection("leads");
 
       if (method === "POST") {
-        await leadsCol.updateOne({ id: body.leadId }, { $push: { photos: body.base64Photo } } as any);
+        const { uploadToCloudinary } = await import("./cloudinary.server");
+        const url = await uploadToCloudinary(body.base64Photo, "revitalize/leads");
+        await leadsCol.updateOne({ id: body.leadId }, { $push: { photos: url } } as any);
       } else if (method === "DELETE") {
         const lead = await leadsCol.findOne({ id: body.leadId });
         if (lead && lead.photos) {
           const photos = [...lead.photos];
+          const photoUrl = photos[body.photoIndex];
+          if (photoUrl && photoUrl.includes("cloudinary.com")) {
+            const { deleteFromCloudinary } = await import("./cloudinary.server");
+            await deleteFromCloudinary(photoUrl);
+          }
           photos.splice(body.photoIndex, 1);
           await leadsCol.updateOne({ id: body.leadId }, { $set: { photos } });
         }
@@ -127,7 +134,9 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const body = await request.json();
         const photos: string[] = [];
         if (body.newReviewPhoto) {
-          photos.push(body.newReviewPhoto);
+          const { uploadToCloudinary } = await import("./cloudinary.server");
+          const url = await uploadToCloudinary(body.newReviewPhoto, "revitalize/reviews");
+          photos.push(url);
         }
         const newReview = {
           title: body.title,
@@ -247,9 +256,11 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
       }
       if (method === "POST") {
         const body = await request.json();
+        const { uploadToCloudinary } = await import("./cloudinary.server");
+        const url = await uploadToCloudinary(body.base64Photo, "revitalize/gallery");
         const newPhoto = {
           id: "photo-" + Math.random().toString(36).substr(2, 9),
-          url: body.base64Photo,
+          url,
           uploadedAt: new Date().toISOString()
         };
         const updated = await dbAddGalleryPhoto(newPhoto);
@@ -257,6 +268,13 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
       }
       if (method === "DELETE") {
         const body = await request.json();
+        const { getDb } = await import("./db.server");
+        const db = await getDb();
+        const photo = await db.collection("gallery_photos").findOne({ id: body.id });
+        if (photo && photo.url && photo.url.includes("cloudinary.com")) {
+          const { deleteFromCloudinary } = await import("./cloudinary.server");
+          await deleteFromCloudinary(photo.url);
+        }
         const updated = await dbRemoveGalleryPhoto(body.id);
         return jsonResponse(updated);
       }
