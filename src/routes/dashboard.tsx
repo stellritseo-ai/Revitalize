@@ -580,11 +580,14 @@ function DashboardPage() {
           <div className="space-y-1">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1.5">Main Menu</p>
             {[
-              { id: "overview", label: "Dashboard", icon: TrendingUp },
+              { id: "overview", label: "Overview & Stats", icon: TrendingUp },
               { id: "leads", label: "Leads Manager", icon: Briefcase },
-              { id: "reviews", label: "Reviews Board", icon: Star },
-              { id: "emails", label: "Web Inquiries", icon: Mail },
-              { id: "chat", label: "Live Chats", icon: MessageCircle, badge: chatSessions.some(s => s.unread) }
+              { id: "reviews", label: "Reviews Moderator", icon: Star },
+              { id: "gallery", label: "Update Gallery", icon: ImageIcon },
+              { id: "chat", label: "Live Chat", icon: MessageCircle, badge: chatSessions.some(s => s.unread) },
+              { id: "emails", label: "Web Emails", icon: Mail },
+              { id: "settings", label: "Portal Settings", icon: Settings },
+              { id: "security", label: "Security Settings", icon: Sliders }
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -592,18 +595,21 @@ function DashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-between group ${
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-250 flex items-center justify-between relative group ${
                     isActive 
-                      ? "bg-[#f1f3f7] text-[#1a1f36]" 
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                      ? "bg-[#faf7f5] text-[#1a1f36]" 
+                      : "text-slate-500 hover:bg-[#faf7f5]/45 hover:text-slate-800"
                   }`}
                 >
-                  <span className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 transition-colors ${isActive ? "text-copper" : "text-slate-400 group-hover:text-copper"}`} />
+                  <span className="flex items-center gap-3 relative z-10">
+                    <Icon className={`w-4 h-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-copper" : "text-slate-400 group-hover:text-copper"}`} />
                     {tab.label}
                   </span>
                   {tab.badge && (
-                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0 animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0 animate-pulse relative z-10" />
+                  )}
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-copper rounded-r-md" />
                   )}
                 </button>
               );
@@ -639,22 +645,7 @@ function DashboardPage() {
 
         {/* Sidebar Footer */}
         <div className="border-t border-slate-100 pt-4 space-y-2">
-          <button
-            onClick={() => setActiveTab("settings")}
-            className="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition flex items-center gap-3"
-          >
-            <Settings className="w-4 h-4 text-slate-400" />
-            <span>Settings</span>
-          </button>
-          {currentUser?.role === "admin" && (
-            <button
-              onClick={() => setActiveTab("security")}
-              className="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition flex items-center gap-3"
-            >
-              <Sliders className="w-4 h-4 text-slate-400" />
-              <span>Portal Accounts</span>
-            </button>
-          )}
+
           <button
             onClick={handleLogout}
             className="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition flex items-center gap-3 cursor-pointer"
@@ -1432,87 +1423,101 @@ function DashboardPage() {
           )}
 
           {/* TAB 8: SECURITY */}
-          {activeTab === "security" && currentUser?.role === "admin" && (
-            <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Register New Account</h3>
-                    <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Add sub-accounts for other staff/members</p>
-                  </div>
-
-                  <form onSubmit={handleCreateUser} className="space-y-4 text-xs text-left">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Username</label>
-                      <input
-                        type="text"
-                        required
-                        value={addUsername}
-                        onChange={(e) => setAddUsername(e.target.value)}
-                        placeholder="e.g. jiten"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
-                      />
+          {activeTab === "security" && (
+            currentUser?.role === "admin" ? (
+              <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Register New Account</h3>
+                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Add sub-accounts for other staff/members</p>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Password</label>
-                      <input
-                        type="password"
-                        required
-                        value={addPassword}
-                        onChange={(e) => setAddPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">User Role Permission</label>
-                      <select
-                        value={addRole}
-                        onChange={(e) => setAddRole(e.target.value as any)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper"
-                      >
-                        <option value="viewer">Viewer (Read-only)</option>
-                        <option value="editor">Editor (CRUD access)</option>
-                        <option value="admin">Administrator (Full permissions)</option>
-                      </select>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow"
-                    >
-                      Add Portal Account
-                    </button>
-                  </form>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Registered Accounts</h3>
-                    <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Management of portal users list</p>
-                  </div>
-
-                  <div className="divide-y divide-slate-100 text-xs text-left">
-                    {portalUsers.map((user) => (
-                      <div key={user.id} className="py-3 flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-slate-850">{user.username}</div>
-                          <div className="text-[9px] text-copper uppercase font-black tracking-wider mt-0.5">{user.role}</div>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteUser(user.id, user.username)}
-                          className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                    <form onSubmit={handleCreateUser} className="space-y-4 text-xs text-left">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Username</label>
+                        <input
+                          type="text"
+                          required
+                          value={addUsername}
+                          onChange={(e) => setAddUsername(e.target.value)}
+                          placeholder="e.g. jiten"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
                       </div>
-                    ))}
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Password</label>
+                        <input
+                          type="password"
+                          required
+                          value={addPassword}
+                          onChange={(e) => setAddPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">User Role Permission</label>
+                        <select
+                          value={addRole}
+                          onChange={(e) => setAddRole(e.target.value as any)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper"
+                        >
+                          <option value="viewer">Viewer (Read-only)</option>
+                          <option value="editor">Editor (CRUD access)</option>
+                          <option value="admin">Administrator (Full permissions)</option>
+                        </select>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow"
+                      >
+                        Add Portal Account
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-800 font-serif leading-none">Registered Accounts</h3>
+                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Management of portal users list</p>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 text-xs text-left">
+                      {portalUsers.map((user) => (
+                        <div key={user.id} className="py-3 flex items-center justify-between">
+                          <div>
+                            <div className="font-bold text-slate-850">{user.username}</div>
+                            <div className="text-[9px] text-copper uppercase font-black tracking-wider mt-0.5">{user.role}</div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteUser(user.id, user.username)}
+                            className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center space-y-4 animate-in fade-in duration-200">
+                <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm font-serif">Admin Permission Required</h3>
+                  <p className="text-xs text-slate-505 mt-2 leading-relaxed">
+                    Access to system user accounts, privilege management, and portal credentials list is restricted to the primary Administrator account.
+                  </p>
+                </div>
+              </div>
+            )
           )}
         </main>
       </div>
