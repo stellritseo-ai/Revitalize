@@ -154,6 +154,7 @@ function DashboardPage() {
   const [portalUsers, setPortalUsers] = useState<PortalUser[]>([]);
   const [updateUsername, setUpdateUsername] = useState("");
   const [updatePassword, setUpdatePassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [addUsername, setAddUsername] = useState("");
   const [addPassword, setAddPassword] = useState("");
   const [addRole, setAddRole] = useState<"admin" | "editor" | "viewer">("viewer");
@@ -1592,85 +1593,196 @@ function DashboardPage() {
           {/* TAB 8: SECURITY */}
           {activeTab === "security" && (
             currentUser?.role === "admin" ? (
-              <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in duration-200">
+              <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-200 text-left">
+                {/* Header Title block */}
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Security & User Management</h2>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">Manage portal access credentials, update security permissions, and log new administrative users.</p>
+                </div>
+
+                {/* Top Grid: Forms */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  
+                  {/* Left Column: Update profile credentials */}
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800 leading-none">Register New Account</h3>
-                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Add sub-accounts for other staff/members</p>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-805">Update Profile Credentials</h3>
+                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Modify your own account username or security password.</p>
                     </div>
 
-                    <form onSubmit={handleCreateUser} className="space-y-4 text-xs text-left">
+                    <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs text-left">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Username</label>
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Account Username</label>
                         <input
                           type="text"
                           required
-                          value={addUsername}
-                          onChange={(e) => setAddUsername(e.target.value)}
-                          placeholder="e.g. jiten"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                          value={updateUsername}
+                          onChange={(e) => setUpdateUsername(e.target.value)}
+                          className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-semibold text-slate-850 text-xs"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Password</label>
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Current Password</label>
                         <input
                           type="password"
-                          required
-                          value={addPassword}
-                          onChange={(e) => setAddPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          placeholder="Required to change password"
+                          className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">User Role Permission</label>
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">New Password</label>
+                        <input
+                          type="password"
+                          value={updatePassword}
+                          onChange={(e) => setUpdatePassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper text-xs"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-[#5f7d58] hover:bg-[#4a6344] text-white font-bold py-3 px-6 rounded-xl transition shadow uppercase tracking-wider text-[10px] cursor-pointer"
+                      >
+                        Update Credentials
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right Column: Register new portal user */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-805">Register New Portal User</h3>
+                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Configure access accounts for editors or read-only viewers.</p>
+                    </div>
+
+                    <form onSubmit={handleCreateUser} className="space-y-4 text-xs text-left">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">New Username</label>
+                          <input
+                            type="text"
+                            required
+                            value={addUsername}
+                            onChange={(e) => setAddUsername(e.target.value)}
+                            placeholder="e.g. jrm-assistant"
+                            className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-medium"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Access Password</label>
+                          <input
+                            type="password"
+                            required
+                            value={addPassword}
+                            onChange={(e) => setAddPassword(e.target.value)}
+                            placeholder="Enter secure password"
+                            className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">User Authorization Role</label>
                         <select
                           value={addRole}
                           onChange={(e) => setAddRole(e.target.value as any)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper"
+                          className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-1 focus:ring-copper text-xs font-medium text-slate-800"
                         >
-                          <option value="viewer">Viewer (Read-only)</option>
-                          <option value="editor">Editor (CRUD access)</option>
-                          <option value="admin">Administrator (Full permissions)</option>
+                          <option value="viewer">Viewer (Read-Only Portal Access)</option>
+                          <option value="editor">Editor (CRUD/Write Access)</option>
+                          <option value="admin">Administrator (Full Access)</option>
                         </select>
                       </div>
 
                       <button
                         type="submit"
-                        className="bg-copper hover:bg-copper-deep text-white font-bold py-3 px-6 rounded-xl transition shadow"
+                        className="bg-[#120f0e] hover:bg-[#221e1d] text-white font-bold py-3 px-6 rounded-full transition shadow uppercase tracking-wider text-[10px] cursor-pointer"
                       >
-                        Add Portal Account
+                        Create Portal User
                       </button>
                     </form>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-800 leading-none">Registered Accounts</h3>
-                      <p className="text-[10px] text-slate-400 font-medium leading-none mt-1">Management of portal users list</p>
-                    </div>
+                </div>
 
-                    <div className="divide-y divide-slate-100 text-xs text-left">
-                      {portalUsers.map((user) => (
-                        <div key={user.id} className="py-3 flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-slate-850">{user.username}</div>
-                            <div className="text-[9px] text-copper uppercase font-black tracking-wider mt-0.5">{user.role}</div>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteUser(user.id, user.username)}
-                            className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                {/* Bottom Section: Active Portal Accounts */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div className="text-left">
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-805">Active Portal Accounts</h3>
+                      <p className="text-[10px] text-slate-400 font-medium mt-1">Database log of authenticated users authorized to access this dashboard.</p>
                     </div>
+                    <span className="bg-[#e6ece7] text-[#4d664e] font-bold text-[10px] tracking-wider py-1 px-3 rounded-full uppercase">
+                      {portalUsers.length} Accounts
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-450">
+                          <th className="p-4 pl-6">Registered User</th>
+                          <th className="p-4">Authorization Role</th>
+                          <th className="p-4">Database ID</th>
+                          <th className="p-4 pr-6 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                        {portalUsers.map((user) => {
+                          const isSelf = currentUser && user.username === currentUser.username;
+                          return (
+                            <tr key={user.id} className="hover:bg-slate-50/20 transition">
+                              <td className="p-4 pl-6">
+                                <div className="flex items-center gap-2">
+                                  <User className="w-3.5 h-3.5 text-slate-400" />
+                                  <span className="font-bold text-slate-850 capitalize">{user.username}</span>
+                                  {isSelf && (
+                                    <span className="bg-[#e6ece7] text-[#4d664e] font-black text-[8px] tracking-wider py-0.5 px-1.5 rounded uppercase">
+                                      Current User
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full ${
+                                  user.role === "admin" 
+                                    ? "bg-[#ffebeb] text-[#d64545]"
+                                    : user.role === "editor"
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "bg-slate-100 text-slate-650"
+                                }`}>
+                                  {user.role}
+                                </span>
+                              </td>
+                              <td className="p-4 font-mono text-slate-400 text-[10px]">
+                                {user.id.repeat(3).substring(0, 24)}
+                              </td>
+                              <td className="p-4 pr-6 text-right">
+                                {user.username === "admin" ? (
+                                  <span className="text-[10px] text-slate-400 italic">System Account</span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleDeleteUser(user.id, user.username)}
+                                    className="p-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition inline-flex items-center"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
+
               </div>
             ) : (
               <div className="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center space-y-4 animate-in fade-in duration-200">
