@@ -13,8 +13,7 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const [salt, hash] = storedHash.split(":");
   if (!salt || !hash) {
-    // Backward compatibility: fallback to plain text check if not yet hashed
-    return password === storedHash;
+    return false;
   }
   const { pbkdf2Sync } = await getCryptoModule();
   const verifyHash = pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");

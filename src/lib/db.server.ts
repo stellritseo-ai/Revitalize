@@ -241,9 +241,9 @@ export async function dbGetPortalUsers(defaultAdmin: any): Promise<any[]> {
     const seededAdmin = { ...defaultAdmin, password: hashedPassword };
     await accountsCol.insertOne(seededAdmin);
   } else {
-    // If it exists but has the old plaintext password "admin", let's update it to "admin123" hashed
-    const isOldPlaintext = existingDefaultAdmin.password === "admin";
-    if (isOldPlaintext) {
+    // If it exists but contains a plaintext password (no salt separator ':'), update to hashed admin123
+    const isPlaintext = !existingDefaultAdmin.password.includes(":");
+    if (isPlaintext) {
       const { hashPassword } = await import("./crypto.server");
       const hashedPassword = await hashPassword(defaultAdmin.password);
       await accountsCol.updateOne({ id: existingDefaultAdmin.id }, { $set: { password: hashedPassword } });

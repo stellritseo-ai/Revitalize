@@ -220,7 +220,7 @@ export const INITIAL_EMAILS: WebEmail[] = [
   }
 ];
 
-const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin" };
+const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin123" };
 
 // ── LOCAL STORAGE FALLBACK HELPERS ──
 const getStorageItem = <T>(key: string, defaultValue: T): T => {
