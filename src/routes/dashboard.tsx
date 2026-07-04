@@ -182,6 +182,9 @@ function DashboardPage() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [reviewReplyText, setReviewReplyText] = useState("");
 
+  const [selectedEmail, setSelectedEmail] = useState<WebEmail | null>(null);
+  const [isViewingEmail, setIsViewingEmail] = useState(false);
+
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
     message: string;
@@ -1192,7 +1195,15 @@ function DashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-150 text-sm">
                       {webEmails.map((email) => (
-                        <tr key={email.id} className="hover:bg-slate-50/50 transition">
+                        <tr 
+                          key={email.id} 
+                          className="hover:bg-slate-50/70 transition cursor-pointer"
+                          onClick={(e) => {
+                            if ((e.target as HTMLElement).closest('button')) return;
+                            setSelectedEmail(email);
+                            setIsViewingEmail(true);
+                          }}
+                        >
                           <td className="p-4 pl-6">
                             <div className="font-bold text-slate-800">{email.name}</div>
                             <div className="text-xs text-slate-400 mt-0.5">{email.email} · {email.phone}</div>
@@ -1208,12 +1219,10 @@ function DashboardPage() {
                           </td>
                           <td className="p-4 pr-6 text-right space-x-1.5 whitespace-nowrap">
                             <button
-                              onClick={() => triggerConfirm({
-                                title: "Read Submission",
-                                message: `Message from ${email.name}:\n\n"${email.message}"`,
-                                confirmText: "Okay",
-                                onConfirm: () => {}
-                              })}
+                              onClick={() => {
+                                setSelectedEmail(email);
+                                setIsViewingEmail(true);
+                              }}
                               className="p-1.5 bg-slate-50 hover:bg-copper/10 border border-slate-200 rounded-lg text-slate-500 transition inline-flex items-center"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1521,6 +1530,72 @@ function DashboardPage() {
           )}
         </main>
       </div>
+
+      {/* Email Details Dialog */}
+      {isViewingEmail && selectedEmail && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white h-full shadow-2xl p-6 overflow-y-auto flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-250 text-xs text-left">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">{selectedEmail.name}</h3>
+                  <p className="text-[10px] text-copper font-bold uppercase tracking-wider mt-0.5">Web Email Inquiry</p>
+                </div>
+                <button 
+                  onClick={() => { setIsViewingEmail(false); setSelectedEmail(null); }}
+                  className="p-1.5 rounded-full hover:bg-slate-100 transition"
+                >
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+
+              {/* Metadata */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Email Address</span>
+                  <a href={`mailto:${selectedEmail.email}`} className="font-semibold text-copper hover:underline mt-0.5 block text-sm">{selectedEmail.email}</a>
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Phone Number</span>
+                  <a href={`tel:${selectedEmail.phone}`} className="font-semibold text-copper hover:underline mt-0.5 block text-sm">{selectedEmail.phone}</a>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Requested Service</span>
+                  <p className="font-semibold text-slate-800 mt-0.5 text-sm capitalize">{selectedEmail.service || "General Inquiry"}</p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Received Date & Time</span>
+                  <p className="font-semibold text-slate-800 mt-0.5 text-sm">{new Date(selectedEmail.createdAt).toLocaleString()}</p>
+                </div>
+                <div className="col-span-2 bg-slate-50 border border-slate-100 p-4 rounded-xl">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide block">Inquiry Message Body</span>
+                  <p className="text-slate-650 font-medium leading-relaxed mt-2 text-sm whitespace-pre-wrap">"{selectedEmail.message}"</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 flex gap-3">
+              <button
+                onClick={() => { setIsViewingEmail(false); setSelectedEmail(null); }}
+                className="w-1/2 border border-slate-200 rounded-xl py-3 font-bold hover:bg-slate-50 transition"
+              >
+                Close View
+              </button>
+              <button
+                onClick={() => {
+                  const emailId = selectedEmail.id;
+                  setIsViewingEmail(false);
+                  setSelectedEmail(null);
+                  handleDeleteEmail(emailId);
+                }}
+                className="w-1/2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-3 font-bold shadow-lg transition"
+              >
+                Delete Message
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit / Details Dialog */}
       {isEditingLead && selectedLead && (
