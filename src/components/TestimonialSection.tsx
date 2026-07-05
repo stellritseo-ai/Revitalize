@@ -330,11 +330,11 @@ export function Testimonials({ isGrid = false }: { isGrid?: boolean }) {
           100% { transform: translateX(0); }
         }
         .marquee-track-left {
-          animation: marquee-left 30s linear infinite;
+          animation: marquee-left 60s linear infinite;
           width: max-content;
         }
         .marquee-track-right {
-          animation: marquee-right 30s linear infinite;
+          animation: marquee-right 60s linear infinite;
           width: max-content;
         }
       `}</style>
