@@ -9,10 +9,12 @@ let client: MongoClient | null = null;
 
 async function getClient(): Promise<MongoClient> {
   if (!client) {
-    client = new MongoClient(MONGODB_URI, {
+    const newClient = new MongoClient(MONGODB_URI, {
       connectTimeoutMS: 5000,
       socketTimeoutMS: 15000,
     });
+    await newClient.connect();
+    client = newClient;
   }
   return client;
 }

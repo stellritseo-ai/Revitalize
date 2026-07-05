@@ -152,14 +152,22 @@ function RootComponent() {
   useEffect(() => {
     if (isAuthOrDashboard) return;
 
+    // Check localStorage first for instant display
+    const stored = localStorage.getItem("rev_settings_maintenanceMode");
+    if (stored === "true") setMaintenanceMode(true);
+
     fetch("/api/settings?t=" + Date.now())
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && typeof data.maintenanceMode === "boolean") {
           setMaintenanceMode(data.maintenanceMode);
+          // Keep localStorage in sync
+          localStorage.setItem("rev_settings_maintenanceMode", String(data.maintenanceMode));
         }
       })
-      .catch(err => console.warn("Failed to check maintenance mode status", err));
+      .catch(() => {
+        // API unavailable - use localStorage value already set above
+      });
   }, [location.pathname, isAuthOrDashboard]);
 
   if (maintenanceMode && !isAuthOrDashboard) {

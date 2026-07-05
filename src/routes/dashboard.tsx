@@ -1936,7 +1936,17 @@ function DashboardPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setMaintenanceMode(!maintenanceMode)}
+                      onClick={async () => {
+                        const newVal = !maintenanceMode;
+                        setMaintenanceMode(newVal);
+                        // Immediately persist so __root.tsx fallback works
+                        localStorage.setItem("rev_settings_maintenanceMode", String(newVal));
+                        try {
+                          await saveSiteSettings({ maintenanceMode: newVal });
+                        } catch {
+                          // Saved to localStorage above; API will sync on next load
+                        }
+                      }}
                       className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${maintenanceMode ? "bg-[#3f5c49]" : "bg-slate-200"
                         }`}
                     >
