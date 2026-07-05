@@ -40,8 +40,11 @@ import {
   ChevronDown,
   Globe,
   Layers,
-  Play
+  Play,
+  CheckSquare,
+  Check
 } from "lucide-react";
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -161,6 +164,8 @@ function DashboardPage() {
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [galleryUploadProgress, setGalleryUploadProgress] = useState(0);
   const [galleryFilter, setGalleryFilter] = useState("all");
+  const [selectedGalleryIds, setSelectedGalleryIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
 
   // Portal Security States
   const [portalUsers, setPortalUsers] = useState<PortalUser[]>([]);
@@ -712,6 +717,31 @@ function DashboardPage() {
       }
     });
   };
+
+  const handleBulkDeleteGallery = () => {
+    if (selectedGalleryIds.size === 0) return;
+    triggerConfirm({
+      title: `Delete ${selectedGalleryIds.size} Photo${selectedGalleryIds.size > 1 ? "s" : ""}`,
+      message: `Are you sure you want to permanently delete ${selectedGalleryIds.size} selected photo${selectedGalleryIds.size > 1 ? "s" : ""}? This cannot be undone.`,
+      confirmText: "Delete All",
+      onConfirm: async () => {
+        try {
+          const ids = Array.from(selectedGalleryIds);
+          let updatedPhotos = galleryPhotos;
+          for (const id of ids) {
+            updatedPhotos = await removeGalleryPhoto(id);
+          }
+          setGalleryPhotos(updatedPhotos);
+          setSelectedGalleryIds(new Set());
+          setIsBulkDeleteMode(false);
+          toast.success(`${ids.length} photo${ids.length > 1 ? "s" : ""} deleted successfully.`);
+        } catch {
+          toast.error("Failed to delete some photos. Please try again.");
+        }
+      }
+    });
+  };
+
 
   // Filtering leads
   const filteredLeads = useMemo(() => {
@@ -1600,8 +1630,22 @@ function DashboardPage() {
                   <h3 className="text-lg font-bold text-slate-900">Photo Gallery Manager</h3>
                   <p className="text-xs text-slate-500 font-medium mt-1">Manage files showing on public Gallery sections by category</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-400">Filter View:</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Bulk Select Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBulkDeleteMode(prev => !prev);
+                      setSelectedGalleryIds(new Set());
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition border flex items-center gap-1.5 ${isBulkDeleteMode
+                      ? "bg-rose-50 border-rose-300 text-rose-700"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300"}`}
+                  >
+                    {isBulkDeleteMode ? <X className="w-3.5 h-3.5" /> : <CheckSquare className="w-3.5 h-3.5" />}
+                    {isBulkDeleteMode ? "Cancel Selection" : "Select Multiple"}
+                  </button>
+                  <span className="text-xs font-semibold text-slate-400">Filter:</span>
                   <div className="flex gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
                     {["All", "Bathroom", "Kitchen", "Residential", "Video"].map((cat) => (
                       <button
@@ -1620,7 +1664,51 @@ function DashboardPage() {
                 </div>
               </div>
 
+              {/* Bulk Delete Action Bar */}
+              {isBulkDeleteMode && (
+                <div className="bg-rose-50 border border-rose-200 rounded-2xl px-5 py-3 flex items-center justify-between gap-4 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filtered = galleryPhotos.filter(p =>
+                          galleryFilter === "all" || !galleryFilter
+                            ? true
+                            : p.category?.toLowerCase() === galleryFilter.toLowerCase()
+                        );
+                        if (selectedGalleryIds.size === filtered.length) {
+                          setSelectedGalleryIds(new Set());
+                        } else {
+                          setSelectedGalleryIds(new Set(filtered.map(p => p.id)));
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-white border border-rose-200 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-50 transition"
+                    >
+                      {selectedGalleryIds.size > 0 &&
+                        selectedGalleryIds.size === galleryPhotos.filter(p =>
+                          galleryFilter === "all" || !galleryFilter ? true : p.category?.toLowerCase() === galleryFilter.toLowerCase()
+                        ).length
+                        ? "Deselect All"
+                        : "Select All"}
+                    </button>
+                    <span className="text-sm font-semibold text-rose-700">
+                      {selectedGalleryIds.size} photo{selectedGalleryIds.size !== 1 ? "s" : ""} selected
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBulkDeleteGallery}
+                    disabled={selectedGalleryIds.size === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition shadow-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete {selectedGalleryIds.size > 0 ? `${selectedGalleryIds.size} Selected` : "Selected"}
+                  </button>
+                </div>
+              )}
+
               {/* Upload Controls Box */}
+
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
                   <Plus className="w-4 h-4 text-copper" /> Upload New Project Media
@@ -1767,60 +1855,93 @@ function DashboardPage() {
                     if (galleryFilter === "all" || !galleryFilter) return true;
                     return p.category?.toLowerCase() === galleryFilter.toLowerCase();
                   })
-                  .map((photo) => (
-                    <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow bg-white">
-                      {photo.url.endsWith(".mp4") || photo.url.endsWith(".mov") || photo.url.includes("/video/upload/") ? (
-                        <div className="relative w-full h-full cursor-zoom-in" onClick={() => setLightboxPhoto(photo.url)}>
-                          <video
-                            src={photo.url}
-                            className="w-full h-full object-cover"
-                            muted
-                            loop
-                            playsInline
-                            autoPlay
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition z-10">
-                            <div className="p-2 bg-white/90 text-slate-800 rounded-full shadow">
-                              <Play className="w-3 h-3 fill-current" />
-                            </div>
+                  .map((photo) => {
+                    const isSelected = selectedGalleryIds.has(photo.id);
+                    return (
+                      <div
+                        key={photo.id}
+                        className={`relative group aspect-square rounded-2xl overflow-hidden border-2 shadow bg-white transition-all duration-150 cursor-pointer ${
+                          isBulkDeleteMode
+                            ? isSelected
+                              ? "border-rose-500 ring-2 ring-rose-300"
+                              : "border-slate-200 hover:border-rose-300"
+                            : "border-slate-200"
+                        }`}
+                        onClick={() => {
+                          if (isBulkDeleteMode) {
+                            setSelectedGalleryIds(prev => {
+                              const next = new Set(prev);
+                              if (next.has(photo.id)) next.delete(photo.id);
+                              else next.add(photo.id);
+                              return next;
+                            });
+                          }
+                        }}
+                      >
+                        {photo.url.endsWith(".mp4") || photo.url.endsWith(".mov") || photo.url.includes("/video/upload/") ? (
+                          <div
+                            className="relative w-full h-full"
+                            onClick={(e) => { if (!isBulkDeleteMode) { e.stopPropagation(); setLightboxPhoto(photo.url); } }}
+                          >
+                            <video src={photo.url} className="w-full h-full object-cover" muted loop playsInline autoPlay />
+                            {!isBulkDeleteMode && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition z-10">
+                                <div className="p-2 bg-white/90 text-slate-800 rounded-full shadow">
+                                  <Play className="w-3 h-3 fill-current" />
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ) : (
-                        <img
-                          src={photo.url}
-                          alt="Gallery item"
-                          className="w-full h-full object-cover cursor-zoom-in"
-                          onClick={() => setLightboxPhoto(photo.url)}
-                        />
-                      )}
-                      {photo.category && (
-                        <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/15 select-none pointer-events-none z-10">
-                          <span className="text-[9px] text-white font-bold uppercase tracking-wider">
-                            {photo.category}
+                        ) : (
+                          <img
+                            src={photo.url}
+                            alt="Gallery item"
+                            className="w-full h-full object-cover"
+                            onClick={(e) => { if (!isBulkDeleteMode) { e.stopPropagation(); setLightboxPhoto(photo.url); } }}
+                          />
+                        )}
+
+                        {/* Category badge */}
+                        {photo.category && (
+                          <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/15 select-none pointer-events-none z-10">
+                            <span className="text-[9px] text-white font-bold uppercase tracking-wider">{photo.category}</span>
+                          </div>
+                        )}
+
+                        {/* Checkbox overlay in bulk mode */}
+                        {isBulkDeleteMode && (
+                          <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center z-20 transition-all ${
+                            isSelected ? "bg-rose-600 border-rose-600" : "bg-white/80 border-slate-300"
+                          }`}>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                          </div>
+                        )}
+
+                        {/* Selected overlay */}
+                        {isBulkDeleteMode && isSelected && (
+                          <div className="absolute inset-0 bg-rose-600/20 z-10 pointer-events-none" />
+                        )}
+
+                        {/* Single delete button (only when NOT in bulk mode) */}
+                        {!isBulkDeleteMode && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteGallery(photo.id); }}
+                            className="absolute top-2 right-2 p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md transition duration-200 z-20 border border-white/10 opacity-0 group-hover:opacity-100"
+                            title="Delete Image"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 pointer-events-none z-10">
+                          <span className="text-[10px] text-white/80 font-medium">
+                            Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
                           </span>
                         </div>
-                      )}
-
-                      {/* Always visible delete button in top-right */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteGallery(photo.id);
-                        }}
-                        className="absolute top-2 right-2 p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md transition duration-200 z-20 border border-white/10"
-                        title="Delete Image"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 pointer-events-none z-10">
-                        <span className="text-[10px] text-white/80 font-medium">
-                          Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
-                        </span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
               </div>
 
               {/* Empty State */}
