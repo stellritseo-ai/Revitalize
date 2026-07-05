@@ -5,20 +5,15 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://revitalize_db_user
 const DB_NAME = "revitalize";
 
 let client: MongoClient | null = null;
-let clientPromise: Promise<MongoClient> | null = null;
 
 async function getClient(): Promise<MongoClient> {
-  if (client) return client;
-  if (!clientPromise) {
+  if (!client) {
     client = new MongoClient(MONGODB_URI, {
-      connectTimeoutMS: 15000,
-      socketTimeoutMS: 45000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 15000,
     });
-    clientPromise = client.connect();
   }
-  const connectedClient = await clientPromise;
-  client = connectedClient;
-  return connectedClient;
+  return client;
 }
 
 export async function getDb() {
