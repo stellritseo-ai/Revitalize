@@ -334,8 +334,25 @@ async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
   }
   const res = await fetch(url, options);
   if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    throw new Error(errorBody.error || `HTTP error ${res.status}`);
+    let errorMsg = `HTTP error ${res.status}`;
+    try {
+      const text = await res.text();
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.error) {
+          errorMsg = parsed.error;
+        }
+      } catch {
+        if (text) {
+          // Clean up HTML tags for cleaner console output if it's an HTML error page
+          const cleanText = text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+          errorMsg = cleanText.length > 200 ? cleanText.substring(0, 200) + "..." : cleanText;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+    throw new Error(errorMsg);
   }
   return res.json() as Promise<T>;
 }
