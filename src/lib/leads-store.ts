@@ -66,6 +66,7 @@ export interface PortalUser {
 export interface GalleryPhoto {
   id: string;
   url: string;
+  category?: string;
   uploadedAt: string;
 }
 
@@ -156,56 +157,137 @@ export const INITIAL_LEADS: Lead[] = [
 export const INITIAL_REVIEWS: Review[] = [
   {
     id: "review-1",
-    title: "Brilliant Real Estate & Renovation Service!",
-    text: "Revitalize Group helped us buy a fixer-upper in St. Petersburg and remodeled the kitchen before we moved in. The combination of broker and renovation under one roof saved us so much time and money. The work is absolutely stunning!",
-    author: "The Miller Family",
-    location: "St. Petersburg",
+    title: "A Kitchen Transformation Beyond Expectations",
+    text: "Revitalize Real Estate completely rebuilt my outdated Tampa kitchen, and the results are stunning. They handled everything—drywall, flooring, custom cabinetry, and even coordinated plumbing seamlessly. Their team showed up on time every day, stayed on budget, and kept the worksite surprisingly clean. I finally have the kitchen I've always dreamed of. Highly recommend!",
+    author: "David R.",
+    location: "Tampa, FL",
     rating: 5,
     featured: true,
-    createdAt: "2026-05-10T10:00:00Z"
+    createdAt: "2026-05-01T12:00:00Z"
   },
   {
     id: "review-2",
-    title: "Kitchen Remodel Perfection",
-    text: "We hired them to remodel our kitchen and bathroom. The custom cabinetry, quartz countertops, and flooring are gorgeous. They finished on schedule and within budget.",
-    author: "Melissa & Ben R.",
-    location: "Tampa",
+    title: "Real Pros Who Delivered Excellence",
+    text: "From framing to final paint, everything was clean and permitted correctly. I loved that they offered video meetings during the planning phase—it saved us so much time and made the process incredibly convenient. The craftsmanship is on a completely different level. Revitalize Real Estate is the definition of professional.",
+    author: "Lisa M.",
+    location: "Clearwater, FL",
     rating: 5,
     featured: true,
-    createdAt: "2026-05-18T14:30:00Z"
+    createdAt: "2026-05-02T12:00:00Z"
+  },
+  {
+    id: "review-3",
+    title: "A Bathroom Remodel That Feels Like a Spa",
+    text: "We hired Revitalize Real Estate for a full bathroom remodel, and the results exceeded every expectation. The attention to detail in the tile work, the premium fixtures, and the flawless finish made our master bath feel like a luxury spa. Their project manager kept us informed every single day. This is the quality you hope for but rarely find.",
+    author: "Marcus T.",
+    location: "St. Petersburg, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-03T12:00:00Z"
+  },
+  {
+    id: "review-4",
+    title: "No Hidden Fees—Exactly What Was Quoted",
+    text: "I was skeptical about remodeling our master bath, but Revitalize Real Estate made it stress-free. Their estimate process was surprisingly accurate. The final invoice matched the initial quote almost perfectly—no hidden fees, no surprise costs. They delivered premium quality with integrity. We couldn't be happier.",
+    author: "Elena P.",
+    location: "Tampa, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-04T12:00:00Z"
+  },
+  {
+    id: "review-5",
+    title: "They Navigated Permitting Like Pros",
+    text: "We hired Revitalize Real Estate for a commercial build-out for our new retail space in Wesley Chapel, and they were incredible. They navigated the city permitting process like seasoned experts and got us open on time. Their team was professional, efficient, and communicative. Highly recommend for any construction need!",
+    author: "Robert W.",
+    location: "Wesley Chapel, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-05T12:00:00Z"
+  },
+  {
+    id: "review-6",
+    title: "A Whole-Home Transformation",
+    text: "I was nervous about undertaking a whole-home improvement project, but their project manager kept me informed every single day. The transformation is breathtaking—every room feels brand new. From the kitchen to the bathrooms to the flooring, the craftsmanship is impeccable. I finally love coming home.",
+    author: "Amanda C.",
+    location: "Riverview, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-06T12:00:00Z"
+  },
+  {
+    id: "review-7",
+    title: "Professional Cleaning That Sold Our House in 8 Hours",
+    text: "We had our house on the market for months with no offers. Revitalize Real Estate came in for a professional deep clean and some minor touch-ups, and we had an offer in just 8 hours. The difference was night and day. They made our house look like a million bucks. I can't thank them enough!",
+    author: "Sarah & Mark T.",
+    location: "Brandon, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-07T12:00:00Z"
+  },
+  {
+    id: "review-8",
+    title: "Affordable, Honest, and Incredibly Detailed",
+    text: "Love this company! They are very honest, professional, and incredibly detailed. Their prices are very affordable. They made our house look like a million dollars, and after they finished the job, we wanted to keep the house instead of selling it. We really love their work and highly recommend them.",
+    author: "Jennifer K.",
+    location: "Lutz, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-08T12:00:00Z"
+  },
+  {
+    id: "review-9",
+    title: "From Vision to Reality—Flawlessly Executed",
+    text: "We had a very specific vision for our kitchen remodel, and Revitalize Real Estate brought it to life flawlessly. They listened to everything we wanted, offered expert suggestions, and delivered a result that exceeded our dreams. The custom cabinetry and premium counters are showstoppers. Thank you!",
+    author: "Michael & Laura D.",
+    location: "Odessa, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-09T12:00:00Z"
+  },
+  {
+    id: "review-10",
+    title: "Expert Guidance for First-Time Home Sellers",
+    text: "As first-time home sellers, we were overwhelmed. Revitalize Real Estate guided us through the entire process—from pre-listing improvements to staging advice. They helped us prepare our home to sell for top dollar, and we couldn't be happier with the result. Their expertise is unmatched.",
+    author: "Ryan & Jessica P.",
+    location: "Land O' Lakes, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-10T12:00:00Z"
+  },
+  {
+    id: "review-11",
+    title: "Quality Work, Respectful Team",
+    text: "Their team was incredibly respectful of our home and family during the renovation. They worked efficiently, kept the noise to a minimum, and cleaned up every day before leaving. The quality of their work is outstanding. I would hire them again in a heartbeat for any future project.",
+    author: "Cynthia R.",
+    location: "Zephyrhills, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-11T12:00:00Z"
+  },
+  {
+    id: "review-12",
+    title: "Premium Cabinet Design That Transformed Our Kitchen",
+    text: "We chose Revitalize Real Estate for premium cabinet sales and custom design, and the results are phenomenal. The custom cabinetry is beautiful, functional, and perfectly fits our space. The entire process was seamless, from the design consultation to the final installation. Highly recommend their cabinet services!",
+    author: "Tom & Diane S.",
+    location: "Plant City, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-12T12:00:00Z"
+  },
+  {
+    id: "review-13",
+    title: "An Investment That Increased Our Home's Value",
+    text: "We hired Revitalize Real Estate for a bathroom remodel and flooring installation before selling our home. The investment paid off—we received multiple offers above asking price within days. Their work added incredible value to our property. They are our go-to team for any future home projects.",
+    author: "Karen & James W.",
+    location: "Apollo Beach, FL",
+    rating: 5,
+    featured: true,
+    createdAt: "2026-05-13T12:00:00Z"
   }
 ];
 
-export const INITIAL_CHATS: ChatSession[] = [
-  {
-    id: "session-1",
-    clientName: "Marcus Vance",
-    clientCity: "Tampa",
-    lastMessage: "When can someone come out to look at the master bedroom space?",
-    lastMessageTime: new Date(Date.now() - 3600000 * 2).toISOString(),
-    unread: true,
-    messages: [
-      {
-        id: "msg-1",
-        sender: "client",
-        text: "Hi, I need an estimate for bedroom remodeling and an office build.",
-        timestamp: new Date(Date.now() - 3600000 * 2.2).toISOString()
-      },
-      {
-        id: "msg-2",
-        sender: "admin",
-        text: "Hi Marcus! We can certainly help with that. We specialize in home renovations and office conversions. Do you have a preferred timeline?",
-        timestamp: new Date(Date.now() - 3600000 * 2.1).toISOString()
-      },
-      {
-        id: "msg-3",
-        sender: "client",
-        text: "Looking to start next month. When can someone come out to look at the master bedroom space?",
-        timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
-      }
-    ]
-  }
-];
+export const INITIAL_CHATS: ChatSession[] = [];
 
 export const INITIAL_EMAILS: WebEmail[] = [
   {
@@ -448,10 +530,22 @@ export const replyToReview = async (id: string, replyText: string): Promise<Revi
   }
 };
 
+export const deleteReview = async (id: string): Promise<Review[]> => {
+  try {
+    return await apiCall<Review[]>("/api/reviews", "DELETE", { id });
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const reviews = await getReviews();
+    const updated = reviews.filter(r => r.id !== id);
+    setStorageItem("revitalize-reviews", updated);
+    return updated;
+  }
+};
+
 // ── CHATS ──
 export const getChatSessions = async (): Promise<ChatSession[]> => {
   try {
-    const chats = await apiCall<ChatSession[]>("/api/chats", "GET");
+    const chats = await apiCall<ChatSession[]>("/api/chats?t=" + Date.now(), "GET");
     setStorageItem("revitalize-chats", chats);
     return chats;
   } catch (err) {
@@ -536,6 +630,20 @@ export const markChatAsRead = async (sessionId: string): Promise<ChatSession[]> 
   }
 };
 
+export const deleteChatSession = async (id: string): Promise<ChatSession[]> => {
+  try {
+    const chats = await apiCall<ChatSession[]>("/api/chats?id=" + id, "DELETE");
+    setStorageItem("revitalize-chats", chats);
+    return chats;
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage:", err);
+    const chats = await getChatSessions();
+    const filtered = chats.filter(c => c.id !== id);
+    setStorageItem("revitalize-chats", filtered);
+    return filtered;
+  }
+};
+
 // ── EMAILS ──
 export const getWebEmails = async (): Promise<WebEmail[]> => {
   try {
@@ -591,15 +699,16 @@ export const getGalleryPhotos = async (): Promise<GalleryPhoto[]> => {
   }
 };
 
-export const uploadGalleryPhoto = async (base64Photo: string): Promise<GalleryPhoto[]> => {
+export const uploadGalleryPhoto = async (base64Photo: string, category?: string): Promise<GalleryPhoto[]> => {
   try {
-    return await apiCall<GalleryPhoto[]>("/api/gallery", "POST", { base64Photo });
+    return await apiCall<GalleryPhoto[]>("/api/gallery", "POST", { base64Photo, category });
   } catch (err) {
     console.warn("MongoDB offline, falling back to local storage:", err);
     const photos = await getGalleryPhotos();
     const newPhoto: GalleryPhoto = {
       id: "photo-" + Math.random().toString(36).substr(2, 9),
       url: base64Photo,
+      category: category || "residential",
       uploadedAt: new Date().toISOString()
     };
     photos.unshift(newPhoto);
@@ -610,7 +719,7 @@ export const uploadGalleryPhoto = async (base64Photo: string): Promise<GalleryPh
 
 export const removeGalleryPhoto = async (id: string): Promise<GalleryPhoto[]> => {
   try {
-    return await apiCall<GalleryPhoto[]>("/api/gallery", "DELETE", { id });
+    return await apiCall<GalleryPhoto[]>(`/api/gallery?id=${id}`, "DELETE");
   } catch (err) {
     console.warn("MongoDB offline, falling back to local storage:", err);
     const photos = await getGalleryPhotos();
@@ -858,4 +967,57 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
     regionChart,
     timelineChart
   };
+};
+
+export interface SiteSettings {
+  alertEmail: string;
+  officePhone: string;
+  smsTemplate: string;
+  emailAlert: boolean;
+  smsAlert: boolean;
+  maintenanceMode: boolean;
+  weekdays: string;
+  saturdays: string;
+  sundays: string;
+}
+
+export const getSiteSettings = async (): Promise<SiteSettings> => {
+  try {
+    return await apiCall<SiteSettings>("/api/settings?t=" + Date.now(), "GET");
+  } catch (err) {
+    console.warn("MongoDB offline, falling back to local storage settings:", err);
+    let email = getStorageItem("rev_settings_alertEmail", "revitalizerealestate@gmail.com");
+    if (email === "robertsa210@icloud.com") {
+      email = "revitalizerealestate@gmail.com";
+      setStorageItem("rev_settings_alertEmail", email);
+    }
+    let phone = getStorageItem("rev_settings_officePhone", "(813) 323-0291");
+    if (phone === "(210) 429-5526") {
+      phone = "(813) 323-0291";
+      setStorageItem("rev_settings_officePhone", phone);
+    }
+    return {
+      alertEmail: email,
+      officePhone: phone,
+      smsTemplate: getStorageItem("rev_settings_smsTemplate", "Hi {Name}, thank you for contacting Revitalize Group! Daniel Thompson will contact you during the {Time} to discuss your {Type} project."),
+      emailAlert: getStorageItem("rev_settings_emailAlert", "true") === "true",
+      smsAlert: getStorageItem("rev_settings_smsAlert", "true") === "true",
+      maintenanceMode: getStorageItem("rev_settings_maintenanceMode", "false") === "true",
+      weekdays: getStorageItem("rev_settings_weekdays", "8:00 AM - 5:00 PM"),
+      saturdays: getStorageItem("rev_settings_saturdays", "8:00 AM - 5:00 PM"),
+      sundays: getStorageItem("rev_settings_sundays", "Closed (Emergency 24/7)")
+    };
+  }
+};
+
+export const saveSiteSettings = async (settings: Partial<SiteSettings>): Promise<SiteSettings> => {
+  try {
+    return await apiCall<SiteSettings>("/api/settings", "POST", settings);
+  } catch (err) {
+    console.warn("MongoDB offline, saving to local storage settings:", err);
+    Object.entries(settings).forEach(([key, val]) => {
+      setStorageItem("rev_settings_" + key, String(val));
+    });
+    return getSiteSettings();
+  }
 };

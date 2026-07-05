@@ -24,6 +24,27 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { toast } from "sonner";
+import { addLead, addWebEmail } from "@/lib/leads-store";
+
+function mapServiceToProjectType(service: string): string {
+  switch (service) {
+    case "Kitchen Remodeling":
+      return "kitchen";
+    case "Bathroom Remodeling":
+      return "bathroom";
+    case "Real Estate Services":
+    case "Home Evaluation":
+      return "real-estate";
+    case "Professional Cleaning Services":
+      return "cleaning";
+    case "Premium Cabinet Sales & Custom Design Services":
+      return "cabinets";
+    case "Residential Remodeling":
+    case "Floor, Pavers & Carpentry":
+    default:
+      return "remodeling";
+  }
+}
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -160,39 +181,61 @@ function ContactPage() {
     const emailTo = "revitalizerealestate@gmail.com";
 
     try {
-      const response = await fetch(`https://formsubmit.co/ajax/${emailTo}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          _subject: `New Estimate Request: ${name} - ${service}`,
-          _cc: "jitenksony@gmail.com",
-          _captcha: "false",
-          name,
-          email,
-          phone,
-          service,
-          address: address || "Not provided",
-          message,
-        }),
+      // 1. Submit to database as a Lead
+      const projectType = mapServiceToProjectType(service);
+      await addLead({
+        name,
+        email,
+        phone,
+        address: address || "Not provided",
+        projectType: projectType,
+        description: message,
+        contactTime: "anytime"
       });
 
-      const result = await response.json();
+      // 2. Submit to database as a Web Email Inquiry
+      await addWebEmail({
+        name,
+        email,
+        phone,
+        service: service || "General Inquiry",
+        message,
+        source: "Contact Page Form"
+      });
 
-      if (response.ok) {
-        setShowPopup(true);
-        setName("");
-        setEmail("");
-        setPhone("");
-        setAddress("");
-        setMessage("");
-        setService("Residential Remodeling");
-        generateCaptcha();
-      } else {
-        throw new Error(result.message || "Failed to submit form.");
+      // 3. Submit to FormSubmit.co as fallback alert
+      const emailTo = "revitalizerealestate@gmail.com";
+      try {
+        await fetch(`https://formsubmit.co/ajax/${emailTo}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            _subject: `New Estimate Request: ${name} - ${service}`,
+            _cc: "jitenksony@gmail.com",
+            _captcha: "false",
+            name,
+            email,
+            phone,
+            service,
+            address: address || "Not provided",
+            message,
+          }),
+        });
+      } catch (emailErr) {
+        console.warn("Email alert transmission failed, but DB record was saved:", emailErr);
       }
+
+      setShowPopup(true);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setAddress("");
+      setMessage("");
+      setService("Residential Remodeling");
+      generateCaptcha();
     } catch (error: any) {
       console.error("Submission error:", error);
       toast.error("Failed to submit form. Please try again.");

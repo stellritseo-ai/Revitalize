@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Send } from "lucide-react";
 import { toast } from "sonner";
+import { addLead, addWebEmail } from "@/lib/leads-store";
 import quoteBgVideo from "../assets/video/04b45dfc-4db8-4375-b262-2eef763f0401.mp4";
 
 const inputCls =
   "bg-white/10 border border-white/15 text-white placeholder-white/40 px-4 py-3.5 rounded-xl w-full outline-none focus:border-copper/70 focus:ring-2 focus:ring-copper/25 transition-all duration-200 text-[15px] font-medium";
+
+function mapServiceToProjectType(service: string): string {
+  switch (service) {
+    case "Kitchen Remodeling":
+      return "kitchen";
+    case "Bathroom Remodeling":
+      return "bathroom";
+    case "Real Estate Services":
+    case "Home Evaluation":
+      return "real-estate";
+    case "Professional Cleaning Services":
+      return "cleaning";
+    case "Premium Cabinet Sales & Custom Design Services":
+      return "cabinets";
+    case "Residential Remodeling":
+    case "Floor, Pavers & Carpentry":
+    default:
+      return "remodeling";
+  }
+}
 
 export function QuoteSection() {
   const [formData, setFormData] = useState({
@@ -50,44 +71,64 @@ export function QuoteSection() {
       return;
     }
 
-    const emailTo = "revitalizerealestate@gmail.com";
-
     try {
-      const response = await fetch(`https://formsubmit.co/ajax/${emailTo}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          _subject: `New Quote Request: ${formData.name} - ${formData.service}`,
-          _cc: "jitenksony@gmail.com",
-          _captcha: "false",
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          service: formData.service,
-          address: formData.address || "Not provided",
-          message: formData.message,
-        }),
+      // 1. Submit to database as a Lead
+      const projectType = mapServiceToProjectType(formData.service);
+      await addLead({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address || "Not provided",
+        projectType: projectType,
+        description: formData.message,
+        contactTime: "anytime"
       });
 
-      const result = await response.json();
+      // 2. Submit to database as a Web Email Inquiry
+      await addWebEmail({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        service: formData.service || "General Inquiry",
+        message: formData.message,
+        source: "Landing Page Quote Form"
+      });
 
-      if (response.ok) {
-        setShowPopup(true);
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          service: "",
-          address: "",
-          message: "",
+      // 3. Keep FormSubmit.co as the email fallback alert
+      const emailTo = "revitalizerealestate@gmail.com";
+      try {
+        await fetch(`https://formsubmit.co/ajax/${emailTo}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            _subject: `New Quote Request: ${formData.name} - ${formData.service}`,
+            _cc: "jitenksony@gmail.com",
+            _captcha: "false",
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            service: formData.service,
+            address: formData.address || "Not provided",
+            message: formData.message,
+          }),
         });
-        generateCaptcha();
-      } else {
-        throw new Error(result.message || "Failed to submit form.");
+      } catch (emailErr) {
+        console.warn("Email alert transmission failed, but DB record was saved:", emailErr);
       }
+
+      setShowPopup(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        address: "",
+        message: "",
+      });
+      generateCaptcha();
     } catch (error: any) {
       console.error("Submission error:", error);
       toast.error("Failed to submit form. Please try again.");
@@ -98,7 +139,7 @@ export function QuoteSection() {
   };
 
   return (
-    <section className="relative py-[50px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-2xl bg-[#09152A] overflow-hidden">
+    <section className="relative py-[50px] px-4 md:px-8 mx-[15px] mt-[15px] rounded-[10px] bg-[#09152A] overflow-hidden">
 
       {/* ── Background Video ─────────────────────────────────────────── */}
       <video

@@ -1,53 +1,12 @@
-import React from "react";
+import { useRef, useState, useEffect } from "react";
 import { Star, Quote, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// Helper function for localization fallback
+const t = (en: string, _es?: string) => en;
 
 const googleReviewsUrl =
   "https://www.google.com/search?sca_esv=6253cd38f2fad33d&hl=en-NP&gl=np&sxsrf=ANbL-n7cS37lAvjY_Gq5hBPjVGleH16DmQ:1780601199430&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOZEiVWyMnEv3Fg7VPBZP4lRtpHcXbC4OPSbzIIOGyaaDedYDEdz7c-5t_uTFwJrQEgVgg_4bb9oLWcel1cScK-41cGunnoY7ASGDLL77Q0LojsgwVw%3D%3D&q=Revitalize+Group+Reviews&sa=X&ved=2ahUKEwjo8emvqO6UAxW73TgGHWLbCzoQ0bkNegQIKxAF&biw=1440&bih=788&dpr=2";
-
-const testimonials = [
-  {
-    text: "Revitalize Real Estate rebuilt my Tampa kitchen and handled drywall + flooring seamlessly. Their team showed up on time, stayed on budget, and even coordinated plumbing.",
-    name: "David R.",
-    location: "Tampa, FL",
-    initial: "D",
-    color: "bg-[#1e110a]",
-  },
-  {
-    text: "Real pros. From framing to final paint, everything was clean and permitted correctly. Love that they offer video meetings — saved us so much time.",
-    name: "Lisa M.",
-    location: "Clearwater, FL",
-    initial: "L",
-    color: "bg-[#d57c4c]",
-  },
-  {
-    text: "We hired them for a full bathroom remodel. The craftsmanship is on a completely different level. Premium finish from start to finish.",
-    name: "Marcus T.",
-    location: "St. Petersburg, FL",
-    initial: "M",
-    color: "bg-[#954d26]",
-  },
-  {
-    text: "Their estimate process was surprisingly accurate. The final invoice for our master bath remodel matched the initial quote almost perfectly. No hidden fees.",
-    name: "Elena P.",
-    location: "Tampa, FL",
-    initial: "E",
-    color: "bg-[#1e110a]",
-  },
-  {
-    text: "Hired them for a commercial build-out for our new retail space. They navigated the city permitting process like pros and got us open on time.",
-    name: "Robert W.",
-    location: "Wesley Chapel, FL",
-    initial: "R",
-    color: "bg-[#d57c4c]",
-  },
-  {
-    text: "I was nervous about undertaking a whole-home improvement, but their project manager kept me informed every single day. The transformation is breathtaking.",
-    name: "Amanda C.",
-    location: "Riverview, FL",
-    initial: "A",
-    color: "bg-[#954d26]",
-  },
-];
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
@@ -70,31 +29,241 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export function TestimonialSection({ variant = "slider" }: { variant?: "slider" | "grid" }) {
+interface Review {
+  text: string;
+  name: string;
+  role: string;
+  rating: number;
+  initials: string;
+  avatarColor: string;
+}
+
+function StarRating({ count }: { count: number }) {
   return (
-    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
-      <div className="max-w-[1400px] mx-auto flex flex-col items-center text-center">
-        {/* Top Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-copper/20 bg-copper/5 px-4 py-1.5 text-xs font-black uppercase tracking-widest mb-6 text-copper">
-          <Sparkles className="h-3.5 w-3.5 text-copper" />
-          Client Testimonials
+    <div className="flex gap-0.5">
+      {Array.from({ length: count }).map((_, i) => (
+        <Star
+          key={i}
+          className="w-3.5 h-3.5 fill-[#FBBF24] text-[#FBBF24]"
+        />
+      ))}
+    </div>
+  );
+}
+
+function TestimonialCard({ review, isGrid = false }: { review: Review; isGrid?: boolean }) {
+  return (
+    <div className={cn(
+      "relative bg-white border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.06)] rounded-2xl p-6 flex flex-col gap-4 group hover:shadow-[0_6px_30px_rgba(0,0,0,0.10)] hover:border-slate-300 transition-all duration-300",
+      isGrid ? "w-full" : "flex-shrink-0 w-[340px] sm:w-[380px] mx-3"
+    )}>
+      {/* Quotation Icon overlay */}
+      <Quote className="absolute top-6 right-6 w-8 h-8 text-copper/5 pointer-events-none group-hover:text-copper/10 transition-colors duration-300" />
+
+      {/* Rating */}
+      <StarRating count={review.rating} />
+
+      {/* Text */}
+      <p className="text-slate-600 text-sm leading-relaxed font-medium flex-1">
+        "{review.text}"
+      </p>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+          style={{ backgroundColor: review.avatarColor }}
+        >
+          {review.initials}
+        </div>
+        <div>
+          <p className="text-slate-900 font-semibold text-sm leading-tight">
+            {review.name}
+          </p>
+          <p className="text-slate-400 text-xs mt-0.5">{review.role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarqueeRow({
+  items,
+  direction = "left",
+}: {
+  items: Review[];
+  direction?: "left" | "right";
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const duplicated = [...items, ...items, ...items];
+
+  const animClass =
+    direction === "left" ? "marquee-track-left" : "marquee-track-right";
+
+  return (
+    <div
+      className="overflow-hidden relative group/row"
+      onMouseEnter={() => {
+        if (trackRef.current) {
+          trackRef.current.style.animationPlayState = "paused";
+        }
+      }}
+      onMouseLeave={() => {
+        if (trackRef.current) {
+          trackRef.current.style.animationPlayState = "running";
+        }
+      }}
+    >
+      {/* Fade edges */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-[#F8FAFC] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-[#F8FAFC] to-transparent" />
+
+      <div ref={trackRef} className={`flex ${animClass}`}>
+        {duplicated.map((review, i) => (
+          <TestimonialCard key={i} review={review} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function Testimonials({ isGrid = false }: { isGrid?: boolean }) {
+  const [dbReviews, setDbReviews] = useState<Array<{
+    id: string; author: string; location: string; text: string; rating: number; title: string; featured: boolean;
+  }>>([]);
+
+  useEffect(() => {
+    fetch("/api/reviews?t=" + Date.now())
+      .then(r => r.ok ? r.json() : [])
+      .then(reviews => {
+        if (Array.isArray(reviews)) {
+          setDbReviews(reviews.filter((r: any) => r.featured));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const staticReviews: Review[] = [
+    {
+      text: t(
+        "Revitalize Real Estate rebuilt my Tampa kitchen and handled drywall + flooring seamlessly. Their team showed up on time, stayed on budget, and even coordinated plumbing.",
+        "Revitalize Real Estate reconstruyó mi cocina en Tampa y manejó los paneles de yeso y los pisos a la perfección. Su equipo se presentó a tiempo, se mantuvo dentro del presupuesto e incluso coordinó la plomería."
+      ),
+      name: "David R.",
+      role: t("Tampa, FL", "Tampa, FL"),
+      rating: 5,
+      initials: "DR",
+      avatarColor: "#1e110a",
+    },
+    {
+      text: t(
+        "Real pros. From framing to final paint, everything was clean and permitted correctly. Love that they offer video meetings — saved us so much time.",
+        "Verdaderos profesionales. Desde la estructura hasta la pintura final, todo estuvo limpio y con los permisos correspondientes. Nos encantó que ofrecieran reuniones por video: nos ahorró mucho tiempo."
+      ),
+      name: "Lisa M.",
+      role: t("Clearwater, FL", "Clearwater, FL"),
+      rating: 5,
+      initials: "LM",
+      avatarColor: "#d57c4c",
+    },
+    {
+      text: t(
+        "We hired them for a full bathroom remodel. The craftsmanship is on a completely different level. Premium finish from start to finish.",
+        "Los contratamos para una remodelación completa del baño. La mano de obra está en un nivel completamente diferente. Acabado premium de principio a fin."
+      ),
+      name: "Marcus T.",
+      role: t("St. Petersburg, FL", "St. Petersburg, FL"),
+      rating: 5,
+      initials: "MT",
+      avatarColor: "#954d26",
+    },
+    {
+      text: t(
+        "Their estimate process was surprisingly accurate. The final invoice for our master bath remodel matched the initial quote almost perfectly. No hidden fees.",
+        "Su proceso de cotización fue sorprendentemente preciso. La factura final de la remodelación de nuestro baño principal coincidió casi a la perfección con la cotización inicial. Sin tarifas ocultas."
+      ),
+      name: "Elena P.",
+      role: t("Tampa, FL", "Tampa, FL"),
+      rating: 5,
+      initials: "EP",
+      avatarColor: "#1e110a",
+    },
+    {
+      text: t(
+        "Hired them for a commercial build-out for our new retail space. They navigated the city permitting process like pros and got us open on time.",
+        "Los contratamos para una habilitación comercial para nuestro nuevo espacio minorista. Gestionaron el proceso de permisos de la ciudad como profesionales y logramos abrir a tiempo."
+      ),
+      name: "Robert W.",
+      role: t("Wesley Chapel, FL", "Wesley Chapel, FL"),
+      rating: 5,
+      initials: "RW",
+      avatarColor: "#d57c4c",
+    },
+    {
+      text: t(
+        "I was nervous about undertaking a whole-home improvement, but their project manager kept me informed every single day. The transformation is breathtaking.",
+        "Estaba nerviosa por emprender una mejora en todo el hogar, pero su gerente de proyecto me mantuvo informada todos los días. La transformación es impresionante."
+      ),
+      name: "Amanda C.",
+      role: t("Riverview, FL", "Riverview, FL"),
+      rating: 5,
+      initials: "AC",
+      avatarColor: "#954d26",
+    },
+  ];
+
+  const colors = ["#1e110a", "#d57c4c", "#954d26"];
+  const allReviews: Review[] = [
+    ...dbReviews.map((r, i) => ({
+      text: r.text,
+      name: r.author,
+      role: r.location,
+      rating: r.rating || 5,
+      initials: r.author.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2),
+      avatarColor: colors[i % colors.length],
+    })),
+    ...staticReviews,
+  ];
+
+  const row1 = allReviews.filter((_, idx) => idx % 2 === 0);
+  const row2 = allReviews.filter((_, idx) => idx % 2 !== 0);
+
+  return (
+    <section
+      id="reviews"
+      className="relative py-[60px] bg-[#F8FAFC] overflow-hidden mx-[15px] mt-[15px] rounded-[10px] border border-slate-200"
+    >
+      {/* Background glow accents */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-copper/5 blur-[120px]" />
+      <div className="pointer-events-none absolute bottom-0 left-1/4 w-[400px] h-[300px] rounded-full bg-[#954d26]/5 blur-[100px]" />
+
+      {/* Section Header */}
+      <div className="mx-auto w-[90%] max-w-7xl text-center mb-10 relative z-10">
+        <div className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 text-xs font-black text-slate-500 uppercase tracking-widest mb-5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-copper animate-pulse" />
+          {t("Client Testimonials", "Opiniones de Clientes")}
         </div>
 
-        {/* Heading */}
-        <h2 className="text-3xl sm:text-4xl md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif">
-          Trusted by{" "}
-          <span className="text-copper italic font-serif font-bold">Tampa Bay Homeowners</span>
+        <h2 className="text-[32px] sm:text-[40px] font-extrabold text-slate-900 tracking-tight leading-tight mb-[10px] font-serif">
+          {t("Trusted by ", "Con la confianza de ")}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-copper to-copper-deep italic font-bold">
+            {t("Tampa Bay Homeowners", "Propietarios de Tampa Bay")}
+          </span>
         </h2>
 
-        {/* Subtitle */}
-        <p className="max-w-2xl text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium mb-8">
-          See what our clients say about their experience remodeling and improving their homes with
-          Revitalize Real Estate.
+        <p className={cn(
+          "mx-auto max-w-2xl text-slate-600 text-sm sm:text-base leading-relaxed font-sans font-medium",
+          isGrid ? "mb-10" : "mb-8"
+        )}>
+          {t(
+            "See what our clients say about their experience remodeling and improving their homes with Revitalize Real Estate.",
+            "Vea lo que nuestros clientes dicen sobre su experiencia remodelando y mejorando sus hogares con Revitalize Real Estate."
+          )}
         </p>
 
         {/* Google Reviews Badge */}
-        <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-white border border-charcoal/10 rounded-2xl sm:rounded-full p-4 sm:py-2.5 sm:pl-3 sm:pr-6 shadow-md mb-12 max-w-full hover:shadow-lg transition-all duration-300">
-          <div className="bg-charcoal/[0.03] w-12 h-12 shrink-0 rounded-full flex items-center justify-center border border-charcoal/5">
+        <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-white border border-slate-200 rounded-2xl sm:rounded-full p-4 sm:py-2.5 sm:pl-3 sm:pr-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 max-w-full">
+          <div className="bg-slate-50 w-12 h-12 shrink-0 rounded-full flex items-center justify-center border border-slate-100">
             <GoogleIcon />
           </div>
           <div className="flex flex-col items-center sm:items-start">
@@ -104,9 +273,9 @@ export function TestimonialSection({ variant = "slider" }: { variant?: "slider" 
               ))}
             </div>
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2">
-              <span className="font-extrabold text-2xl text-charcoal leading-none">5</span>
-              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-2 gap-y-0.5 text-xs font-bold text-charcoal-soft/80">
-                <span className="whitespace-nowrap">Based On 127+ Google Reviews</span>
+              <span className="font-black text-2xl text-slate-900 leading-none">5</span>
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-2 gap-y-0.5 text-xs font-bold text-slate-500">
+                <span className="whitespace-nowrap">{t("Based On 127+ Google Reviews", "Basado en más de 127 opiniones de Google")}</span>
                 <span className="px-0.5 hidden sm:inline opacity-30">|</span>
                 <a
                   href={googleReviewsUrl}
@@ -114,7 +283,7 @@ export function TestimonialSection({ variant = "slider" }: { variant?: "slider" 
                   rel="noopener noreferrer"
                   className="text-copper hover:text-copper-deep underline underline-offset-2 transition-colors whitespace-nowrap"
                 >
-                  Read All Reviews
+                  {t("Read All Reviews", "Leer Todas las Opiniones")}
                 </a>
               </div>
             </div>
@@ -122,109 +291,57 @@ export function TestimonialSection({ variant = "slider" }: { variant?: "slider" 
         </div>
       </div>
 
-      {/* Slider or Grid */}
-      <div
-        className={`max-w-[1400px] mx-auto relative px-2 -mt-[30px] ${
-          variant === "slider" ? "overflow-hidden marquee-mask" : ""
-        }`}
-      >
-        {variant === "slider" ? (
-          <div className="flex w-max gap-6 animate-marquee hover-pause cursor-pointer py-8 !mt-0">
-            {/* We duplicate the list of testimonials 2 times for a seamless loop */}
-            {[...Array(2)].map((_, arrayIndex) => (
-              <div key={arrayIndex} className="flex gap-6 shrink-0">
-                {testimonials.map((t, i) => (
-                  <div
-                    className="w-[300px] sm:w-[350px] md:w-[400px] shrink-0"
-                    key={`${arrayIndex}-${i}`}
-                  >
-                    <div className="relative bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 h-full flex flex-col justify-between border border-charcoal/5">
-                      {/* Quotation Icon overlay */}
-                      <Quote className="absolute top-6 right-6 w-8 h-8 text-copper/10 pointer-events-none" />
-
-                      <div className="relative z-10">
-                        <div className="flex mb-4">
-                          {[...Array(5)].map((_, idx) => (
-                            <Star key={idx} className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
-                          ))}
-                        </div>
-                        <p className="text-charcoal-soft/95 text-[15px] leading-relaxed mb-8 font-sans font-medium">
-                          "{t.text}"
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-lg ${t.color}`}
-                        >
-                          {t.initial}
-                        </div>
-                        <div className="flex flex-col text-left">
-                          <span className="font-bold text-charcoal">{t.name}</span>
-                          <span className="text-xs font-semibold text-charcoal-soft/75">
-                            {t.location}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
-            {testimonials.map((t, i) => (
-              <div
-                key={i}
-                className="relative bg-white p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 h-full flex flex-col justify-between border border-charcoal/5"
-              >
-                {/* Quotation Icon overlay */}
-                <Quote className="absolute top-6 right-6 w-8 h-8 text-copper/10 pointer-events-none" />
-
-                <div className="relative z-10">
-                  <div className="flex mb-4">
-                    {[...Array(5)].map((_, idx) => (
-                      <Star key={idx} className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
-                    ))}
-                  </div>
-                  <p className="text-charcoal-soft/95 text-[15px] leading-relaxed mb-8 font-sans font-medium">
-                    "{t.text}"
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-lg ${t.color}`}
-                  >
-                    {t.initial}
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <span className="font-bold text-charcoal">{t.name}</span>
-                    <span className="text-xs font-semibold text-charcoal-soft/75">
-                      {t.location}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Grid or Marquee View */}
+      {isGrid ? (
+        <div className="mx-auto w-[90%] max-w-7xl relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+          {allReviews.map((review, idx) => (
+            <TestimonialCard key={idx} review={review} isGrid={true} />
+          ))}
+        </div>
+      ) : (
+        <div className="relative z-10 flex flex-col gap-5">
+          <MarqueeRow items={row1} direction="left" />
+          <MarqueeRow items={row2} direction="right" />
+        </div>
+      )}
 
       {/* Bottom Button */}
-      {variant === "slider" && (
-        <div className="mt-4 text-center">
+      {!isGrid && (
+        <div className="mt-12 text-center relative z-10">
           <a
             href={googleReviewsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-[#1e110a] to-[#954d26] text-white font-bold text-sm hover:opacity-95 transition-all shadow-md hover:shadow-lg hover:scale-102 transform duration-300"
+            className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-[#1e110a] to-[#954d26] text-white font-bold text-sm hover:opacity-95 transition-all shadow-md hover:shadow-lg hover:scale-[1.02] transform duration-300"
           >
-            Read All Customer Reviews
+            {t("Read All Customer Reviews", "Leer Todas las Opiniones")}
           </a>
         </div>
       )}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes marquee-left {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-33.3333%); }
+        }
+        @keyframes marquee-right {
+          0%   { transform: translateX(-33.3333%); }
+          100% { transform: translateX(0); }
+        }
+        .marquee-track-left {
+          animation: marquee-left 30s linear infinite;
+          width: max-content;
+        }
+        .marquee-track-right {
+          animation: marquee-right 30s linear infinite;
+          width: max-content;
+        }
+      `}</style>
     </section>
   );
+}
+
+export function TestimonialSection({ variant = "slider" }: { variant?: "slider" | "grid" }) {
+  return <Testimonials isGrid={variant === "grid"} />;
 }

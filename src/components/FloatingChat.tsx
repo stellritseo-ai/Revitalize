@@ -13,17 +13,100 @@ interface Message {
 export function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1); // Start with 1 to prompt interaction
+  const [sessionCreated, setSessionCreated] = useState(false);
+  const [initTimestamp] = useState(() => new Date());
+  
+  // Registration Form States
+  const [regName, setRegName] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regService, setRegService] = useState("Free Estimate");
+  const [regError, setRegError] = useState("");
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "init",
       sender: "assistant",
       text: "Hi there! 👋 Welcome to Revitalize Group. How can we help you today with your real estate or home improvement needs?",
-      timestamp: new Date(),
+      timestamp: initTimestamp,
     },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load existing chat session on mount
+  useEffect(() => {
+    const storedId = localStorage.getItem("revitalize-chat-session-id");
+    if (storedId) {
+      fetch("/api/chats?t=" + Date.now())
+        .then((r) => (r.ok ? r.json() : []))
+        .then((sessions) => {
+          if (Array.isArray(sessions)) {
+            const match = sessions.find((s: any) => s.id === storedId);
+            if (match) {
+              const mapped = match.messages.map((m: any) => ({
+                id: m.id,
+                sender: m.sender === "admin" ? "assistant" : m.sender === "assistant" ? "assistant" : "user",
+                text: m.text,
+                timestamp: new Date(m.timestamp),
+              }));
+              if (mapped.length > 0) {
+                setMessages([
+                  {
+                    id: "init",
+                    sender: "assistant",
+                    text: `Hello ${match.clientName}! 👋 Welcome to Revitalize Group. How can we help you today with your real estate or home improvement needs?`,
+                    timestamp: initTimestamp,
+                  },
+                  ...mapped,
+                ]);
+              }
+              setSessionCreated(true);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [initTimestamp]);
+
+  // Poll for admin replies when chat is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const storedId = localStorage.getItem("revitalize-chat-session-id");
+    if (!storedId) return;
+
+    const interval = setInterval(() => {
+      fetch("/api/chats?t=" + Date.now())
+        .then((r) => (r.ok ? r.json() : []))
+        .then((sessions) => {
+          if (Array.isArray(sessions)) {
+            const match = sessions.find((s: any) => s.id === storedId);
+            if (match) {
+              const mapped = match.messages.map((m: any) => ({
+                id: m.id,
+                sender: m.sender === "admin" ? "assistant" : m.sender === "assistant" ? "assistant" : "user",
+                text: m.text,
+                timestamp: new Date(m.timestamp),
+              }));
+              if (mapped.length > 0) {
+                setMessages([
+                  {
+                    id: "init",
+                    sender: "assistant",
+                    text: `Hello ${match.clientName}! 👋 Welcome to Revitalize Group. How can we help you today with your real estate or home improvement needs?`,
+                    timestamp: initTimestamp,
+                  },
+                  ...mapped,
+                ]);
+              }
+            }
+          }
+        })
+        .catch(() => {});
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, sessionCreated, initTimestamp]);
 
   useEffect(() => {
     if (isOpen) {
@@ -36,7 +119,73 @@ export function FloatingChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSend = (textToSend: string) => {
+  const handleStartChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regName.trim()) {
+      setRegError("Please enter your name.");
+      return;
+    }
+    if (!regPhone.trim()) {
+      setRegError("Please enter your phone number.");
+      return;
+    }
+    setRegError("");
+    setIsTyping(true);
+
+    try {
+      const createRes = await fetch("/api/chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          clientName: regName,
+          clientCity: regService,
+          clientPhone: regPhone,
+        }),
+      });
+
+      if (createRes.ok) {
+        const sessionData = await createRes.json();
+        const activeSessionId = sessionData.id;
+        localStorage.setItem("revitalize-chat-session-id", activeSessionId || "");
+        
+        // Push initial greetings from assistant mentioning service choice
+        const greetingText = `Hello ${regName}! 👋 Thank you for choosing Revitalize Group. We noticed you are interested in our "${regService}" services. An agent has been alerted and will respond shortly. Please feel free to describe your project or ask any questions here!`;
+        
+        // Save the welcome message to the database
+        await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "message",
+            sessionId: activeSessionId,
+            sender: "assistant",
+            text: greetingText,
+          }),
+        });
+
+        // Set state
+        setMessages([
+          {
+            id: "init",
+            sender: "assistant",
+            text: greetingText,
+            timestamp: new Date(),
+          }
+        ]);
+        setSessionCreated(true);
+      } else {
+        setRegError("Failed to connect chat. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setRegError("Server error. Please try again later.");
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
     const userMessage: Message = {
@@ -50,35 +199,73 @@ export function FloatingChat() {
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate response
-    setTimeout(() => {
-      let replyText = "";
-      const lower = textToSend.toLowerCase();
+    try {
+      const activeSessionId = localStorage.getItem("revitalize-chat-session-id");
 
-      if (lower.includes("estimate") || lower.includes("remodel") || lower.includes("renovat") || lower.includes("renov")) {
-        replyText = "We would love to help you with your home renovations! Revitalize Group provides expert kitchen and bath remodeling, flooring, custom cabinetry, and full-scale updates. You can schedule a consultation by clicking our buttons, or call us directly at (813) 323-0291.";
-      } else if (lower.includes("buy") || lower.includes("sell") || lower.includes("agent") || lower.includes("broker") || lower.includes("real estate") || lower.includes("property")) {
-        replyText = "At Revitalize Group, we help clients make smarter decisions by combining licensed real estate services with professional home improvements. Whether you are buying your first home or preparing to sell for maximum equity, we've got you covered. What properties or areas are you interested in?";
-      } else if (lower.includes("call") || lower.includes("phone") || lower.includes("callback") || lower.includes("contact")) {
-        replyText = "We'd be glad to give you a call back! Please type your phone number and the best time to reach you below, and our team will get in touch shortly. You can also call us directly at (813) 323-0291.";
-      } else {
-        replyText = "Thank you for reaching out! Revitalize Group is your one team for every step of your home journey (real estate, renovations, and property solutions). Let us know your contact info or call us directly at (813) 323-0291 to discuss your goals.";
+      // Send the client's message to the backend
+      if (activeSessionId) {
+        await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "message",
+            sessionId: activeSessionId,
+            sender: "client",
+            text: textToSend,
+          }),
+        });
       }
 
-      const assistantMessage: Message = {
-        id: Math.random().toString(),
-        sender: "assistant",
-        text: replyText,
-        timestamp: new Date(),
-      };
+      // Simulate assistant response if keywords hit
+      setTimeout(async () => {
+        let replyText = "";
+        let isFallback = false;
+        const lower = textToSend.toLowerCase();
 
-      setMessages((prev) => [...prev, assistantMessage]);
+        if (lower.includes("estimate") || lower.includes("remodel") || lower.includes("renovat") || lower.includes("renov")) {
+          replyText = "We would love to help you with your home renovations! Revitalize Group provides expert kitchen and bath remodeling, flooring, custom cabinetry, and full-scale updates. You can schedule a consultation by clicking our buttons, or call us directly at (813) 323-0291.";
+        } else if (lower.includes("buy") || lower.includes("sell") || lower.includes("agent") || lower.includes("broker") || lower.includes("real estate") || lower.includes("property")) {
+          replyText = "At Revitalize Group, we help clients make smarter decisions by combining licensed real estate services with professional home improvements. Whether you are buying your first home or preparing to sell for maximum equity, we've got you covered. What properties or areas are you interested in?";
+        } else if (lower.includes("call") || lower.includes("phone") || lower.includes("callback") || lower.includes("contact")) {
+          replyText = "We'd be glad to give you a call back! Please type your phone number and the best time to reach you below, and our team will get in touch shortly. You can also call us directly at (813) 323-0291.";
+        } else {
+          isFallback = true;
+        }
+
+        if (isFallback) {
+          setIsTyping(false);
+          return;
+        }
+
+        const assistantMessage: Message = {
+          id: Math.random().toString(),
+          sender: "assistant",
+          text: replyText,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+        setIsTyping(false);
+
+        // Send simulated assistant response to the database
+        if (activeSessionId) {
+          await fetch("/api/chats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "message",
+              sessionId: activeSessionId,
+              sender: "assistant",
+              text: replyText,
+            }),
+          });
+        }
+      }, 1200);
+
+    } catch (e) {
+      console.error("Failed to sync chat message:", e);
       setIsTyping(false);
-    }, 1200);
-  };
-
-  const selectQuickOption = (option: string, displayMessage: string) => {
-    handleSend(displayMessage);
+    }
   };
 
   return (
@@ -108,103 +295,133 @@ export function FloatingChat() {
             </button>
           </div>
 
-          {/* Message Area */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50/50 min-h-[220px] max-h-[340px]">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-2 max-w-[85%] ${
-                  msg.sender === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
-                }`}
+          {/* Form / Onboarding Screen */}
+          {!sessionCreated ? (
+            <form onSubmit={handleStartChat} className="flex-1 p-6 overflow-y-auto space-y-3.5 bg-gray-50/50 flex flex-col justify-center min-h-[320px]">
+              <div className="text-center mb-1">
+                <h3 className="font-extrabold text-sm text-charcoal tracking-wide uppercase">Start Live Chat</h3>
+                <p className="text-[10.5px] text-charcoal-soft/75 mt-0.5 font-medium">Introduce yourself to start chatting with an agent</p>
+              </div>
+
+              {regError && (
+                <div className="bg-rose-50 border border-rose-100 text-rose-600 text-[10.5px] p-2.5 rounded-xl font-bold text-center animate-shake">
+                  {regError}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="text-[9.5px] text-charcoal-soft/50 font-black uppercase tracking-wider block text-left">Your Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  className="w-full bg-white border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:border-copper focus:ring-1 focus:ring-copper text-xs font-semibold text-charcoal"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9.5px] text-charcoal-soft/50 font-black uppercase tracking-wider block text-left">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="e.g. (813) 555-0199"
+                  value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)}
+                  className="w-full bg-white border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:border-copper focus:ring-1 focus:ring-copper text-xs font-semibold text-charcoal"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9.5px] text-charcoal-soft/50 font-black uppercase tracking-wider block text-left">Service Needed</label>
+                <select
+                  value={regService}
+                  onChange={(e) => setRegService(e.target.value)}
+                  className="w-full bg-white border border-charcoal/10 rounded-xl py-2.5 px-3 focus:outline-none focus:border-copper focus:ring-1 focus:ring-copper text-xs font-bold text-charcoal appearance-none cursor-pointer"
+                >
+                  <option value="Free Estimate">Free Estimate</option>
+                  <option value="Real Estate">Real Estate</option>
+                  <option value="Buy & Sell Home">Buy & Sell Home</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isTyping}
+                className="w-full bg-copper hover:bg-copper-deep text-white font-extrabold text-xs py-3 rounded-xl shadow-lg shadow-copper/20 hover:scale-[1.01] active:scale-[0.99] transition mt-2 flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                {msg.sender === "assistant" && (
-                  <div className="w-7 h-7 rounded-full bg-copper/10 flex items-center justify-center text-copper text-xs shrink-0 font-bold border border-copper/10">
-                    R
+                {isTyping ? "Connecting..." : "Start Chatting"}
+              </button>
+            </form>
+          ) : (
+            <>
+              {/* Message Area */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50/50 min-h-[220px] max-h-[340px]">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex gap-2 max-w-[85%] ${
+                      msg.sender === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
+                    }`}
+                  >
+                    {msg.sender === "assistant" && (
+                      <div className="w-7 h-7 rounded-full bg-copper/10 flex items-center justify-center text-copper text-xs shrink-0 font-bold border border-copper/10">
+                        R
+                      </div>
+                    )}
+                    <div
+                      className={`p-3 rounded-2xl text-sm leading-relaxed ${
+                        msg.sender === "user"
+                          ? "bg-copper text-white rounded-tr-none shadow-md shadow-copper/10"
+                          : "bg-white text-charcoal border border-charcoal/5 rounded-tl-none shadow-sm"
+                      }`}
+                    >
+                      <p>{msg.text}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex gap-2 max-w-[85%] mr-auto items-center">
+                    <div className="w-7 h-7 rounded-full bg-copper/10 flex items-center justify-center text-copper text-xs shrink-0 font-bold border border-copper/10">
+                      R
+                    </div>
+                    <div className="bg-white border border-charcoal/5 p-3 rounded-2xl rounded-tl-none flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce" />
+                      <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    </div>
                   </div>
                 )}
-                <div
-                  className={`p-3 rounded-2xl text-sm leading-relaxed ${
-                    msg.sender === "user"
-                      ? "bg-copper text-white rounded-tr-none shadow-md shadow-copper/10"
-                      : "bg-white text-charcoal border border-charcoal/5 rounded-tl-none shadow-sm"
-                  }`}
-                >
-                  <p>{msg.text}</p>
-                </div>
+                <div ref={messagesEndRef} />
               </div>
-            ))}
 
-            {isTyping && (
-              <div className="flex gap-2 max-w-[85%] mr-auto items-center">
-                <div className="w-7 h-7 rounded-full bg-copper/10 flex items-center justify-center text-copper text-xs shrink-0 font-bold border border-copper/10">
-                  R
-                </div>
-                <div className="bg-white border border-charcoal/5 p-3 rounded-2xl rounded-tl-none flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce" />
-                  <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 bg-charcoal/40 rounded-full animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </div>
-            )}
-
-            {/* Quick Suggestions - Only show when there are no user messages yet */}
-            {messages.length === 1 && !isTyping && (
-              <div className="pt-2 pl-9 space-y-2">
+              {/* Form */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend(inputValue);
+                }}
+                className="p-3 border-t border-charcoal/10 bg-white flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  placeholder="Ask a question..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="flex-1 bg-gray-50 border border-charcoal/10 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-sm font-medium"
+                />
                 <button
-                  onClick={() => selectQuickOption("estimate", "I'd like to get a free estimate / consultation")}
-                  className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-charcoal/10 bg-white hover:border-copper/40 hover:bg-copper/5 transition text-xs font-semibold text-charcoal-soft hover:text-copper shadow-sm"
+                  type="submit"
+                  disabled={!inputValue.trim()}
+                  className="bg-copper hover:bg-copper-deep text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-copper/20 hover:scale-105 active:scale-95 transition disabled:opacity-50 disabled:scale-100 disabled:shadow-none cursor-pointer"
                 >
-                  <span className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5" /> Get a Free Estimate
-                  </span>
-                  <ArrowRight className="w-3 h-3 opacity-60" />
+                  <Send className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => selectQuickOption("realty", "I have a question about buying or selling a home")}
-                  className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-charcoal/10 bg-white hover:border-copper/40 hover:bg-copper/5 transition text-xs font-semibold text-charcoal-soft hover:text-copper shadow-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5" /> Buy or Sell a Home
-                  </span>
-                  <ArrowRight className="w-3 h-3 opacity-60" />
-                </button>
-                <button
-                  onClick={() => selectQuickOption("callback", "I'd like to request a callback")}
-                  className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-charcoal/10 bg-white hover:border-copper/40 hover:bg-copper/5 transition text-xs font-semibold text-charcoal-soft hover:text-copper shadow-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5" /> Request a Callback
-                  </span>
-                  <ArrowRight className="w-3 h-3 opacity-60" />
-                </button>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Form */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend(inputValue);
-            }}
-            className="p-3 border-t border-charcoal/10 bg-white flex items-center gap-2"
-          >
-            <input
-              type="text"
-              placeholder="Ask a question..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="flex-1 bg-gray-50 border border-charcoal/10 focus:border-copper focus:ring-0 focus:outline-none rounded-xl px-4 py-2.5 text-sm font-medium"
-            />
-            <button
-              type="submit"
-              disabled={!inputValue.trim()}
-              className="bg-copper hover:bg-copper-deep text-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-copper/20 hover:scale-105 active:scale-95 transition disabled:opacity-50 disabled:scale-100 disabled:shadow-none"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+              </form>
+            </>
+          )}
         </div>
       )}
 
@@ -221,7 +438,7 @@ export function FloatingChat() {
 
         {/* Unread notification badge */}
         {unreadCount > 0 && !isOpen && (
-          <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+          <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-bounce animate-duration-500">
             {unreadCount}
           </span>
         )}

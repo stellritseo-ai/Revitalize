@@ -144,9 +144,18 @@ const servingCities = [
 
 function Reviews() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [reviewsList, setReviewsList] = useState<any[]>(reviewsData);
 
   useEffect(() => {
     setIsLoaded(true);
+    fetch("/api/reviews?t=" + Date.now())
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setReviewsList(data);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const jsonLdSchema = {
@@ -168,7 +177,7 @@ function Reviews() {
       "ratingValue": "5.0",
       "reviewCount": "127"
     },
-    "review": reviewsData.map((r) => ({
+    "review": reviewsList.map((r) => ({
       "@type": "Review",
       "author": {
         "@type": "Person",
@@ -177,7 +186,7 @@ function Reviews() {
       "reviewBody": r.text,
       "reviewRating": {
         "@type": "Rating",
-        "ratingValue": r.rating.toString()
+        "ratingValue": (r.rating || 5).toString()
       }
     }))
   };
@@ -242,7 +251,7 @@ function Reviews() {
           {/* Main Feed: 13 Reviews */}
           <div className="w-full lg:w-[68%] order-2 lg:order-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reviewsData.map((item, idx) => (
+              {reviewsList.map((item, idx) => (
                 <div
                   key={idx}
                   className="group bg-white border border-[#efe5da] p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:border-copper/25 flex flex-col justify-between"

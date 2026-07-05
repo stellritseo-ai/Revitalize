@@ -33,6 +33,8 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import * as Accordion from "@radix-ui/react-accordion";
+import { addLead, addWebEmail } from "@/lib/leads-store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/services/finishing-systems")({
   head: () => ({
@@ -52,9 +54,108 @@ export const Route = createFileRoute("/services/finishing-systems")({
 function FinishingSystemsPage() {
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Form States
+  const [name, setName] = useState("");
+  const [contact, setContact] = useState("");
+  const [service, setService] = useState("Drywall");
+  const [address, setAddress] = useState("");
+  const [meeting, setMeeting] = useState("Video Call");
+  const [interestFinancing, setInterestFinancing] = useState(false);
+  const [interestMaterials, setInterestMaterials] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Captcha
+  const [captchaNum1, setCaptchaNum1] = useState(0);
+  const [captchaNum2, setCaptchaNum2] = useState(0);
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+
+  const generateCaptcha = () => {
+    setCaptchaNum1(Math.floor(Math.random() * 9) + 1);
+    setCaptchaNum2(Math.floor(Math.random() * 9) + 1);
+    setCaptchaAnswer("");
+  };
+
   useEffect(() => {
+    generateCaptcha();
     setIsLoaded(true);
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !contact) {
+      toast.error("Please enter your Name and Email / Phone.");
+      return;
+    }
+    if (parseInt(captchaAnswer) !== captchaNum1 + captchaNum2) {
+      toast.error("Incorrect captcha. Please solve the math problem correctly.");
+      return;
+    }
+    setIsSubmitting(true);
+
+    try {
+      const isEmail = contact.includes("@");
+      const email = isEmail ? contact : "no-email@revitalize.com";
+      const phone = isEmail ? "Not provided" : contact;
+
+      // 1. Submit to database as a Lead
+      await addLead({
+        name,
+        email,
+        phone,
+        address: address || "Not provided",
+        projectType: "remodeling",
+        description: `Finishing System Request: Service Needed: ${service}, Preferred Meeting: ${meeting}, Financing Interest: ${interestFinancing ? "Yes" : "No"}, Material Info Interest: ${interestMaterials ? "Yes" : "No"}`,
+        contactTime: "anytime"
+      });
+
+      // 2. Submit to database as a Web Email Inquiry
+      await addWebEmail({
+        name,
+        email,
+        phone,
+        service: `Finishing - ${service}`,
+        message: `Preferred Meeting: ${meeting}. Financing Interest: ${interestFinancing ? "Yes" : "No"}, Material Info: ${interestMaterials ? "Yes" : "No"}. Address: ${address}`,
+        source: "Finishing Systems Page Form"
+      });
+
+      // Email fallback
+      try {
+        await fetch(`https://formsubmit.co/ajax/revitalizerealestate@gmail.com`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            _subject: `New Finishing Systems Request: ${name} - ${service}`,
+            _captcha: "false",
+            name,
+            contact,
+            service,
+            address,
+            meeting,
+            financing: interestFinancing ? "Yes" : "No",
+            materials: interestMaterials ? "Yes" : "No"
+          }),
+        });
+      } catch (emailErr) {
+        console.warn("Email alert transmission failed, but DB record was saved:", emailErr);
+      }
+
+      setShowPopup(true);
+      setName("");
+      setContact("");
+      setAddress("");
+      setCaptchaAnswer("");
+      generateCaptcha();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit inquiry.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="bg-[#F8FAFC] overflow-x-hidden">
@@ -654,7 +755,7 @@ function FinishingSystemsPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <Mail className="w-5 h-5 text-brand-orange" />
-                    <span className="font-bold">info@revitalizerealestate.com</span>
+                    <span className="font-bold">revitalizerealestate@gmail.com</span>
                   </div>
                 </div>
               </div>
@@ -665,76 +766,88 @@ function FinishingSystemsPage() {
           </div>
 
           <div className="lg:w-1/2">
-            <form className="bg-gray-50 p-8 md:p-12 rounded-[3rem] border border-gray-100 shadow-inner grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="bg-gray-50 p-8 md:p-12 rounded-[3rem] border border-gray-100 shadow-inner grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 text-left">
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">
-                  Full Name
+                  Full Name <span className="text-[#975033]">*</span>
                 </label>
                 <input
                   type="text"
+                  required
                   placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">
-                  Email / Phone
+                  Email / Phone <span className="text-[#975033]">*</span>
                 </label>
                 <input
                   type="text"
+                  required
                   placeholder="john@example.com"
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
                   className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none"
                 />
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2 md:col-span-2 text-left">
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">
                   Service Needed
                 </label>
-                <select className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none appearance-none cursor-pointer">
-                  <option>Select Service...</option>
-                  <option>Drywall</option>
-                  <option>Electrical Coordination</option>
-                  <option>Plumbing Coordination</option>
-                  <option>Painting</option>
-                  <option>Flooring</option>
-                  <option>Exterior Improvements</option>
-                  <option>Multiple Services</option>
+                <select
+                  value={service}
+                  onChange={(e) => setService(e.target.value)}
+                  className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none appearance-none cursor-pointer"
+                >
+                  <option value="Drywall">Drywall</option>
+                  <option value="Electrical Coordination">Electrical Coordination</option>
+                  <option value="Plumbing Coordination">Plumbing Coordination</option>
+                  <option value="Painting">Painting</option>
+                  <option value="Flooring">Flooring</option>
+                  <option value="Exterior Improvements">Exterior Improvements</option>
+                  <option value="Multiple Services">Multiple Services</option>
                 </select>
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2 md:col-span-2 text-left">
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">
                   Project Address (City)
                 </label>
                 <input
                   type="text"
                   placeholder="e.g. Tampa, FL"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none"
                 />
               </div>
 
-              <div className="md:col-span-2 p-8 border-2 border-dashed border-gray-200 rounded-[2rem] bg-white flex flex-col items-center justify-center gap-4 group hover:border-brand-orange transition-colors cursor-pointer">
-                <Upload className="w-8 h-8 text-gray-300 group-hover:text-brand-orange transition-colors" />
-                <div className="text-center">
-                  <p className="font-black text-gray-500">Upload Photos/Plans</p>
-                  <p className="text-xs text-gray-400 font-medium">PDF, JPG, PNG (Max 50MB)</p>
-                </div>
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
+              <div className="md:col-span-2 space-y-2 text-left">
                 <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4">
                   Preferred Meeting
                 </label>
-                <select className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none appearance-none cursor-pointer">
-                  <option>Video Call</option>
-                  <option>In-Person Consult</option>
-                  <option>Phone Call</option>
+                <select
+                  value={meeting}
+                  onChange={(e) => setMeeting(e.target.value)}
+                  className="w-full bg-white border-transparent focus:border-brand-orange focus:ring-4 focus:ring-brand-orange/10 rounded-2xl px-6 py-4 font-bold text-charcoal transition-all outline-none appearance-none cursor-pointer"
+                >
+                  <option value="Video Call">Video Call</option>
+                  <option value="In-Person Consult">In-Person Consult</option>
+                  <option value="Phone Call">Phone Call</option>
                 </select>
               </div>
 
-              <div className="md:col-span-2 space-y-4 pt-4">
+              <div className="md:col-span-2 space-y-4 pt-4 text-left">
                 <label className="flex items-center gap-4 cursor-pointer group">
                   <div className="relative">
-                    <input type="checkbox" className="sr-only peer" />
+                    <input
+                      type="checkbox"
+                      checked={interestFinancing}
+                      onChange={(e) => setInterestFinancing(e.target.checked)}
+                      className="sr-only peer"
+                    />
                     <div className="w-6 h-6 bg-white border-2 border-gray-200 rounded-lg peer-checked:bg-brand-orange peer-checked:border-brand-orange transition-all" />
                     <CheckCircle2 className="w-4 h-4 text-white absolute inset-1 opacity-0 peer-checked:opacity-100 transition-opacity" />
                   </div>
@@ -744,7 +857,12 @@ function FinishingSystemsPage() {
                 </label>
                 <label className="flex items-center gap-4 cursor-pointer group">
                   <div className="relative">
-                    <input type="checkbox" className="sr-only peer" />
+                    <input
+                      type="checkbox"
+                      checked={interestMaterials}
+                      onChange={(e) => setInterestMaterials(e.target.checked)}
+                      className="sr-only peer"
+                    />
                     <div className="w-6 h-6 bg-white border-2 border-gray-200 rounded-lg peer-checked:bg-brand-orange peer-checked:border-brand-orange transition-all" />
                     <CheckCircle2 className="w-4 h-4 text-white absolute inset-1 opacity-0 peer-checked:opacity-100 transition-opacity" />
                   </div>
@@ -754,13 +872,60 @@ function FinishingSystemsPage() {
                 </label>
               </div>
 
-              <button className="md:col-span-2 bg-charcoal hover:bg-charcoal/95 text-white px-10 py-6 rounded-2xl font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/20 transition-all hover:scale-[1.02] active:scale-95 mt-4">
-                Submit Finishing Request <ArrowRight className="w-6 h-6" />
+              {/* Captcha */}
+              <div className="md:col-span-2 space-y-2 text-left">
+                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-4 block">
+                  Security Check <span className="text-[#975033]">*</span>
+                </label>
+                <div className="flex items-center gap-4 bg-white border border-gray-200 rounded-2xl px-6 py-4">
+                  <span className="text-sm font-extrabold text-charcoal bg-gray-100 px-3 py-1.5 rounded-lg select-none shrink-0">
+                    {captchaNum1} + {captchaNum2} =
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    placeholder="Solve equation"
+                    value={captchaAnswer}
+                    onChange={(e) => setCaptchaAnswer(e.target.value)}
+                    className="w-full bg-transparent text-charcoal placeholder-charcoal/30 text-sm font-semibold focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="md:col-span-2 bg-charcoal hover:bg-charcoal/95 text-white px-10 py-6 rounded-2xl font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/20 transition-all hover:scale-[1.02] active:scale-95 mt-4 disabled:opacity-50"
+              >
+                {isSubmitting ? "Submitting Request..." : "Submit Finishing Request"} <ArrowRight className="w-6 h-6" />
               </button>
             </form>
           </div>
         </div>
       </section>
+
+      {/* Success Modal Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-charcoal/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2rem] p-8 max-w-md w-full border border-charcoal/10 shadow-2xl relative text-center flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-charcoal font-serif mb-3">
+              Request Received!
+            </h3>
+            <p className="text-charcoal-soft/75 text-sm mb-6 leading-relaxed">
+              Thank you for requesting an estimate. We've saved your inquiry to our system. An expert from our team will reach out to you within 24 hours.
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="w-full bg-charcoal hover:bg-charcoal/95 text-white font-extrabold text-sm py-4 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+            >
+              Back to Services
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

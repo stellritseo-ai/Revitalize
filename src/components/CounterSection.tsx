@@ -165,7 +165,7 @@ export function CounterSection() {
         background: "linear-gradient(135deg, #0d0d1a 0%, #14102a 40%, #1c1209 100%)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.4)",
       }}
-      className="relative mx-[15px] mt-[15px] rounded-2xl overflow-hidden py-16 px-6 md:px-12"
+      className="relative mx-[15px] mt-[15px] rounded-[10px] overflow-hidden py-16 px-6 md:px-12"
     >
       {/* Background decorative radial glows */}
       <div className="pointer-events-none absolute inset-0">

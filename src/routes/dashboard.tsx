@@ -15,6 +15,7 @@ import {
   Plus,
   Phone,
   Mail,
+  Home,
   FileText,
   Settings,
   LogOut,
@@ -38,8 +39,8 @@ import {
   Upload,
   ChevronDown,
   Globe,
-  Home,
-  Layers
+  Layers,
+  Play
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -74,8 +75,10 @@ import {
   toggleReviewFeatured,
   replyToReview,
   addReview,
+  deleteReview,
   sendChatMessage,
   markChatAsRead,
+  deleteChatSession,
   deleteWebEmail,
   uploadGalleryPhoto,
   removeGalleryPhoto,
@@ -83,6 +86,8 @@ import {
   createPortalUser,
   deletePortalUser,
   verifyAdminToken,
+  getSiteSettings,
+  saveSiteSettings,
   Lead,
   Review,
   WebEmail,
@@ -150,6 +155,13 @@ function DashboardPage() {
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
   const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
 
+  // Gallery Upload Workflow States
+  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
+  const [uploadCategory, setUploadCategory] = useState<string>("residential");
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [galleryUploadProgress, setGalleryUploadProgress] = useState(0);
+  const [galleryFilter, setGalleryFilter] = useState("all");
+
   // Portal Security States
   const [portalUsers, setPortalUsers] = useState<PortalUser[]>([]);
   const [updateUsername, setUpdateUsername] = useState("");
@@ -183,19 +195,27 @@ function DashboardPage() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [reviewReplyText, setReviewReplyText] = useState("");
 
+  const [isAddingReview, setIsAddingReview] = useState(false);
+  const [newReviewAuthor, setNewReviewAuthor] = useState("");
+  const [newReviewLocation, setNewReviewLocation] = useState("");
+  const [newReviewTitle, setNewReviewTitle] = useState("");
+  const [newReviewText, setNewReviewText] = useState("");
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [newReviewPhoto, setNewReviewPhoto] = useState("");
+
   const [selectedEmail, setSelectedEmail] = useState<WebEmail | null>(null);
   const [isViewingEmail, setIsViewingEmail] = useState(false);
 
   // Portal & Site Config States from Mockup
-  const [alertEmail, setAlertEmail] = useState(() => localStorage.getItem("rev_settings_alertEmail") || "robertsa210@icloud.com");
-  const [officePhone, setOfficePhone] = useState(() => localStorage.getItem("rev_settings_officePhone") || "(210) 429-5526");
-  const [smsTemplate, setSmsTemplate] = useState(() => localStorage.getItem("rev_settings_smsTemplate") || "Hi {Name}, thank you for contacting Revitalize Group! Daniel Thompson will contact you during the {Time} to discuss your {Type} project.");
-  const [emailAlert, setEmailAlert] = useState(() => localStorage.getItem("rev_settings_emailAlert") !== "false");
-  const [smsAlert, setSmsAlert] = useState(() => localStorage.getItem("rev_settings_smsAlert") !== "false");
-  const [maintenanceMode, setMaintenanceMode] = useState(() => localStorage.getItem("rev_settings_maintenanceMode") === "true");
-  const [weekdays, setWeekdays] = useState(() => localStorage.getItem("rev_settings_weekdays") || "8:00 AM - 5:00 PM");
-  const [saturdays, setSaturdays] = useState(() => localStorage.getItem("rev_settings_saturdays") || "8:00 AM - 5:00 PM");
-  const [sundays, setSundays] = useState(() => localStorage.getItem("rev_settings_sundays") || "Closed (Emergency 24/7)");
+  const [alertEmail, setAlertEmail] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_alertEmail") : null) || "revitalizerealestate@gmail.com");
+  const [officePhone, setOfficePhone] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_officePhone") : null) || "(813) 323-0291");
+  const [smsTemplate, setSmsTemplate] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_smsTemplate") : null) || "Hi {Name}, thank you for contacting Revitalize Group! Daniel Thompson will contact you during the {Time} to discuss your {Type} project.");
+  const [emailAlert, setEmailAlert] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_emailAlert") !== "false" : true));
+  const [smsAlert, setSmsAlert] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_smsAlert") !== "false" : true));
+  const [maintenanceMode, setMaintenanceMode] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_maintenanceMode") === "true" : false));
+  const [weekdays, setWeekdays] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_weekdays") : null) || "8:00 AM - 5:00 PM");
+  const [saturdays, setSaturdays] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_saturdays") : null) || "8:00 AM - 5:00 PM");
+  const [sundays, setSundays] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("rev_settings_sundays") : null) || "Closed (Emergency 24/7)");
 
   const [confirmConfig, setConfirmConfig] = useState<{
     title: string;
@@ -255,11 +275,39 @@ function DashboardPage() {
       getWebEmails().then(setWebEmails);
       getChatSessions().then(setChatSessions);
       getGalleryPhotos().then(setGalleryPhotos);
+      getSiteSettings().then(settings => {
+        if (settings) {
+          setAlertEmail(settings.alertEmail || "");
+          setOfficePhone(settings.officePhone || "");
+          setSmsTemplate(settings.smsTemplate || "");
+          setEmailAlert(settings.emailAlert);
+          setSmsAlert(settings.smsAlert);
+          setMaintenanceMode(settings.maintenanceMode);
+          setWeekdays(settings.weekdays || "");
+          setSaturdays(settings.saturdays || "");
+          setSundays(settings.sundays || "");
+        }
+      });
       if (currentUser?.role === "admin") {
         getPortalUsers().then(setPortalUsers);
       }
     }
   }, [isAuthenticated, activeTab, currentUser]);
+
+  // Real-time chat polling for dashboard admin
+  useEffect(() => {
+    if (!isAuthenticated || activeTab !== "chat") return;
+
+    const interval = setInterval(() => {
+      getChatSessions().then((sessions) => {
+        if (Array.isArray(sessions)) {
+          setChatSessions(sessions);
+        }
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, activeTab]);
 
   const activeChatSession = useMemo(() => {
     return chatSessions.find((s) => s.id === activeSessionId) || null;
@@ -297,18 +345,24 @@ function DashboardPage() {
     }
   };
 
-  const handleSaveConfig = (e: React.FormEvent) => {
+  const handleSaveConfig = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("rev_settings_alertEmail", alertEmail);
-    localStorage.setItem("rev_settings_officePhone", officePhone);
-    localStorage.setItem("rev_settings_smsTemplate", smsTemplate);
-    localStorage.setItem("rev_settings_emailAlert", String(emailAlert));
-    localStorage.setItem("rev_settings_smsAlert", String(smsAlert));
-    localStorage.setItem("rev_settings_maintenanceMode", String(maintenanceMode));
-    localStorage.setItem("rev_settings_weekdays", weekdays);
-    localStorage.setItem("rev_settings_saturdays", saturdays);
-    localStorage.setItem("rev_settings_sundays", sundays);
-    toast.success("Configurations saved successfully!");
+    try {
+      await saveSiteSettings({
+        alertEmail,
+        officePhone,
+        smsTemplate,
+        emailAlert,
+        smsAlert,
+        maintenanceMode,
+        weekdays,
+        saturdays,
+        sundays
+      });
+      toast.success("Configurations saved successfully!");
+    } catch {
+      toast.error("Failed to save configurations.");
+    }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -476,6 +530,49 @@ function DashboardPage() {
     }
   };
 
+  const handleDeleteReview = (id: string, title: string) => {
+    triggerConfirm({
+      title: "Delete Review",
+      message: `Are you sure you want to delete the review "${title}"? This will also remove it from the public website.`,
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const updated = await deleteReview(id);
+          setReviews(updated);
+          toast.success("Review deleted.");
+        } catch {
+          toast.error("Failed to delete review.");
+        }
+      }
+    });
+  };
+
+  const handleAddReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewAuthor.trim() || !newReviewText.trim()) return;
+    try {
+      await addReview({
+        author: newReviewAuthor,
+        location: newReviewLocation,
+        title: newReviewTitle,
+        text: newReviewText,
+        rating: newReviewRating,
+        newReviewPhoto: newReviewPhoto || undefined,
+      });
+      toast.success("Review added successfully!");
+      setIsAddingReview(false);
+      setNewReviewAuthor("");
+      setNewReviewLocation("");
+      setNewReviewTitle("");
+      setNewReviewText("");
+      setNewReviewRating(5);
+      setNewReviewPhoto("");
+      getReviews().then(setReviews);
+    } catch {
+      toast.error("Failed to add review.");
+    }
+  };
+
   const handleSaveReviewReply = async () => {
     if (!selectedReview) return;
     try {
@@ -528,22 +625,75 @@ function DashboardPage() {
     }
   };
 
-  // Gallery Handlers
-  const handleUploadGallery = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64 = reader.result as string;
-      try {
-        const updated = await uploadGalleryPhoto(base64);
-        setGalleryPhotos(updated);
-        toast.success("Gallery photo uploaded.");
-      } catch {
-        toast.error("Failed to upload photo.");
+  const handleDeleteChat = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerConfirm({
+      title: "Delete Chat Session?",
+      message: "Are you sure you want to delete this chat session? This action is permanent and cannot be undone.",
+      confirmText: "Delete",
+      onConfirm: async () => {
+        try {
+          const updated = await deleteChatSession(id);
+          setChatSessions(updated);
+          if (activeSessionId === id) {
+            setActiveSessionId(null);
+          }
+          toast.success("Chat deleted successfully!");
+        } catch {
+          toast.error("Failed to delete chat.");
+        }
       }
-    };
-    reader.readAsDataURL(file);
+    });
+  };
+
+  // Gallery Handlers
+  const handleUploadGallery = async () => {
+    if (selectedGalleryFiles.length === 0) {
+      toast.error("Please select one or more files first.");
+      return;
+    }
+
+    setIsUploadingGallery(true);
+    setGalleryUploadProgress(0);
+
+    const filesCount = selectedGalleryFiles.length;
+    let currentPhotosList = [...galleryPhotos];
+
+    try {
+      for (let i = 0; i < filesCount; i++) {
+        const file = selectedGalleryFiles[i];
+
+        // Read file as Base64 helper promise
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("File reading failed"));
+          reader.readAsDataURL(file);
+        });
+
+        // Track internal segment progress for this file
+        const segmentStart = (i / filesCount) * 100;
+        const segmentEnd = ((i + 1) / filesCount) * 100;
+        setGalleryUploadProgress(Math.floor(segmentStart));
+
+        // Call API
+        const updated = await uploadGalleryPhoto(base64, uploadCategory);
+        currentPhotosList = updated;
+
+        // Instantly complete this segment
+        setGalleryUploadProgress(Math.floor(segmentEnd));
+      }
+
+      setGalleryPhotos(currentPhotosList);
+      setIsUploadingGallery(false);
+      setGalleryUploadProgress(0);
+      setSelectedGalleryFiles([]);
+      toast.success(`Successfully uploaded ${filesCount} photos.`);
+    } catch (err) {
+      setIsUploadingGallery(false);
+      setGalleryUploadProgress(0);
+      toast.error("Failed to upload all photos. Please try again.");
+    }
   };
 
   const handleDeleteGallery = (id: string) => {
@@ -590,11 +740,11 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex font-inter text-[#1a1f36] antialiased selection:bg-copper selection:text-white">
-      
+
       {/* Left Sidebar Navigation (Matching exact Connexio structure but for Revitalize Group) */}
       <aside className="w-64 sm:w-72 bg-white border-r border-[#e3e6f0] flex flex-col justify-between p-5 sticky top-0 h-screen z-40">
         <div className="space-y-6 overflow-y-auto pr-1 scrollbar-none">
-          
+
           {/* Header branding */}
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
@@ -626,11 +776,10 @@ function DashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250 flex items-center justify-between relative group ${
-                    isActive 
-                      ? "bg-[#faf7f5] text-[#1a1f36]" 
-                      : "text-slate-500 hover:bg-[#faf7f5]/45 hover:text-slate-800"
-                  }`}
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-250 flex items-center justify-between relative group ${isActive
+                    ? "bg-[#faf7f5] text-[#1a1f36]"
+                    : "text-slate-500 hover:bg-[#faf7f5]/45 hover:text-slate-800"
+                    }`}
                 >
                   <span className="flex items-center gap-3 relative z-10">
                     <Icon className={`w-4 h-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-copper" : "text-slate-400 group-hover:text-copper"}`} />
@@ -689,7 +838,7 @@ function DashboardPage() {
 
       {/* Main Workspace Column */}
       <div className="flex-1 min-h-screen overflow-y-auto flex flex-col">
-        
+
         {/* Top Header Bar */}
         <header className="bg-white border-b border-[#e3e6f0] px-6 py-4 flex items-center justify-between sticky top-0 z-30">
           <div>
@@ -720,7 +869,7 @@ function DashboardPage() {
                 className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper w-48 transition"
               />
             </div>
-            
+
             <button className="p-2 text-slate-400 hover:text-slate-600 relative">
               <MessageSquare className="w-4 h-4" />
               {chatSessions.some(s => s.unread) && (
@@ -736,14 +885,14 @@ function DashboardPage() {
 
         {/* Content Workspace Area */}
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
-          
+
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              
+
               {/* Overview Cards Row (Exactly 5 cards: Leads, Projects, Contracts, Reviews, Visitors) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                
+
                 {/* Card 1: Total Leads */}
                 <div className="bg-gradient-to-br from-white to-slate-50/50 p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all duration-200">
                   <div className="flex items-center justify-between">
@@ -859,7 +1008,7 @@ function DashboardPage() {
 
               {/* Charts grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 {/* Chart 1: Devices Usage Analytics -> Lead Acquisition Analytics */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
@@ -910,8 +1059,8 @@ function DashboardPage() {
                       ]}>
                         <defs>
                           <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#D69873" stopOpacity={0.25}/>
-                            <stop offset="95%" stopColor="#D69873" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#D69873" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#D69873" stopOpacity={0} />
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
@@ -1029,11 +1178,10 @@ function DashboardPage() {
                           <td className="p-4 pl-6 font-bold text-slate-800">{lead.name}</td>
                           <td className="p-4 text-slate-500 font-medium capitalize">{lead.projectType.replace("-", " ")}</td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block ${
-                              lead.status === "won" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block ${lead.status === "won" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
                               lead.status === "lost" ? "bg-rose-50 text-rose-700 border border-rose-100" :
-                              "bg-amber-50 text-amber-700 border border-amber-100"
-                            }`}>
+                                "bg-amber-50 text-amber-700 border border-amber-100"
+                              }`}>
                               {lead.status.replace("_", " ")}
                             </span>
                           </td>
@@ -1148,11 +1296,10 @@ function DashboardPage() {
                           </td>
                           <td className="p-4">
                             <span
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block border ${
-                                lead.status === "won" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block border ${lead.status === "won" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
                                 lead.status === "lost" ? "bg-rose-50 text-rose-700 border-rose-100" :
-                                "bg-amber-50 text-amber-700 border-amber-100"
-                              }`}
+                                  "bg-amber-50 text-amber-700 border-amber-100"
+                                }`}
                             >
                               {lead.status.replace("_", " ")}
                             </span>
@@ -1183,19 +1330,41 @@ function DashboardPage() {
           {/* TAB 3: REVIEWS */}
           {activeTab === "reviews" && (
             <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Toolbar */}
+              <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 leading-none">Reviews Moderator</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">{reviews.filter(r => r.featured).length} featured · {reviews.length} total</p>
+                </div>
+                <button
+                  onClick={() => setIsAddingReview(true)}
+                  className="bg-copper hover:bg-copper-deep text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1.5 shrink-0 shadow transition cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Add Review
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {reviews.map((rev) => (
                   <div key={rev.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
                     <div>
-                      <div className="flex items-start justify-between">
-                        <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-sm text-slate-800 leading-tight">{rev.title}</h4>
                           <p className="text-xs text-slate-500 font-semibold mt-0.5">{rev.author} · {rev.location}</p>
                         </div>
-                        <div className="flex items-center gap-0.5 text-copper shrink-0">
-                          {Array.from({ length: rev.rating }).map((_, i) => (
-                            <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                          ))}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <div className="flex items-center gap-0.5 text-copper">
+                            {Array.from({ length: rev.rating }).map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => handleDeleteReview(rev.id, rev.title)}
+                            className="p-1 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-rose-600 transition ml-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
 
@@ -1214,13 +1383,12 @@ function DashboardPage() {
                     <div className="border-t border-slate-100 pt-4 flex items-center justify-between gap-2">
                       <button
                         onClick={() => handleToggleReviewFeatured(rev.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
-                          rev.featured
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-250 hover:bg-emerald-100"
-                            : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
-                        }`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${rev.featured
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-250 hover:bg-emerald-100"
+                          : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
+                          }`}
                       >
-                        {rev.featured ? "Featured on Site" : "Hidden from Site"}
+                        {rev.featured ? "⭐ Featured on Site" : "Hidden from Site"}
                       </button>
 
                       <button
@@ -1256,8 +1424,8 @@ function DashboardPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-150 text-sm">
                       {webEmails.map((email) => (
-                        <tr 
-                          key={email.id} 
+                        <tr
+                          key={email.id}
                           className="hover:bg-slate-50/70 transition cursor-pointer"
                           onClick={(e) => {
                             if ((e.target as HTMLElement).closest('button')) return;
@@ -1317,9 +1485,8 @@ function DashboardPage() {
                     <button
                       key={session.id}
                       onClick={() => handleSelectChat(session.id)}
-                      className={`w-full text-left p-4 flex items-center justify-between transition ${
-                        activeSessionId === session.id ? "bg-slate-50 border-l-4 border-copper" : "hover:bg-slate-50/50"
-                      }`}
+                      className={`w-full text-left p-4 flex items-center justify-between transition group/chat ${activeSessionId === session.id ? "bg-slate-50 border-l-4 border-copper" : "hover:bg-slate-50/50"
+                        }`}
                     >
                       <div className="truncate pr-2">
                         <div className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
@@ -1330,9 +1497,18 @@ function DashboardPage() {
                         </div>
                         <p className="text-xs text-slate-400 mt-1 truncate">{session.lastMessage}</p>
                       </div>
-                      <span className="text-xs text-slate-400 shrink-0 font-medium">
-                        {formatChatTime(session.lastMessageTime)}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-slate-400 font-medium">
+                          {formatChatTime(session.lastMessageTime)}
+                        </span>
+                        <button
+                          onClick={(e) => handleDeleteChat(session.id, e)}
+                          className="opacity-0 group-hover/chat:opacity-100 p-1 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-opacity duration-200"
+                          title="Delete Chat"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -1345,7 +1521,22 @@ function DashboardPage() {
                     <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                       <div>
                         <h4 className="font-bold text-sm text-slate-800 leading-none">{activeChatSession.clientName}</h4>
-                        <p className="text-xs text-slate-400 font-medium leading-none mt-1">{activeChatSession.clientCity} · Visitor Session</p>
+                        <p className="text-xs text-slate-400 font-medium leading-none mt-1.5 flex flex-wrap gap-2 items-center">
+                          <span className="bg-copper/10 text-copper px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">{activeChatSession.clientCity}</span>
+                          <span>· Visitor Session</span>
+                          {activeChatSession.clientPhone && (
+                            <>
+                              <span>·</span>
+                              <span className="font-semibold text-slate-600">Phone: {activeChatSession.clientPhone}</span>
+                            </>
+                          )}
+                          {activeChatSession.clientEmail && (
+                            <>
+                              <span>·</span>
+                              <span className="font-semibold text-slate-600">Email: {activeChatSession.clientEmail}</span>
+                            </>
+                          )}
+                        </p>
                       </div>
                     </div>
 
@@ -1353,21 +1544,18 @@ function DashboardPage() {
                       {activeChatSession.messages.map((msg) => (
                         <div
                           key={msg.id}
-                          className={`flex gap-2 max-w-[80%] ${
-                            msg.sender === "admin" ? "ml-auto flex-row-reverse" : "mr-auto"
-                          }`}
+                          className={`flex gap-2 max-w-[80%] ${msg.sender === "admin" ? "ml-auto flex-row-reverse" : "mr-auto"
+                            }`}
                         >
                           <div
-                            className={`p-3 rounded-2xl text-sm leading-relaxed ${
-                              msg.sender === "admin"
-                                ? "bg-copper text-white rounded-tr-none shadow-sm"
-                                : "bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-sm"
-                            }`}
+                            className={`p-3 rounded-2xl text-sm leading-relaxed ${msg.sender === "admin"
+                              ? "bg-copper text-white rounded-tr-none shadow-sm"
+                              : "bg-white text-slate-800 border border-slate-200 rounded-tl-none shadow-sm"
+                              }`}
                           >
                             <p>{msg.text}</p>
-                            <span className={`text-[10px] mt-1 block text-right font-medium ${
-                              msg.sender === "admin" ? "text-white/70" : "text-slate-400"
-                            }`}>
+                            <span className={`text-[10px] mt-1 block text-right font-medium ${msg.sender === "admin" ? "text-white/70" : "text-slate-400"
+                              }`}>
                               {formatChatTime(msg.timestamp)}
                             </span>
                           </div>
@@ -1405,47 +1593,246 @@ function DashboardPage() {
 
           {/* TAB 6: GALLERY */}
           {activeTab === "gallery" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="space-y-6 animate-in fade-in duration-200 text-left">
+              {/* Gallery Header */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-800 leading-none">Photo Gallery Manager</h3>
-                  <p className="text-xs text-slate-500 font-medium leading-none mt-1">Manage files showing on public Gallery sections</p>
+                  <h3 className="text-lg font-bold text-slate-900">Photo Gallery Manager</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">Manage files showing on public Gallery sections by category</p>
                 </div>
-
-                <label className="bg-copper hover:bg-copper-deep text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1.5 shrink-0 shadow transition cursor-pointer">
-                  <Upload className="w-4 h-4" /> Add Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUploadGallery}
-                    className="hidden"
-                  />
-                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-400">Filter View:</span>
+                  <div className="flex gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                    {["All", "Bathroom", "Kitchen", "Residential", "Video"].map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setGalleryFilter(cat.toLowerCase())}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${galleryFilter === cat.toLowerCase() || (cat === "All" && galleryFilter === "all")
+                          ? "bg-slate-800 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100"
+                          }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {galleryPhotos.map((photo) => (
-                  <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow bg-white">
-                    <img
-                      src={photo.url}
-                      alt="Gallery item"
-                      className="w-full h-full object-cover cursor-zoom-in"
-                      onClick={() => setLightboxPhoto(photo.url)}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-3">
-                      <span className="text-xs text-white/80 font-medium">
-                        Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
-                      </span>
+              {/* Upload Controls Box */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                  <Plus className="w-4 h-4 text-copper" /> Upload New Project Media
+                </h4>
+
+                {/* 1. Category Selector */}
+                <div className="space-y-2">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">1. Select Service Category</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["All", "Bathroom", "Kitchen", "Residential", "Video"].map((cat) => (
                       <button
-                        onClick={() => handleDeleteGallery(photo.id)}
-                        className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition"
+                        key={cat}
+                        type="button"
+                        onClick={() => setUploadCategory(cat.toLowerCase())}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition border ${uploadCategory === cat.toLowerCase()
+                          ? "bg-copper/5 border-copper text-copper"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                          }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2. Browse & Upload actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">2. Click Browse and choose the images</label>
+                    <div className="flex gap-2">
+                      <label className="flex-1 bg-slate-50 border border-slate-200 border-dashed hover:border-slate-300 rounded-xl py-3 px-4 flex items-center justify-center gap-2 cursor-pointer transition">
+                        <ImageIcon className="w-4 h-4 text-slate-400" />
+                        <span className="text-xs font-semibold text-slate-600 truncate">
+                          {selectedGalleryFiles.length > 0
+                            ? `${selectedGalleryFiles.length} file(s) selected`
+                            : "Choose files..."}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            if (files.length > 0) {
+                              setSelectedGalleryFiles(prev => [...prev, ...files]);
+                            }
+                          }}
+                          className="hidden"
+                          disabled={isUploadingGallery}
+                        />
+                      </label>
+                      {selectedGalleryFiles.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGalleryFiles([])}
+                          className="p-3 border border-slate-200 hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-xl transition"
+                          disabled={isUploadingGallery}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">3. Upload the images/videos</label>
+                    <button
+                      type="button"
+                      onClick={handleUploadGallery}
+                      disabled={selectedGalleryFiles.length === 0 || isUploadingGallery}
+                      className="w-full bg-copper hover:bg-copper-deep disabled:bg-slate-100 disabled:text-slate-400 text-white py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {isUploadingGallery
+                        ? "Uploading..."
+                        : `Upload ${selectedGalleryFiles.length} Item${selectedGalleryFiles.length !== 1 ? "s" : ""} to ${uploadCategory.toUpperCase()}`}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Upload Progress Indicator */}
+                {isUploadingGallery && (
+                  <div className="pt-2 space-y-1.5 animate-in fade-in duration-200">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-600">
+                      <span>Uploading media to Cloudinary storage...</span>
+                      <span>{galleryUploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                      <div
+                        className="bg-copper h-full transition-all duration-150 rounded-full"
+                        style={{ width: `${galleryUploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Multiple Thumbnail Preview Grid */}
+                {selectedGalleryFiles.length > 0 && !isUploadingGallery && (
+                  <div className="pt-2 animate-in fade-in duration-200 space-y-2">
+                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Selected Files Preview</label>
+                    <div className="flex flex-wrap gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl max-h-[180px] overflow-y-auto">
+                      {selectedGalleryFiles.map((file, idx) => {
+                        const isVideo = file.type.startsWith("video/") || file.name.endsWith(".mp4") || file.name.endsWith(".mov");
+                        return (
+                          <div key={idx} className="relative group w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-white shrink-0 shadow-sm">
+                            {isVideo ? (
+                              <div className="w-full h-full bg-slate-900 relative">
+                                <video
+                                  src={URL.createObjectURL(file)}
+                                  className="w-full h-full object-cover opacity-80"
+                                  muted
+                                  playsInline
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <Play className="w-3.5 h-3.5 text-white fill-white opacity-90" />
+                                </div>
+                              </div>
+                            ) : (
+                              <img
+                                src={URL.createObjectURL(file)}
+                                alt="preview"
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedGalleryFiles(prev => prev.filter((_, i) => i !== idx))}
+                              className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Gallery Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {galleryPhotos
+                  .filter((p) => {
+                    if (galleryFilter === "all" || !galleryFilter) return true;
+                    return p.category?.toLowerCase() === galleryFilter.toLowerCase();
+                  })
+                  .map((photo) => (
+                    <div key={photo.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow bg-white">
+                      {photo.url.endsWith(".mp4") || photo.url.endsWith(".mov") || photo.url.includes("/video/upload/") ? (
+                        <div className="relative w-full h-full cursor-zoom-in" onClick={() => setLightboxPhoto(photo.url)}>
+                          <video
+                            src={photo.url}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            playsInline
+                            autoPlay
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/30 transition z-10">
+                            <div className="p-2 bg-white/90 text-slate-800 rounded-full shadow">
+                              <Play className="w-3 h-3 fill-current" />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <img
+                          src={photo.url}
+                          alt="Gallery item"
+                          className="w-full h-full object-cover cursor-zoom-in"
+                          onClick={() => setLightboxPhoto(photo.url)}
+                        />
+                      )}
+                      {photo.category && (
+                        <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded-lg backdrop-blur-sm border border-white/15 select-none pointer-events-none z-10">
+                          <span className="text-[9px] text-white font-bold uppercase tracking-wider">
+                            {photo.category}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Always visible delete button in top-right */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteGallery(photo.id);
+                        }}
+                        className="absolute top-2 right-2 p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md transition duration-200 z-20 border border-white/10"
+                        title="Delete Image"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 pointer-events-none z-10">
+                        <span className="text-[10px] text-white/80 font-medium">
+                          Uploaded {new Date(photo.uploadedAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
+
+              {/* Empty State */}
+              {galleryPhotos.filter((p) => {
+                if (galleryFilter === "all" || !galleryFilter) return true;
+                return p.category?.toLowerCase() === galleryFilter.toLowerCase();
+              }).length === 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl py-12 flex flex-col items-center justify-center text-slate-400 gap-3">
+                    <ImageIcon className="w-10 h-10 opacity-30" />
+                    <p className="text-sm font-semibold">No media in this category</p>
+                  </div>
+                )}
             </div>
           )}
 
@@ -1512,14 +1899,12 @@ function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => setEmailAlert(!emailAlert)}
-                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
-                        emailAlert ? "bg-[#3f5c49]" : "bg-slate-200"
-                      }`}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${emailAlert ? "bg-[#3f5c49]" : "bg-slate-200"
+                        }`}
                     >
                       <span
-                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
-                          emailAlert ? "right-[3px]" : "left-[3px]"
-                        }`}
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${emailAlert ? "right-[3px]" : "left-[3px]"
+                          }`}
                       />
                     </button>
                   </div>
@@ -1533,14 +1918,12 @@ function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => setSmsAlert(!smsAlert)}
-                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
-                        smsAlert ? "bg-[#3f5c49]" : "bg-slate-200"
-                      }`}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${smsAlert ? "bg-[#3f5c49]" : "bg-slate-200"
+                        }`}
                     >
                       <span
-                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
-                          smsAlert ? "right-[3px]" : "left-[3px]"
-                        }`}
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${smsAlert ? "right-[3px]" : "left-[3px]"
+                          }`}
                       />
                     </button>
                   </div>
@@ -1554,14 +1937,12 @@ function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => setMaintenanceMode(!maintenanceMode)}
-                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${
-                        maintenanceMode ? "bg-[#3f5c49]" : "bg-slate-200"
-                      }`}
+                      className={`w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 ${maintenanceMode ? "bg-[#3f5c49]" : "bg-slate-200"
+                        }`}
                     >
                       <span
-                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${
-                          maintenanceMode ? "right-[3px]" : "left-[3px]"
-                        }`}
+                        className={`w-4.5 h-4.5 bg-white rounded-full absolute top-[3px] transition-all ${maintenanceMode ? "right-[3px]" : "left-[3px]"
+                          }`}
                       />
                     </button>
                   </div>
@@ -1572,7 +1953,7 @@ function DashboardPage() {
                 {/* Row 4: Business Calendar Schedule */}
                 <div className="space-y-4">
                   <h4 className="text-[11px] font-extrabold uppercase tracking-widest text-slate-700">Business Calendar Schedule</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-slate-450 font-bold uppercase tracking-wider block">Weekdays</label>
@@ -1635,7 +2016,7 @@ function DashboardPage() {
 
                 {/* Top Grid: Forms */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                  
+
                   {/* Left Column: Update profile credentials */}
                   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div>
@@ -1702,7 +2083,7 @@ function DashboardPage() {
                             required
                             value={addUsername}
                             onChange={(e) => setAddUsername(e.target.value)}
-                            placeholder="e.g. jrm-assistant"
+                            placeholder="e.g. Revitalize-assistant"
                             className="w-full bg-[#fdfdfd] border border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-medium"
                           />
                         </div>
@@ -1783,13 +2164,12 @@ function DashboardPage() {
                                 </div>
                               </td>
                               <td className="p-4">
-                                <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full ${
-                                  user.role === "admin" 
-                                    ? "bg-[#ffebeb] text-[#d64545]"
-                                    : user.role === "editor"
+                                <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full ${user.role === "admin"
+                                  ? "bg-[#ffebeb] text-[#d64545]"
+                                  : user.role === "editor"
                                     ? "bg-blue-50 text-blue-600"
                                     : "bg-slate-100 text-slate-650"
-                                }`}>
+                                  }`}>
                                   {user.role}
                                 </span>
                               </td>
@@ -1844,7 +2224,7 @@ function DashboardPage() {
                   <h3 className="text-lg font-bold text-slate-800">{selectedEmail.name}</h3>
                   <p className="text-[10px] text-copper font-bold uppercase tracking-wider mt-0.5">Web Email Inquiry</p>
                 </div>
-                <button 
+                <button
                   onClick={() => { setIsViewingEmail(false); setSelectedEmail(null); }}
                   className="p-1.5 rounded-full hover:bg-slate-100 transition"
                 >
@@ -1910,7 +2290,7 @@ function DashboardPage() {
                   <h3 className="text-lg font-bold text-slate-800">{selectedLead.name}</h3>
                   <p className="text-[10px] text-copper font-bold uppercase tracking-wider mt-0.5">Lead Details Profile</p>
                 </div>
-                <button 
+                <button
                   onClick={() => { setIsEditingLead(false); setSelectedLead(null); }}
                   className="p-1.5 rounded-full hover:bg-slate-100 transition"
                 >
@@ -2053,7 +2433,7 @@ function DashboardPage() {
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 text-xs text-left">
             <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
               <h3 className="font-bold text-sm leading-tight">Create New Business Lead</h3>
-              <button 
+              <button
                 onClick={() => setIsAddingLead(false)}
                 className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10"
               >
@@ -2169,7 +2549,7 @@ function DashboardPage() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-250 animate-in zoom-in-95 duration-200 text-xs text-left">
             <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
               <h3 className="font-bold text-sm leading-tight">Reply to Review</h3>
-              <button 
+              <button
                 onClick={() => setSelectedReview(null)}
                 className="text-white/80 hover:text-white p-1 rounded-full"
               >
@@ -2210,6 +2590,115 @@ function DashboardPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Add Review Dialog */}
+      {isAddingReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 text-xs text-left">
+            <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between">
+              <h3 className="font-bold text-sm leading-tight">Add New Review</h3>
+              <button onClick={() => setIsAddingReview(false)} className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleAddReview} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Client Name</label>
+                  <input type="text" required value={newReviewAuthor} onChange={(e) => setNewReviewAuthor(e.target.value)} placeholder="e.g. John Doe" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Location</label>
+                  <input type="text" value={newReviewLocation} onChange={(e) => setNewReviewLocation(e.target.value)} placeholder="e.g. Tampa, FL" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper" />
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Review Title</label>
+                  <input type="text" value={newReviewTitle} onChange={(e) => setNewReviewTitle(e.target.value)} placeholder="e.g. Amazing Kitchen Remodel" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper" />
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Review Text</label>
+                  <textarea rows={3} required value={newReviewText} onChange={(e) => setNewReviewText(e.target.value)} placeholder="Client review content..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper resize-none" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Star Rating</label>
+                  <select value={newReviewRating} onChange={(e) => setNewReviewRating(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper">
+                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r} Stars</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setIsAddingReview(false)} className="w-1/2 border border-slate-200 rounded-xl py-3 font-bold hover:bg-slate-50 transition">Cancel</button>
+                <button type="submit" className="w-1/2 bg-copper hover:bg-copper-deep text-white rounded-xl py-3 font-bold shadow-lg shadow-copper/10 transition">Add Review</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Dialog */}
+      {confirmConfig && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
+            <div className="p-6 space-y-3">
+              <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 mx-auto">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-bold text-slate-800 text-sm">{confirmConfig.title}</h3>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">{confirmConfig.message}</p>
+              </div>
+            </div>
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                onClick={() => setConfirmConfig(null)}
+                className="w-1/2 border border-slate-200 rounded-xl py-3 text-xs font-bold hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmConfig.onConfirm();
+                  setConfirmConfig(null);
+                }}
+                className="w-1/2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-3 text-xs font-bold shadow-lg transition"
+              >
+                {confirmConfig.confirmText || "Confirm"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Photo Modal */}
+      {lightboxPhoto && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4 animate-in fade-in duration-200"
+          onClick={() => setLightboxPhoto(null)}
+        >
+          <button
+            className="absolute top-6 right-6 text-white/70 hover:text-white transition"
+            onClick={() => setLightboxPhoto(null)}
+          >
+            <X className="w-8 h-8" />
+          </button>
+          {lightboxPhoto.endsWith(".mp4") || lightboxPhoto.endsWith(".mov") || lightboxPhoto.includes("/video/upload/") ? (
+            <video
+              src={lightboxPhoto}
+              className="max-w-full max-h-[90vh] rounded-xl object-contain shadow-2xl"
+              controls
+              autoPlay
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={lightboxPhoto}
+              alt="Enlarged view"
+              className="max-w-full max-h-full rounded-xl object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
 

@@ -96,11 +96,21 @@ export async function dbDeleteLead(id: string): Promise<any[]> {
 export async function dbGetReviews(initialSeeds: any[]): Promise<any[]> {
   const db = await getDb();
   const reviewsCol = db.collection("reviews");
-  const count = await reviewsCol.countDocuments();
-  if (count === 0 && initialSeeds.length > 0) {
-    await reviewsCol.insertMany(initialSeeds);
-    return initialSeeds;
+  
+  if (initialSeeds && initialSeeds.length > 0) {
+    for (const seed of initialSeeds) {
+      const exists = await reviewsCol.findOne({
+        $or: [
+          { id: seed.id },
+          { title: seed.title, author: seed.author }
+        ]
+      });
+      if (!exists) {
+        await reviewsCol.insertOne(seed);
+      }
+    }
   }
+
   const docs = await reviewsCol.find({}).toArray();
   return docs.map(mapDoc);
 }
@@ -124,6 +134,20 @@ export async function dbUpdateReview(id: string, updates: any): Promise<any[]> {
     }
   }
   
+  const docs = await reviewsCol.find({}).toArray();
+  return docs.map(mapDoc);
+}
+
+export async function dbDeleteReview(id: string): Promise<any[]> {
+  const db = await getDb();
+  const reviewsCol = db.collection("reviews");
+  let res = await reviewsCol.deleteOne({ id });
+  if (res.deletedCount === 0) {
+    const { ObjectId } = await getMongodb();
+    if (ObjectId.isValid(id)) {
+      await reviewsCol.deleteOne({ _id: new ObjectId(id) });
+    }
+  }
   const docs = await reviewsCol.find({}).toArray();
   return docs.map(mapDoc);
 }
@@ -287,4 +311,43 @@ export async function dbUpdatePortalUser(userId: string, updates: any): Promise<
   
   const docs = await accountsCol.find({}).toArray();
   return docs.map(mapDoc);
+}
+
+// ── SETTINGS ──
+export async function dbGetSettings(defaultSettings: any): Promise<any> {
+  const db = await getDb();
+  const settingsCol = db.collection("settings");
+  let doc = await settingsCol.findOne({ id: "site_config" });
+  if (!doc) {
+    const seeded = { ...defaultSettings, id: "site_config" };
+    await settingsCol.insertOne(seeded);
+    return seeded;
+  }
+  
+  // Auto-correct legacy database values if present
+  let needsUpdate = false;
+  const updates: any = {};
+  if (doc.alertEmail === "robertsa210@icloud.com") {
+    doc.alertEmail = "revitalizerealestate@gmail.com";
+    updates.alertEmail = "revitalizerealestate@gmail.com";
+    needsUpdate = true;
+  }
+  if (doc.officePhone === "(210) 429-5526") {
+    doc.officePhone = "(813) 323-0291";
+    updates.officePhone = "(813) 323-0291";
+    needsUpdate = true;
+  }
+  if (needsUpdate) {
+    await settingsCol.updateOne({ id: "site_config" }, { $set: updates });
+  }
+
+  return mapDoc(doc);
+}
+
+export async function dbSaveSettings(settings: any): Promise<any> {
+  const db = await getDb();
+  const settingsCol = db.collection("settings");
+  await settingsCol.updateOne({ id: "site_config" }, { $set: settings }, { upsert: true });
+  const doc = await settingsCol.findOne({ id: "site_config" });
+  return mapDoc(doc);
 }

@@ -96,7 +96,7 @@ export function FaqSection() {
   };
 
   return (
-    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
+    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-[10px] border border-charcoal/5">
       <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
         {/* Left Column */}
         <div className="w-full lg:w-[480px] shrink-0 flex flex-col lg:sticky lg:top-32 self-start">

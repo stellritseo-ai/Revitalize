@@ -113,22 +113,16 @@ export function HeroBanner() {
               style={{ marginTop: "0px" }}
             >
               {duplicatedServices.map((service, index) => (
-                <Link
+                <div
                   key={index}
-                  to={service.to}
                   className="group relative flex flex-col items-center justify-center h-20 w-32 xs:h-24 xs:w-40 bg-white/5 backdrop-blur border border-white/10 hover:bg-white/10 hover:border-copper/45 hover:shadow-lg transition-all duration-300 text-center shrink-0 rounded-lg"
                 >
-                  {/* Arrow indicator on hover */}
-                  <div className="absolute top-2 right-2 text-white/20 group-hover:text-copper transition-colors duration-300">
-                    <ArrowUpRight className="h-3 w-3" />
-                  </div>
-
                   {/* Logo Image with silhouette overlay */}
                   <div className="flex justify-center items-center h-6 w-20 xs:h-8 xs:w-24 shrink-0 mb-1.5">
                     <img
                       src={service.logo}
                       alt={service.name}
-                      className="max-h-full max-w-full object-contain filter grayscale brightness-0 invert opacity-70 group-hover:filter-none group-hover:opacity-100 transition-all duration-300 cursor-pointer"
+                      className="max-h-full max-w-full object-contain filter grayscale brightness-0 invert opacity-70 group-hover:filter-none group-hover:opacity-100 transition-all duration-300"
                     />
                   </div>
 
@@ -136,7 +130,7 @@ export function HeroBanner() {
                   <span className="text-[9px] xs:text-[10px] font-bold text-white/90 group-hover:text-copper transition-colors duration-300 tracking-wide px-2 select-none">
                     {service.name}
                   </span>
-                </Link>
+                </div>
               ))}
             </div>
           </div>

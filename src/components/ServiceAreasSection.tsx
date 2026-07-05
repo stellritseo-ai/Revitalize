@@ -20,7 +20,7 @@ const areas = [
 
 export function ServiceAreasSection() {
   return (
-    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
+    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-[10px] border border-charcoal/5">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           {/* Left Card */}

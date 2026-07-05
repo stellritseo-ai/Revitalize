@@ -1,188 +1,290 @@
 import { Link } from "@tanstack/react-router";
-import kitchenImg from "@/assets/kitchen/uploaded-kitchen.png";
-import bathroomImg from "@/assets/bathroom/uploaded-bathroom.png";
-import homeEvalImg from "@/assets/residential/uploaded-home-evaluation.png";
-import floorCarpentryImg from "@/assets/residential/uploaded-floor-carpentry.jpg";
-import realEstateImg from "@/assets/residential/uploaded-real-estate.png";
-import cleaningImg from "@/assets/residential/uploaded-cleaning.png";
-import cabinetsImg from "@/assets/kitchen/uploaded-cabinets.png";
+import buySellImg from "@/assets/services/buy_sell_homes.png";
+import homeRenovationsImg from "@/assets/services/home_renovations.png";
+import kitchenImg from "@/assets/services/kitchen_remodeling.png";
+import bathroomImg from "@/assets/services/bathroom_remodeling.png";
+import flooringImg from "@/assets/services/flooring.png";
+import roofingImg from "@/assets/services/roofing.png";
+import cleaningImg from "@/assets/services/professional_cleaning.png";
+import cabinetsImg from "@/assets/services/cabinet_sales.png";
+import investmentImg from "@/assets/services/investment_properties.png";
 import {
   Utensils,
   Bath,
   Home,
   Layers,
-  Briefcase,
   LineChart,
   Sparkles,
   Paintbrush,
-  ArrowUpRight,
+  ArrowRight,
+  Hammer,
+  ShieldCheck,
 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import AutoScroll from "embla-carousel-auto-scroll";
+import { motion } from "framer-motion";
 
-const services = [
-  {
-    title: "Kitchen Remodeling",
-    // lead: "Innovative design & craftsmanship.",
-    body: "Transform your space with our kitchen remodeling service, combining innovative design and expert craftsmanship to create a...",
-    icon: Utensils,
-    image: kitchenImg,
-    to: "/services/kitchen",
-    gridClass: "lg:col-span-1 lg:row-span-2 h-[350px] sm:h-[400px] lg:h-[624px]",
-  },
-  {
-    title: "Bathroom Remodeling",
-    // lead: "Functionality and style blended.",
-    body: "Transform your bathroom with our expert remodeling services. We blend functionality and style, delivering customized...",
-    icon: Bath,
-    image: bathroomImg,
-    to: "/services/bathroom",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Residential Remodeling",
-    // lead: "Customized home improvements.",
-    body: "Transform your home with our expert Residential home improvement services, delivering customized solutions that enhance...",
-    icon: Home,
-    image: "/g1.jpg",
-    to: "/services/residential",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Floor, Pavers & Carpentry",
-    // lead: "Stunning floors & durable pavers.",
-    body: "Enhance your home with our expert carpentry services. We specialize in crafting stunning floors and durable pavers, providing tailored solutions...",
-    icon: Layers,
-    image: floorCarpentryImg,
-    to: "/services/specialty-trade",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Real Estate Services",
-    // lead: "Pre-listing home improvements.",
-    body: "We offer expert pre-listing services that seamlessly combine home improvements, remodeling, and real estate expertise—giving you the tools...",
-    icon: Briefcase,
-    image: realEstateImg,
-    to: "/services/real-estate",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Home evaluation",
-    // lead: "Personalized market value analysis.",
-    body: "Want to know what your home is really worth in today’s market? Our free home evaluation service gives you a personalized property...",
-    icon: LineChart,
-    image: homeEvalImg,
-    to: "/services/construction",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Professional Cleaning Services",
-    // lead: "Post-improvement & routine cleanings.",
-    body: "Revitalize Group offers professional cleaning services, including post-improvement, pre-listing, move-in/move-out, and routine cleanings.",
-    icon: Sparkles,
-    image: cleaningImg,
-    to: "/services/cleaning",
-    gridClass: "h-[300px]",
-  },
-  {
-    title: "Premium Cabinet Sales & Custom Design Services",
-    // lead: "High-end cabinetry for any space.",
-    body: "Upgrade your space with premium cabinetry for kitchens, bathrooms, offices, and closets. We offer a wide selection of high-end styles, finishes, and configurations",
-    icon: Paintbrush,
-    image: cabinetsImg,
-    to: "/services/cabinets",
-    gridClass: "h-[300px]",
-  },
-];
+/* ── Shared card inner content ─────────────────────────────── */
+function CardContent({ s }: { s: { icon: any; title: string; desc: string; image: string; to: string } }) {
+  const Icon = s.icon;
+
+  return (
+    <>
+      {/* Image */}
+      <img
+        src={s.image}
+        alt={s.title}
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+        loading="lazy"
+      />
+
+      {/* Gradient — stronger on hover */}
+      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-charcoal/35 to-transparent group-hover:from-charcoal/95 group-hover:via-charcoal/80 group-hover:to-charcoal/20 transition-all duration-500" />
+
+      {/* Copper accent line at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-copper via-copper-soft to-copper-deep opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Icon badge — top-left */}
+      <div className="absolute top-4 left-4 w-9 h-9 rounded-xl bg-copper/90 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-y-1 group-hover:translate-y-0">
+        <Icon className="h-4 w-4 text-white" />
+      </div>
+
+      {/* Content */}
+      <div className="absolute inset-0 p-5 flex flex-col justify-end z-10">
+        <div className="transition-all duration-500 group-hover:-translate-y-2">
+          <h3 className="text-sm sm:text-[15px] font-extrabold text-white leading-tight uppercase tracking-wide font-serif">
+            {s.title}
+          </h3>
+
+          {/* Hover reveal */}
+          <div className="grid grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100 transition-all duration-500 ease-out">
+            <div className="overflow-hidden">
+              <p className="text-[12px] text-white/80 leading-snug mt-2 line-clamp-3 font-sans">
+                {s.desc}
+              </p>
+              <div className="mt-3 inline-flex items-center gap-1.5 text-copper-soft font-black text-[10px] uppercase tracking-widest group/link">
+                <span className="border-b border-copper-soft/50 group-hover/link:border-copper-soft transition-colors font-sans">
+                  Explore Service
+                </span>
+                <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform duration-300" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export function ServicesSection() {
-  return (
-    <section className="bg-gradient-brand-light bg-background py-16 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl border border-charcoal/5">
-      <div className="max-w-[1400px] mx-auto">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between lg:items-end mb-14 gap-8">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-copper mb-4">
-              <span className="w-6 h-[1.5px] bg-copper inline-block" />
-              What we build
-            </div>
+  const services = [
+    {
+      title: "Buy & Sell Homes",
+      desc: "We offer expert real estate representation and pre-listing home improvements, giving you the competitive edge to sell for top dollar.",
+      icon: Home,
+      image: buySellImg,
+      to: "/services/real-estate",
+    },
+    {
+      title: "Home Renovations",
+      desc: "Transform your home with our expert residential remodeling services, delivering customized structural solutions that enhance your daily living.",
+      icon: Hammer,
+      image: homeRenovationsImg,
+      to: "/services/residential",
+    },
+    {
+      title: "Kitchen Remodeling",
+      desc: "Transform your space with our kitchen remodeling service, combining innovative design and expert craftsmanship to create a beautiful, functional cooking area.",
+      icon: Utensils,
+      image: kitchenImg,
+      to: "/services/kitchen",
+    },
+    {
+      title: "Bathroom Remodeling",
+      desc: "Transform your bathroom with our expert remodeling services. We blend functionality and style, delivering customized features and luxury upgrades.",
+      icon: Bath,
+      image: bathroomImg,
+      to: "/services/bathroom",
+    },
+    {
+      title: "Flooring",
+      desc: "Enhance your home with our premium flooring services, specializing in stunning hardwood, tile, and durable pavers tailored to your lifestyle.",
+      icon: Layers,
+      image: flooringImg,
+      to: "/services/specialty-trade",
+    },
+    {
+      title: "Roofing",
+      desc: "Protect your property with our professional roofing solutions, offering durable materials, thorough inspections, and expert repairs.",
+      icon: ShieldCheck,
+      image: roofingImg,
+      to: "/services/specialty-trade",
+    },
+    {
+      title: "Professional Cleaning",
+      desc: "Revitalize Group offers professional cleaning services, including post-improvement, pre-listing, move-in/move-out, and routine cleanings.",
+      icon: Sparkles,
+      image: cleaningImg,
+      to: "/services/cleaning",
+    },
+    {
+      title: "Cabinet Sales",
+      desc: "Upgrade your space with premium cabinetry for kitchens, bathrooms, offices, and closets. We offer a wide selection of high-end styles, finishes, and configurations.",
+      icon: Paintbrush,
+      image: cabinetsImg,
+      to: "/services/cabinets",
+    },
+    {
+      title: "Investment Properties",
+      desc: "Build long-term wealth with our investment property services. We assist with property acquisition, ROI analysis, strategic renovations, and full property management.",
+      icon: LineChart,
+      image: investmentImg,
+      to: "/services/real-estate",
+    },
+  ];
 
-            <h2 className="text-[26px] text-center md:text-left md:text-[45px] md:leading-[55px] font-bold tracking-tight text-charcoal mb-4 font-serif lg:whitespace-nowrap">
+  const topItems = services.slice(0, 3);
+  const slideItems = [...services.slice(3), ...services.slice(3)];
+
+  return (
+    <section id="services" className="bg-gradient-brand-light bg-background py-[60px] overflow-hidden mx-[15px] mt-[15px] rounded-[10px] border border-charcoal/5">
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 w-full">
+
+        {/* ── Top Row: Text + 3 Hero Cards ──────────────────── */}
+        <div className="grid gap-10 lg:grid-cols-[38%_1fr] lg:gap-14 items-center">
+
+          {/* Left Text */}
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.75, ease: "easeOut" }}
+            className="flex flex-col justify-center text-left"
+          >
+            {/* Eyebrow badge */}
+            <span className="inline-flex items-center gap-2 bg-copper/10 border border-copper/20 text-copper rounded-full px-5 py-1.5 text-[11px] font-black uppercase tracking-widest mb-5 w-fit font-sans">
+              <Sparkles className="w-3.5 h-3.5 text-copper" />
+              What We Build
+            </span>
+
+            {/* Heading */}
+            <h2
+              className="text-charcoal tracking-tight leading-[1.2] font-bold font-serif"
+              style={{ fontSize: "clamp(24px, 3.2vw, 36px)" }}
+            >
               A Full Suite of{" "}
               <span className="text-copper italic font-serif font-bold">
-                Real Estate And Home Improvement
+                Real Estate & Home Improvement
               </span>{" "}
               Services
             </h2>
 
-            <p className="text-base sm:text-lg text-charcoal-soft/95 font-sans font-medium">
-              Every project is led by senior craftsmen and supported by trusted local trades. We
-              focus only on homes — no commercial work, no shortcuts.
-            </p>
-          </div>
-
-          <div className="shrink-0">
-            <Link
-              to="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-charcoal/20 hover:border-[#1e110a] bg-white/60 backdrop-blur hover:bg-[#1e110a] hover:text-white hover:border-[#1e110a] transition-all duration-300 text-charcoal font-bold text-sm px-6 py-3.5"
-            >
-              Start a Project <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Grid layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className={`group relative rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-charcoal/5 ${service.gridClass}`}
-            >
-              <Link to={service.to} className="absolute inset-0 z-20" aria-label={service.title} />
-
-              {/* Background Image */}
-              <img
-                src={service.image}
-                alt={service.title}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-
-              {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/95 via-[#160d08]/45 to-transparent transition-opacity duration-500 group-hover:from-charcoal group-hover:via-charcoal/70" />
-
-              {/* Card Icons & Arrow */}
-              <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-[#1e110a]/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white">
-                  <service.icon className="h-5 w-5 text-white" strokeWidth={2} />
-                </div>
-              </div>
-
-              <div className="absolute top-6 right-6 z-10 text-white/50 group-hover:text-white transition-colors duration-300">
-                <ArrowUpRight className="h-5 w-5" strokeWidth={2} />
-              </div>
-
-              {/* Card Content */}
-              <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end pointer-events-none z-10">
-                <h3 className="text-white text-xl sm:text-2xl font-bold font-serif mb-1 transition-transform duration-500 ease-out group-hover:-translate-y-2">
-                  {service.title}
-                </h3>
-
-                {/* Expandable Hover Content */}
-                <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-out">
-                  <div className="overflow-hidden">
-                    <p className="text-white/75 text-xs sm:text-sm font-medium leading-relaxed font-sans max-w-[280px] mb-4 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                      {service.body}
-                    </p>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-150 pb-1">
-                      <span className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-copper text-white font-bold text-[11px] uppercase tracking-wider shadow-md transition-all duration-300 hover:bg-copper-deep">
-                        Read More <ArrowUpRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Divider accent */}
+            <div className="flex items-center gap-3 mt-5 mb-5">
+              <div className="h-[2px] w-10 bg-copper rounded-full" />
+              <div className="h-[2px] w-4 bg-copper/40 rounded-full" />
             </div>
-          ))}
+
+            <p className="text-charcoal-soft/95 text-sm md:text-[15px] leading-[28px] font-medium max-w-[95%] font-sans">
+              Every project is led by senior craftsmen and supported by trusted local trades. We focus only on homes — no commercial work, no shortcuts.
+            </p>
+
+            {/* Trust row */}
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[12px] font-bold text-charcoal-soft font-sans">
+              {["Licensed & Insured", "Veteran Craftsmen", "Free Estimates"].map((itemText) => (
+                <span key={itemText} className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-copper" />
+                  {itemText}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-7">
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 bg-copper hover:bg-copper-deep text-white rounded-full px-7 py-3.5 text-[13px] font-black uppercase tracking-wider shadow-[0_10px_25px_-5px_rgba(202,110,58,0.35)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-sans"
+              >
+                Start a Project <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Top 3 Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {topItems.map((s, idx) => (
+              <motion.div
+                key={s.title}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.65, delay: idx * 0.12, ease: "easeOut" }}
+              >
+                <Link
+                  to={s.to}
+                  className="group relative rounded-2xl overflow-hidden bg-neutral-950 h-[210px] sm:h-[290px] lg:h-[360px] xl:h-[400px] cursor-pointer shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.22)] transition-shadow duration-500 block"
+                >
+                  <CardContent s={s} />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
+
+        {/* ── Auto-scroll Carousel ────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.75, delay: 0.15, ease: "easeOut" }}
+          className="mt-6 relative"
+        >
+          {/* Section divider with label */}
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-px flex-1 bg-charcoal/10" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-charcoal-soft whitespace-nowrap font-sans">
+              More Services
+            </span>
+            <div className="h-px flex-1 bg-charcoal/10" />
+          </div>
+
+          {/* Fade edges */}
+          <div className="absolute top-0 bottom-0 left-0 w-20 bg-gradient-to-r from-ivory to-transparent z-10 pointer-events-none hidden sm:block" />
+          <div className="absolute top-0 bottom-0 right-0 w-20 bg-gradient-to-l from-ivory to-transparent z-10 pointer-events-none hidden sm:block" />
+
+          <Carousel
+            plugins={[
+              AutoScroll({
+                speed: 1.2,
+                stopOnInteraction: false,
+                stopOnMouseEnter: true,
+                stopOnFocusIn: true,
+              }),
+            ]}
+            opts={{ align: "start", loop: true }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-4">
+              {slideItems.map((s, idx) => (
+                <CarouselItem
+                  key={`${s.title}-${idx}`}
+                  className="pl-4 basis-4/5 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+                >
+                  <Link
+                    to={s.to}
+                    className="group relative rounded-xl overflow-hidden bg-neutral-950 h-[180px] sm:h-[220px] lg:h-[260px] cursor-pointer shadow-md hover:shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-shadow duration-500 block"
+                  >
+                    <CardContent s={s} />
+                  </Link>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </motion.div>
+
       </div>
     </section>
   );

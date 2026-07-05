@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 
 export function WelcomeSection() {
   return (
-    <section className="relative bg-gradient-to-br from-[#faf8f5] via-[#f7f0e7] to-[#efe5da] overflow-hidden mx-[15px] rounded-2xl border border-[#efe5da]">
+    <section className="relative bg-gradient-to-br from-[#faf8f5] via-[#f7f0e7] to-[#efe5da] overflow-hidden mx-[15px] rounded-[10px] border border-[#efe5da]">
       <div className="mx-auto max-w-[1400px] px-6 sm:px-8 lg:px-12 py-[60px]">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center justify-between">
           {/* Text */}

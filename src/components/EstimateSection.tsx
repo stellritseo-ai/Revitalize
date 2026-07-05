@@ -1,10 +1,24 @@
+import { useState, useEffect } from "react";
 import { PhoneCall, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import estimateBgVideo from "@/assets/video/4916647f-cd0d-4677-9b51-5beca8209180.mp4";
 
 export function EstimateSection() {
+  const [officePhone, setOfficePhone] = useState("(813) 323-0291");
+
+  useEffect(() => {
+    fetch("/api/settings?t=" + Date.now())
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.officePhone) {
+          setOfficePhone(data.officePhone);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <section className="relative py-20 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+    <section className="relative py-20 px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] rounded-[10px] overflow-hidden border border-white/5 shadow-xl">
       {/* Background Video with warm overlay */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <video
@@ -48,11 +62,11 @@ export function EstimateSection() {
           </Link>
 
           <a
-            href="tel:8133230291"
+            href={`tel:${officePhone.replace(/\D/g, "")}`}
             className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-bold text-sm transition-all duration-300 w-full sm:w-auto"
           >
             <PhoneCall className="w-4 h-4 text-copper animate-pulse" />
-            Call (813) 323-0291
+            Call {officePhone}
           </a>
         </div>
       </div>

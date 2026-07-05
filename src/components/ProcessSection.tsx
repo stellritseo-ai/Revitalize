@@ -58,7 +58,7 @@ export function ProcessSection() {
   const loop = [...logos, ...logos];
 
   return (
-    <section className="relative overflow-hidden mx-[15px] mt-[15px] rounded-2xl border border-white/5">
+    <section className="relative overflow-hidden mx-[15px] mt-[15px] rounded-[10px] border border-white/5">
       {/* Background Video */}
       <div className="absolute inset-0 z-0">
         <video

@@ -33,7 +33,7 @@ const showcaseItems = [
 
 export function FeaturedServices() {
   return (
-    <section className="relative bg-gradient-to-br from-[#fcfbfa] via-[#faf5ef] to-[#f4ebe1] py-[60px] px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] mb-[15px] rounded-3xl border border-[#efe5da]/60 shadow-[0_8px_32px_0_rgba(149,77,38,0.02)] overflow-hidden select-none">
+    <section className="relative bg-gradient-to-br from-[#fcfbfa] via-[#faf5ef] to-[#f4ebe1] py-[60px] px-6 sm:px-8 lg:px-12 mx-[15px] mt-[15px] mb-[15px] rounded-[10px] border border-[#efe5da]/60 shadow-[0_8px_32px_0_rgba(149,77,38,0.02)] overflow-hidden select-none">
       {/* Decorative luxury ambient glows */}
       <div className="absolute left-[-10%] top-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-copper/10 to-transparent blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute right-[-10%] bottom-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-copper/8 to-transparent blur-[140px] rounded-full pointer-events-none" />

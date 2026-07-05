@@ -10,11 +10,11 @@ const navItems = [
     label: "Services",
     to: "/services",
     subItems: [
+      { label: "Buy & Sell Homes", to: "/services/real-estate" },
       { label: "Residential Remodeling", to: "/services/residential" },
       { label: "Bathroom Remodeling", to: "/services/bathroom" },
       { label: "Kitchen Remodeling", to: "/services/kitchen" },
       { label: "Floor, Pavers & Carpentry", to: "/services/specialty-trade" },
-      { label: "Real Estate Services", to: "/services/real-estate" },
       { label: "Home Evaluation", to: "/services/construction" },
       { label: "Professional Cleaning Services", to: "/services/cleaning" },
       { label: "Premium Cabinet Sales & Custom Design", to: "/services/cabinets" },
@@ -39,6 +39,20 @@ const navItems = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [officePhone, setOfficePhone] = useState("(813) 323-0291");
+  const [alertEmail, setAlertEmail] = useState("revitalizerealestate@gmail.com");
+
+  useEffect(() => {
+    fetch("/api/settings?t=" + Date.now())
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          if (data.officePhone) setOfficePhone(data.officePhone);
+          if (data.alertEmail) setAlertEmail(data.alertEmail);
+        }
+      })
+      .catch(() => { });
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,21 +79,20 @@ export function SiteHeader() {
     >
       {/* Top utility bar */}
       <div
-        className={`text-white text-xs sm:text-sm rounded-t-[10px] overflow-hidden transition-all duration-300 ${
-          isScrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
-        }`}
+        className={`text-white text-xs sm:text-sm rounded-t-[10px] overflow-hidden transition-all duration-300 ${isScrolled ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
+          }`}
         style={{ background: "var(--gradient-topbar)" }}
       >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 h-10 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 sm:gap-6 min-w-0">
             <a
-              href="mailto:revitalizerealestate@gmail.com"
+              href={`mailto:${alertEmail}`}
               className="flex items-center gap-2 min-w-0"
             >
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 shrink-0">
                 <Mail className="h-3.5 w-3.5" />
               </span>
-              <span className="truncate font-medium">revitalizerealestate@gmail.com</span>
+              <span className="truncate font-medium">{alertEmail}</span>
             </a>
             <span className="hidden sm:flex items-center gap-2 min-w-0">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 shrink-0">
@@ -154,7 +167,7 @@ export function SiteHeader() {
 
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <a
-              href="tel:8133230291"
+              href={`tel:${officePhone.replace(/\D/g, "")}`}
               className="flex items-center gap-2 rounded-full px-3 xl:px-4 py-2 text-white font-semibold text-[13px] xl:text-sm whitespace-nowrap"
               style={{
                 background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))",
@@ -163,7 +176,7 @@ export function SiteHeader() {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
                 <PhoneCall className="h-3.5 w-3.5" />
               </span>
-              (813) 323-0291
+              {officePhone}
             </a>
             <Link
               to="/services/real-estate"
@@ -187,14 +200,14 @@ export function SiteHeader() {
           <div className="lg:hidden pb-4 space-y-1 border-t pt-3 max-h-[calc(100vh-140px)] overflow-y-auto scroll-smooth">
             <div className="pb-3 flex flex-col gap-2 border-b border-gray-100/50 mb-3">
               <a
-                href="tel:8133230291"
+                href={`tel:${officePhone.replace(/\D/g, "")}`}
                 className="rounded-full px-4 py-2.5 text-white font-semibold text-sm text-center flex items-center justify-center gap-2"
                 style={{
                   background: "linear-gradient(90deg, var(--brand-orange), oklch(0.58 0.2 35))",
                 }}
               >
                 <PhoneCall className="h-4 w-4" />
-                (813) 323-0291
+                {officePhone}
               </a>
               <Link
                 to="/services/real-estate"

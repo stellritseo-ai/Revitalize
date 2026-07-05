@@ -6,6 +6,7 @@ import {
   dbGetReviews,
   dbAddReview,
   dbUpdateReview,
+  dbDeleteReview,
   dbGetWebEmails,
   dbAddWebEmail,
   dbDeleteWebEmail,
@@ -17,7 +18,9 @@ import {
   dbGetPortalUsers,
   dbAddPortalUser,
   dbDeletePortalUser,
-  dbUpdatePortalUser
+  dbUpdatePortalUser,
+  dbGetSettings,
+  dbSaveSettings
 } from "./db.server";
 
 import {
@@ -166,6 +169,11 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           return jsonResponse(updated);
         }
       }
+      if (method === "DELETE") {
+        const body = await request.json();
+        const updated = await dbDeleteReview(body.id);
+        return jsonResponse(updated);
+      }
     }
 
     // ── /api/emails ──
@@ -196,6 +204,19 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
       if (method === "GET") {
         const chats = await dbGetChatSessions(INITIAL_CHATS);
         return jsonResponse(chats);
+      }
+      if (method === "DELETE") {
+        const urlObj = new URL(request.url);
+        const id = urlObj.searchParams.get("id");
+        if (id) {
+          const { getDb } = await import("./db.server");
+          const db = await getDb();
+          await db.collection("chat_sessions").deleteOne({ id });
+          const docs = await db.collection("chat_sessions").find({}).toArray();
+          const mapped = docs.map(d => ({ ...d, id: d.id || String(d._id), _id: undefined }));
+          return jsonResponse(mapped);
+        }
+        return jsonResponse({ error: "Missing ID" }, 400);
       }
       if (method === "POST") {
         const body = await request.json();
@@ -261,21 +282,35 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const newPhoto = {
           id: "photo-" + Math.random().toString(36).substr(2, 9),
           url,
+          category: body.category || "residential",
           uploadedAt: new Date().toISOString()
         };
         const updated = await dbAddGalleryPhoto(newPhoto);
         return jsonResponse(updated);
       }
       if (method === "DELETE") {
-        const body = await request.json();
+        let id = url.searchParams.get("id");
+        if (!id) {
+          try {
+            const body = await request.json();
+            id = body.id;
+          } catch {}
+        }
+        if (!id) {
+          return jsonResponse({ error: "Missing image ID" }, 400);
+        }
         const { getDb } = await import("./db.server");
         const db = await getDb();
-        const photo = await db.collection("gallery_photos").findOne({ id: body.id });
+        const photo = await db.collection("gallery_photos").findOne({ id });
         if (photo && photo.url && photo.url.includes("cloudinary.com")) {
-          const { deleteFromCloudinary } = await import("./cloudinary.server");
-          await deleteFromCloudinary(photo.url);
+          try {
+            const { deleteFromCloudinary } = await import("./cloudinary.server");
+            await deleteFromCloudinary(photo.url);
+          } catch (cloudinaryErr) {
+            console.error("Failed to delete from Cloudinary, proceeding with database removal:", cloudinaryErr);
+          }
         }
-        const updated = await dbRemoveGalleryPhoto(body.id);
+        const updated = await dbRemoveGalleryPhoto(id);
         return jsonResponse(updated);
       }
     }
@@ -332,6 +367,31 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           const updatedUser = users.find(u => u.id === body.userId);
           return jsonResponse({ success: true, username: updatedUser ? updatedUser.username : (body.username || "") });
         }
+      }
+    }
+
+    // ── /api/settings ──
+    if (pathname === "/api/settings") {
+      const defaultSettings = {
+        alertEmail: "revitalizerealestate@gmail.com",
+        officePhone: "(813) 323-0291",
+        smsTemplate: "Hi {Name}, thank you for contacting Revitalize Group! Daniel Thompson will contact you during the {Time} to discuss your {Type} project.",
+        emailAlert: true,
+        smsAlert: true,
+        maintenanceMode: false,
+        weekdays: "8:00 AM - 5:00 PM",
+        saturdays: "8:00 AM - 5:00 PM",
+        sundays: "Closed (Emergency 24/7)"
+      };
+
+      if (method === "GET") {
+        const settings = await dbGetSettings(defaultSettings);
+        return jsonResponse(settings);
+      }
+      if (method === "POST") {
+        const body = await request.json();
+        const saved = await dbSaveSettings(body);
+        return jsonResponse(saved);
       }
     }
   } catch (error: any) {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Instagram, ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -58,9 +58,24 @@ const seoLinks = [
 ];
 
 export function FooterSection() {
+  const [officePhone, setOfficePhone] = useState("(813) 323-0291");
+  const [alertEmail, setAlertEmail] = useState("revitalizerealestate@gmail.com");
+
+  useEffect(() => {
+    fetch("/api/settings?t=" + Date.now())
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          if (data.officePhone) setOfficePhone(data.officePhone);
+          if (data.alertEmail) setAlertEmail(data.alertEmail);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer
-      className="mx-[15px] mt-[15px] rounded-2xl overflow-hidden font-sans"
+      className="mx-[15px] mt-[15px] rounded-[10px] overflow-hidden font-sans"
       style={{
         background: "linear-gradient(160deg, #0d1117 0%, #0f1620 50%, #110d0a 100%)",
       }}
@@ -168,7 +183,7 @@ export function FooterSection() {
             <ul className="space-y-4 mb-8">
               <li>
                 <a
-                  href="tel:8133230291"
+                  href={`tel:${officePhone.replace(/\D/g, "")}`}
                   className="group flex items-start gap-3 hover:opacity-90 transition-opacity"
                 >
                   <div
@@ -182,14 +197,14 @@ export function FooterSection() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Phone</p>
-                    <p className="text-white text-[14px] font-bold">(813) 323-0291</p>
+                    <p className="text-white text-[14px] font-bold">{officePhone}</p>
                   </div>
                 </a>
               </li>
 
               <li>
                 <a
-                  href="mailto:revitalizerealestate@gmail.com"
+                  href={`mailto:${alertEmail}`}
                   className="group flex items-start gap-3 hover:opacity-90 transition-opacity"
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-white/6 border border-white/8">
@@ -197,7 +212,7 @@ export function FooterSection() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Email</p>
-                    <p className="text-white/80 text-[13px] font-medium">revitalizerealestate@gmail.com</p>
+                    <p className="text-white/80 text-[13px] font-medium">{alertEmail}</p>
                   </div>
                 </a>
               </li>
