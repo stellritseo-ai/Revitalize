@@ -20,15 +20,19 @@ import {
   dbDeletePortalUser,
   dbUpdatePortalUser,
   dbGetSettings,
-  dbSaveSettings
-} from "./db.server";
+  dbSaveSettings,
+  getDb
+} from "./db.server.js";
 
 import {
   INITIAL_LEADS,
   INITIAL_REVIEWS,
   INITIAL_CHATS,
   INITIAL_EMAILS
-} from "./leads-store";
+} from "./leads-store.js";
+
+import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinary.server.js";
+import { hashPassword, verifyPassword } from "./crypto.server.js";
 
 const DEFAULT_ADMIN = { id: "admin-1", username: "admin", role: "admin", password: "admin123" };
 
@@ -102,12 +106,10 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
     // ── /api/leads/photos ──
     if (pathname === "/api/leads/photos") {
       const body = await request.json();
-      const { dbGetLeads, getDb } = await import("./db.server");
       const db = await getDb();
       const leadsCol = db.collection("leads");
 
       if (method === "POST") {
-        const { uploadToCloudinary } = await import("./cloudinary.server");
         const url = await uploadToCloudinary(body.base64Photo, "revitalize/leads");
         await leadsCol.updateOne({ id: body.leadId }, { $push: { photos: url } } as any);
       } else if (method === "DELETE") {
@@ -116,7 +118,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           const photos = [...lead.photos];
           const photoUrl = photos[body.photoIndex];
           if (photoUrl && photoUrl.includes("cloudinary.com")) {
-            const { deleteFromCloudinary } = await import("./cloudinary.server");
             await deleteFromCloudinary(photoUrl);
           }
           photos.splice(body.photoIndex, 1);
@@ -137,7 +138,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const body = await request.json();
         const photos: string[] = [];
         if (body.newReviewPhoto) {
-          const { uploadToCloudinary } = await import("./cloudinary.server");
           const url = await uploadToCloudinary(body.newReviewPhoto, "revitalize/reviews");
           photos.push(url);
         }
@@ -161,7 +161,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           const updated = await dbUpdateReview(body.id, { replyText: body.replyText });
           return jsonResponse(updated);
         } else if (body.action === "featured") {
-          const { getDb } = await import("./db.server");
           const db = await getDb();
           const review = await db.collection("reviews").findOne({ id: body.id });
           const featured = review ? !review.featured : false;
@@ -209,7 +208,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const urlObj = new URL(request.url);
         const id = urlObj.searchParams.get("id");
         if (id) {
-          const { getDb } = await import("./db.server");
           const db = await getDb();
           await db.collection("chat_sessions").deleteOne({ id });
           const docs = await db.collection("chat_sessions").find({}).toArray();
@@ -236,7 +234,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           return jsonResponse(newSession);
         }
         if (body.action === "message") {
-          const { getDb } = await import("./db.server");
           const db = await getDb();
           const session = await db.collection("chat_sessions").findOne({ id: body.sessionId });
           if (!session) return jsonResponse(null, 404);
@@ -257,7 +254,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           return jsonResponse(updatedSession);
         }
         if (body.action === "read") {
-          const { getDb } = await import("./db.server");
           const db = await getDb();
           await db.collection("chat_sessions").updateOne({ id: body.sessionId }, { $set: { unread: false } });
           const docs = await db.collection("chat_sessions").find({}).toArray();
@@ -277,7 +273,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
       }
       if (method === "POST") {
         const body = await request.json();
-        const { uploadToCloudinary } = await import("./cloudinary.server");
         const url = await uploadToCloudinary(body.base64Photo, "revitalize/gallery");
         const newPhoto = {
           id: "photo-" + Math.random().toString(36).substr(2, 9),
@@ -299,12 +294,10 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         if (!id) {
           return jsonResponse({ error: "Missing image ID" }, 400);
         }
-        const { getDb } = await import("./db.server");
         const db = await getDb();
         const photo = await db.collection("gallery_photos").findOne({ id });
         if (photo && photo.url && photo.url.includes("cloudinary.com")) {
           try {
-            const { deleteFromCloudinary } = await import("./cloudinary.server");
             await deleteFromCloudinary(photo.url);
           } catch (cloudinaryErr) {
             console.error("Failed to delete from Cloudinary, proceeding with database removal:", cloudinaryErr);
@@ -328,7 +321,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           const accounts = await dbGetPortalUsers(DEFAULT_ADMIN);
           const user = accounts.find(a => a.username.toLowerCase() === body.username.toLowerCase());
           if (user) {
-            const { verifyPassword } = await import("./crypto.server");
             const isValid = await verifyPassword(body.password, user.password);
             if (isValid) {
               return jsonResponse({ success: true, user: { id: user.id, username: user.username, role: user.role } });
@@ -341,7 +333,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           if (accounts.some(a => a.username.toLowerCase() === body.username.toLowerCase())) {
             return jsonResponse({ error: "Username already exists" }, 400);
           }
-          const { hashPassword } = await import("./crypto.server");
           const hashedPassword = await hashPassword(body.password);
           const newUser = {
             id: "admin-" + Math.random().toString(36).substr(2, 9),
@@ -360,7 +351,6 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
           const updates: any = {};
           if (body.username) updates.username = body.username;
           if (body.password) {
-            const { hashPassword } = await import("./crypto.server");
             updates.password = await hashPassword(body.password);
           }
           const users = await dbUpdatePortalUser(body.userId, updates);

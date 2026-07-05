@@ -1,4 +1,5 @@
 import { MongoClient, ObjectId } from "mongodb";
+import { hashPassword } from "./crypto.server.js";
 
 // MongoDB Connection Config
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://revitalize_db_user:y0YMD1Zehs44T4se@revitalize.umub891.mongodb.net/?appName=revitalize";
@@ -235,7 +236,6 @@ export async function dbGetPortalUsers(defaultAdmin: any): Promise<any[]> {
   const accountsCol = db.collection("portal_users");
   const count = await accountsCol.countDocuments();
   if (count === 0) {
-    const { hashPassword } = await import("./crypto.server");
     const hashedPassword = await hashPassword(defaultAdmin.password);
     const seededAdmin = { ...defaultAdmin, password: hashedPassword };
     await accountsCol.insertOne(seededAdmin);
@@ -245,7 +245,6 @@ export async function dbGetPortalUsers(defaultAdmin: any): Promise<any[]> {
   // Ensure default admin exists and has the correct password hashed
   const existingDefaultAdmin = await accountsCol.findOne({ username: defaultAdmin.username });
   if (!existingDefaultAdmin) {
-    const { hashPassword } = await import("./crypto.server");
     const hashedPassword = await hashPassword(defaultAdmin.password);
     const seededAdmin = { ...defaultAdmin, password: hashedPassword };
     await accountsCol.insertOne(seededAdmin);
@@ -253,7 +252,6 @@ export async function dbGetPortalUsers(defaultAdmin: any): Promise<any[]> {
     // If it exists but contains a plaintext password (no salt separator ':'), update to hashed admin123
     const isPlaintext = !existingDefaultAdmin.password.includes(":");
     if (isPlaintext) {
-      const { hashPassword } = await import("./crypto.server");
       const hashedPassword = await hashPassword(defaultAdmin.password);
       await accountsCol.updateOne({ id: existingDefaultAdmin.id }, { $set: { password: hashedPassword } });
     }
