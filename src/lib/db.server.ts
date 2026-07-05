@@ -1,19 +1,15 @@
+import { MongoClient, ObjectId } from "mongodb";
+
 // MongoDB Connection Config
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://revitalize_db_user:y0YMD1Zehs44T4se@revitalize.umub891.mongodb.net/?appName=revitalize";
 const DB_NAME = "revitalize";
 
-let client: any = null;
-let clientPromise: Promise<any> | null = null;
+let client: MongoClient | null = null;
+let clientPromise: Promise<MongoClient> | null = null;
 
-async function getMongodb() {
-  const loadModule = new Function("m", "return import(m)");
-  return loadModule("mongodb");
-}
-
-async function getClient(): Promise<any> {
+async function getClient(): Promise<MongoClient> {
   if (client) return client;
   if (!clientPromise) {
-    const { MongoClient } = await getMongodb();
     client = new MongoClient(MONGODB_URI, {
       connectTimeoutMS: 15000,
       socketTimeoutMS: 45000,
@@ -66,7 +62,6 @@ export async function dbUpdateLead(id: string, updates: any): Promise<any[] | nu
   
   let res = await leadsCol.updateOne({ id }, { $set: updates });
   if (res.matchedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await leadsCol.updateOne({ _id: new ObjectId(id) }, { $set: updates });
     }
@@ -82,7 +77,6 @@ export async function dbDeleteLead(id: string): Promise<any[]> {
   
   let res = await leadsCol.deleteOne({ id });
   if (res.deletedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await leadsCol.deleteOne({ _id: new ObjectId(id) });
     }
@@ -128,7 +122,6 @@ export async function dbUpdateReview(id: string, updates: any): Promise<any[]> {
   
   let res = await reviewsCol.updateOne({ id }, { $set: updates });
   if (res.matchedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await reviewsCol.updateOne({ _id: new ObjectId(id) }, { $set: updates });
     }
@@ -143,7 +136,6 @@ export async function dbDeleteReview(id: string): Promise<any[]> {
   const reviewsCol = db.collection("reviews");
   let res = await reviewsCol.deleteOne({ id });
   if (res.deletedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await reviewsCol.deleteOne({ _id: new ObjectId(id) });
     }
@@ -178,7 +170,6 @@ export async function dbDeleteWebEmail(id: string): Promise<any[]> {
   
   let res = await emailsCol.deleteOne({ id });
   if (res.deletedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await emailsCol.deleteOne({ _id: new ObjectId(id) });
     }
@@ -234,7 +225,6 @@ export async function dbRemoveGalleryPhoto(id: string): Promise<any[]> {
   
   let res = await galleryCol.deleteOne({ id });
   if (res.deletedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(id)) {
       await galleryCol.deleteOne({ _id: new ObjectId(id) });
     }
@@ -290,7 +280,6 @@ export async function dbDeletePortalUser(userId: string): Promise<void> {
   
   let res = await accountsCol.deleteOne({ id: userId });
   if (res.deletedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(userId)) {
       await accountsCol.deleteOne({ _id: new ObjectId(userId) });
     }
@@ -303,7 +292,6 @@ export async function dbUpdatePortalUser(userId: string, updates: any): Promise<
   
   let res = await accountsCol.updateOne({ id: userId }, { $set: updates });
   if (res.matchedCount === 0) {
-    const { ObjectId } = await getMongodb();
     if (ObjectId.isValid(userId)) {
       await accountsCol.updateOne({ _id: new ObjectId(userId) }, { $set: updates });
     }
