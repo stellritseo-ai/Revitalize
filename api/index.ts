@@ -1,3 +1,5 @@
+import "mongodb";
+import "cloudinary";
 import { handleNodeApiRequest } from "../src/lib/api-handler.server";
 
 export default async function handler(req: any, res: any) {
