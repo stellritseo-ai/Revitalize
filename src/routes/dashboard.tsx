@@ -668,24 +668,15 @@ function DashboardPage() {
       for (let i = 0; i < filesCount; i++) {
         const file = selectedGalleryFiles[i];
 
-        // Read file as Base64 helper promise
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = () => reject(new Error("File reading failed"));
-          reader.readAsDataURL(file);
-        });
-
-        // Track internal segment progress for this file
+        // Track segment progress for this file
         const segmentStart = (i / filesCount) * 100;
         const segmentEnd = ((i + 1) / filesCount) * 100;
         setGalleryUploadProgress(Math.floor(segmentStart));
 
-        // Call API
-        const updated = await uploadGalleryPhoto(base64, uploadCategory);
+        // Upload File directly (no base64 conversion needed — avoids Vercel body limit)
+        const updated = await uploadGalleryPhoto(file, uploadCategory);
         currentPhotosList = updated;
 
-        // Instantly complete this segment
         setGalleryUploadProgress(Math.floor(segmentEnd));
       }
 

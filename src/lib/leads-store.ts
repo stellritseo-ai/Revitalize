@@ -716,15 +716,49 @@ export const getGalleryPhotos = async (): Promise<GalleryPhoto[]> => {
   }
 };
 
-export const uploadGalleryPhoto = async (base64Photo: string, category?: string): Promise<GalleryPhoto[]> => {
+export const uploadGalleryPhoto = async (fileOrBase64: string | File, category?: string): Promise<GalleryPhoto[]> => {
   try {
-    return await apiCall<GalleryPhoto[]>("/api/gallery", "POST", { base64Photo, category });
+    const folder = `revitalize/${category && category !== "all" ? category : "gallery"}`;
+
+    // Step 1: Get a signed upload token from the server
+    const signRes = await apiCall<{ signature: string; timestamp: number; apiKey: string; cloudName: string; folder: string }>(
+      "/api/sign-upload", "POST", { folder }
+    );
+
+    // Step 2: Build FormData for direct Cloudinary upload (supports any size)
+    const formData = new FormData();
+    formData.append("api_key", signRes.apiKey);
+    formData.append("signature", signRes.signature);
+    formData.append("timestamp", String(signRes.timestamp));
+    formData.append("folder", signRes.folder);
+
+    // Accept either a File object (from input) or a base64 string
+    if (fileOrBase64 instanceof File) {
+      formData.append("file", fileOrBase64);
+    } else {
+      formData.append("file", fileOrBase64);
+    }
+
+    // Step 3: Upload directly to Cloudinary (no Vercel limit!)
+    const uploadRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${signRes.cloudName}/auto/upload`,
+      { method: "POST", body: formData }
+    );
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      throw new Error(`Cloudinary upload failed: ${err}`);
+    }
+    const uploadData = await uploadRes.json();
+    const secureUrl: string = uploadData.secure_url;
+
+    // Step 4: Save the URL to our database
+    return await apiCall<GalleryPhoto[]>("/api/gallery", "POST", { url: secureUrl, category });
   } catch (err) {
-    console.warn("MongoDB offline, falling back to local storage:", err);
+    console.warn("Gallery upload failed, falling back to local storage:", err);
     const photos = await getGalleryPhotos();
     const newPhoto: GalleryPhoto = {
       id: "photo-" + Math.random().toString(36).substr(2, 9),
-      url: base64Photo,
+      url: typeof fileOrBase64 === "string" ? fileOrBase64 : URL.createObjectURL(fileOrBase64),
       category: category || "residential",
       uploadedAt: new Date().toISOString()
     };

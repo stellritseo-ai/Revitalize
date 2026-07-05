@@ -87,6 +87,25 @@ export default async function handler(req: any, res: any) {
   try {
     const db = await getDb();
 
+    // ── /api/sign-upload  (direct Cloudinary browser upload) ──
+    if (pathname === "/api/sign-upload" && method === "POST") {
+      const body = await readBody(req);
+      const folder = body.folder || "revitalize/gallery";
+      const timestamp = Math.round(Date.now() / 1000);
+      const apiSecret = process.env.CLOUDINARY_API_SECRET || "VA-N6KeiGaH5T1t2GVjqsJvpwlw";
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "hbld03xh";
+      const apiKey = process.env.CLOUDINARY_API_KEY || "315681416549322";
+
+      // Build the string to sign
+      const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
+      const signature = crypto
+        .createHash("sha1")
+        .update(paramsToSign + apiSecret)
+        .digest("hex");
+
+      return json(res, { signature, timestamp, apiKey, cloudName, folder });
+    }
+
     // ── /api/settings ──
     if (pathname === "/api/settings") {
       const col = db.collection("settings");
@@ -279,8 +298,16 @@ export default async function handler(req: any, res: any) {
       }
       if (method === "POST") {
         const body = await readBody(req);
-        const r = await cloudinary.uploader.upload(body.base64Photo, { folder: "revitalize/gallery", resource_type: "auto" });
-        const photo = { id: "photo-" + Math.random().toString(36).substr(2, 9), url: r.secure_url, category: body.category || "residential", uploadedAt: new Date().toISOString() };
+        let photoUrl: string;
+        if (body.url) {
+          // Direct upload: URL already uploaded to Cloudinary from the browser
+          photoUrl = body.url;
+        } else {
+          // Fallback: base64 upload via server (for small images)
+          const r = await cloudinary.uploader.upload(body.base64Photo, { folder: "revitalize/gallery", resource_type: "auto" });
+          photoUrl = r.secure_url;
+        }
+        const photo = { id: "photo-" + Math.random().toString(36).substr(2, 9), url: photoUrl, category: body.category || "residential", uploadedAt: new Date().toISOString() };
         await col.insertOne(photo);
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
