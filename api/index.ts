@@ -5,6 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 // ── CONFIG ──
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://revitalize_db_user:y0YMD1Zehs44T4se@revitalize.umub891.mongodb.net/?appName=revitalize";
 const DB_NAME = "revitalize";
+const SESSION_SECRET = process.env.SESSION_SECRET || "revitalize_secure_session_token_key_2026_9876543210";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "hbld03xh",
@@ -38,7 +39,7 @@ function json(res: any, data: any, status = 200) {
   return true;
 }
 
-// ── CRYPTO ──
+// ── CRYPTO & TOKENS ──
 function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
@@ -49,6 +50,46 @@ function verifyPassword(password: string, storedHash: string): boolean {
   if (!salt || !hash) return false;
   const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
   return hash === verifyHash;
+}
+
+function generateToken(user: { id: string; username: string; role: string }): string {
+  const payload = JSON.stringify({
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    expires: Date.now() + 24 * 60 * 60 * 1000 // 24 hours validity
+  });
+  const iv = crypto.randomBytes(12);
+  const key = crypto.scryptSync(SESSION_SECRET, "salt", 32);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  let encrypted = cipher.update(payload, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  const authTag = cipher.getAuthTag().toString("hex");
+  return `${iv.toString("hex")}:${encrypted}:${authTag}`;
+}
+
+function verifyToken(token: string): { id: string; username: string; role: string } | null {
+  try {
+    const [ivHex, encryptedHex, authTagHex] = token.split(":");
+    if (!ivHex || !encryptedHex || !authTagHex) return null;
+    const key = crypto.scryptSync(SESSION_SECRET, "salt", 32);
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(ivHex, "hex"));
+    decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
+    let decrypted = decipher.update(encryptedHex, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    const payload = JSON.parse(decrypted);
+    if (payload.expires < Date.now()) return null;
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getAuthUser(req: any): { id: string; username: string; role: string } | null {
+  const authHeader = req.headers["authorization"] || req.headers["Authorization"];
+  if (!authHeader) return null;
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  return verifyToken(token);
 }
 
 // ── DEFAULT DATA ──
@@ -87,9 +128,47 @@ export default async function handler(req: any, res: any) {
   try {
     const db = await getDb();
 
+    // Pre-parse JSON body for POST/PUT/DELETE
+    let body: any = {};
+    if (method !== "GET" && method !== "HEAD") {
+      body = await readBody(req);
+    }
+
+    // Access Control Authentication Middleware Check
+    const authUser = getAuthUser(req);
+    const isPublicSettings = pathname === "/api/settings" && method === "GET";
+    const isPublicLeads = pathname === "/api/leads" && method === "POST";
+    const isPublicReviews = pathname === "/api/reviews" && (method === "GET" || method === "POST");
+    const isPublicEmails = pathname === "/api/emails" && method === "POST";
+    const isPublicChats = pathname === "/api/chats" && method === "POST" && (body.action === "create" || body.action === "message");
+    const isPublicGallery = pathname === "/api/gallery" && method === "GET";
+    const isPublicLogin = pathname === "/api/users" && method === "POST" && body.action === "login";
+
+    const isPublic = isPublicSettings || isPublicLeads || isPublicReviews || isPublicEmails || isPublicChats || isPublicGallery || isPublicLogin;
+
+    if (!isPublic) {
+      if (!authUser) {
+        return json(res, { error: "Unauthorized access" }, 401);
+      }
+
+      // Role-based Access Control (RBAC)
+      const isModification = method === "POST" || method === "PUT" || method === "DELETE";
+      const isUserManagement = pathname === "/api/users" && (method === "GET" || (method === "POST" && body.action !== "login"));
+
+      if (isUserManagement) {
+        const isSelfUpdate = method === "POST" && body.action === "update" && body.userId === authUser.id;
+        if (authUser.role !== "admin" && !isSelfUpdate) {
+          return json(res, { error: "Forbidden: Admin access required" }, 403);
+        }
+      } else if (isModification) {
+        if (authUser.role !== "admin" && authUser.role !== "editor") {
+          return json(res, { error: "Forbidden: Edit permissions required" }, 403);
+        }
+      }
+    }
+
     // ── /api/sign-upload  (direct Cloudinary browser upload) ──
     if (pathname === "/api/sign-upload" && method === "POST") {
-      const body = await readBody(req);
       const folder = body.folder || "revitalize/gallery";
       const timestamp = Math.round(Date.now() / 1000);
       const apiSecret = process.env.CLOUDINARY_API_SECRET || "VA-N6KeiGaH5T1t2GVjqsJvpwlw";
@@ -98,10 +177,7 @@ export default async function handler(req: any, res: any) {
 
       // Build the string to sign
       const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
-      const signature = crypto
-        .createHash("sha1")
-        .update(paramsToSign + apiSecret)
-        .digest("hex");
+      const signature = crypto.createHash("sha1").update(paramsToSign + apiSecret).digest("hex");
 
       return json(res, { signature, timestamp, apiKey, cloudName, folder });
     }
@@ -123,7 +199,6 @@ export default async function handler(req: any, res: any) {
         return json(res, mapDoc(doc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         await col.updateOne({ id: "site_config" }, { $set: body }, { upsert: true });
         const doc = await col.findOne({ id: "site_config" });
         return json(res, mapDoc(doc));
@@ -138,19 +213,18 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         await col.insertOne(body);
         return json(res, body);
       }
       if (method === "PUT") {
-        const body = await readBody(req);
-        await col.updateOne({ id: body.id }, { $set: body });
+        const idString = typeof body.id === "string" ? body.id : "";
+        await col.updateOne({ id: idString }, { $set: body });
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
       if (method === "DELETE") {
-        const body = await readBody(req);
-        await col.deleteOne({ id: body.id });
+        const idString = typeof body.id === "string" ? body.id : "";
+        await col.deleteOne({ id: idString });
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
@@ -158,13 +232,13 @@ export default async function handler(req: any, res: any) {
 
     // ── /api/leads/photos ──
     if (pathname === "/api/leads/photos") {
-      const body = await readBody(req);
       const leadsCol = db.collection("leads");
+      const leadIdString = typeof body.leadId === "string" ? body.leadId : "";
       if (method === "POST") {
         const uploadUrl = await cloudinary.uploader.upload(body.base64Photo, { folder: "revitalize/leads", resource_type: "auto" });
-        await leadsCol.updateOne({ id: body.leadId }, { $push: { photos: uploadUrl.secure_url } } as any);
+        await leadsCol.updateOne({ id: leadIdString }, { $push: { photos: uploadUrl.secure_url } } as any);
       } else if (method === "DELETE") {
-        const lead = await leadsCol.findOne({ id: body.leadId });
+        const lead = await leadsCol.findOne({ id: leadIdString });
         if (lead?.photos) {
           const photos = [...lead.photos];
           const photoUrl = photos[body.photoIndex];
@@ -175,7 +249,7 @@ export default async function handler(req: any, res: any) {
             await cloudinary.uploader.destroy(id);
           }
           photos.splice(body.photoIndex, 1);
-          await leadsCol.updateOne({ id: body.leadId }, { $set: { photos } });
+          await leadsCol.updateOne({ id: leadIdString }, { $set: { photos } });
         }
       }
       const docs = await leadsCol.find({}).toArray();
@@ -190,7 +264,6 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         const photos: string[] = [];
         if (body.newReviewPhoto) {
           const r = await cloudinary.uploader.upload(body.newReviewPhoto, { folder: "revitalize/reviews", resource_type: "auto" });
@@ -206,19 +279,19 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "PUT") {
-        const body = await readBody(req);
+        const idString = typeof body.id === "string" ? body.id : "";
         if (body.action === "reply") {
-          await col.updateOne({ id: body.id }, { $set: { replyText: body.replyText } });
+          await col.updateOne({ id: idString }, { $set: { replyText: body.replyText } });
         } else if (body.action === "featured") {
-          const r = await col.findOne({ id: body.id });
-          await col.updateOne({ id: body.id }, { $set: { featured: r ? !r.featured : false } });
+          const r = await col.findOne({ id: idString });
+          await col.updateOne({ id: idString }, { $set: { featured: r ? !r.featured : false } });
         }
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
       if (method === "DELETE") {
-        const body = await readBody(req);
-        await col.deleteOne({ id: body.id });
+        const idString = typeof body.id === "string" ? body.id : "";
+        await col.deleteOne({ id: idString });
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
@@ -232,15 +305,14 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         const email = { ...body.emailData, id: "email-" + Math.random().toString(36).substr(2, 9), createdAt: new Date().toISOString() };
         await col.insertOne(email);
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
       if (method === "DELETE") {
-        const body = await readBody(req);
-        await col.deleteOne({ id: body.id });
+        const idString = typeof body.id === "string" ? body.id : "";
+        await col.deleteOne({ id: idString });
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
@@ -261,7 +333,6 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         if (body.action === "create") {
           const session = {
             id: "session-" + Math.random().toString(36).substr(2, 9),
@@ -274,15 +345,17 @@ export default async function handler(req: any, res: any) {
           return json(res, session);
         }
         if (body.action === "message") {
-          const session = await col.findOne({ id: body.sessionId });
+          const sessionIdString = typeof body.sessionId === "string" ? body.sessionId : "";
+          const session = await col.findOne({ id: sessionIdString });
           if (!session) return json(res, null, 404);
           const msg = { id: "msg-" + Math.random().toString(36).substr(2, 9), sender: body.sender, text: body.text, timestamp: new Date().toISOString() };
           const updated = { ...session, messages: [...(session.messages || []), msg], lastMessage: body.text, lastMessageTime: msg.timestamp, unread: body.sender === "client" };
-          await col.replaceOne({ id: body.sessionId }, updated);
+          await col.replaceOne({ id: sessionIdString }, updated);
           return json(res, mapDoc(updated));
         }
         if (body.action === "read") {
-          await col.updateOne({ id: body.sessionId }, { $set: { unread: false } });
+          const sessionIdString = typeof body.sessionId === "string" ? body.sessionId : "";
+          await col.updateOne({ id: sessionIdString }, { $set: { unread: false } });
           const docs = await col.find({}).toArray();
           return json(res, docs.map(mapDoc));
         }
@@ -297,13 +370,10 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(mapDoc));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         let photoUrl: string;
         if (body.url) {
-          // Direct upload: URL already uploaded to Cloudinary from the browser
           photoUrl = body.url;
         } else {
-          // Fallback: base64 upload via server (for small images)
           const r = await cloudinary.uploader.upload(body.base64Photo, { folder: "revitalize/gallery", resource_type: "auto" });
           photoUrl = r.secure_url;
         }
@@ -314,9 +384,10 @@ export default async function handler(req: any, res: any) {
       }
       if (method === "DELETE") {
         let id = url.searchParams.get("id");
-        if (!id) { const b = await readBody(req); id = b.id; }
-        if (!id) return json(res, { error: "Missing ID" }, 400);
-        const photo = await col.findOne({ id });
+        if (!id) { id = body.id; }
+        const idString = typeof id === "string" ? id : "";
+        if (!idString) return json(res, { error: "Missing ID" }, 400);
+        const photo = await col.findOne({ id: idString });
         if (photo?.url?.includes("cloudinary.com")) {
           try {
             const parts = photo.url.split("/");
@@ -325,7 +396,7 @@ export default async function handler(req: any, res: any) {
             await cloudinary.uploader.destroy(pid);
           } catch {}
         }
-        await col.deleteOne({ id });
+        await col.deleteOne({ id: idString });
         const docs = await col.find({}).toArray();
         return json(res, docs.map(mapDoc));
       }
@@ -355,13 +426,13 @@ export default async function handler(req: any, res: any) {
         return json(res, docs.map(d => ({ id: d.id, username: d.username, role: d.role })));
       }
       if (method === "POST") {
-        const body = await readBody(req);
         await ensureAdmin();
         if (body.action === "login") {
           const users = await col.find({}).toArray();
           const user = users.find((u: any) => u.username.toLowerCase() === body.username.toLowerCase());
           if (user && verifyPassword(body.password, user.password)) {
-            return json(res, { success: true, user: { id: user.id, username: user.username, role: user.role } });
+            const token = generateToken({ id: user.id, username: user.username, role: user.role });
+            return json(res, { success: true, user: { id: user.id, username: user.username, role: user.role }, token });
           }
           return json(res, { error: "Invalid username or password" }, 401);
         }

@@ -328,10 +328,23 @@ const setStorageItem = <T>(key: string, value: T): void => {
 // ── GENERIC API FETCH HELPER ──
 async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
   const options: RequestInit = { method };
+  const headers: Record<string, string> = {};
+
   if (body !== undefined) {
-    options.headers = { "content-type": "application/json" };
+    headers["content-type"] = "application/json";
     options.body = JSON.stringify(body);
   }
+
+  // Attach session token if logged in
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("revitalize-session-token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
+  options.headers = headers;
+
   const res = await fetch(url, options);
   if (!res.ok) {
     let errorMsg = `HTTP error ${res.status}`;
