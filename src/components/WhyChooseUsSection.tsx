@@ -26,7 +26,7 @@ export function WhyChooseUsSection() {
           setOfficePhone(data.officePhone);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
   const features = [
     {
@@ -169,10 +169,10 @@ export function WhyChooseUsSection() {
               <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 bg-white/90 backdrop-blur-md border border-white/20 rounded-2xl p-3 sm:p-5 shadow-lg flex items-center justify-between select-none transition-all duration-300 group-hover:bottom-6 group-hover:bg-white/95 group-hover:shadow-xl">
                 <div className="text-left">
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("Revitalize Quality", "Calidad Revitalize")}</p>
-                  <p className="text-xs sm:text-sm font-extrabold text-[#0F172A] mt-0.5">{t("Licensed Florida Contractor", "Contratista Autorizado de Florida")}</p>
+                  <p className="text-xs sm:text-sm font-extrabold text-[#0F172A] mt-0.5">{t("Licensed Florida Real Estate Professional", "Contratista Autorizado de Florida")}</p>
                 </div>
                 <span className="text-[10px] font-black text-white bg-copper border border-copper/20 px-3 py-1 rounded-full uppercase tracking-wider whitespace-nowrap">
-                  {t("Active Work", "Trabajo Activo")}
+                  {t("PROPERTY SHOWCASE.", "Trabajo Activo")}
                 </span>
               </div>
             </motion.div>
