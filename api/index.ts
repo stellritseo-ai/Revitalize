@@ -31,6 +31,27 @@ function mapDoc(doc: any) {
   return { ...rest, id: rest.id || String(_id) };
 }
 
+function normalizeLeadDoc(doc: any): any {
+  if (!doc) return null;
+  const mapped = mapDoc(doc);
+  const data = mapped.leadData || mapped;
+  return {
+    ...mapped,
+    name: data.name || mapped.name || "Unknown Lead",
+    email: data.email || mapped.email || "",
+    phone: data.phone || mapped.phone || "",
+    address: data.address || mapped.address || "Tampa, FL",
+    projectType: data.projectType || mapped.projectType || "remodeling",
+    description: data.description || mapped.description || "",
+    contactTime: data.contactTime || mapped.contactTime || "anytime",
+    status: data.status || mapped.status || "new",
+    estimatedValue: typeof data.estimatedValue === "number" ? data.estimatedValue : (typeof mapped.estimatedValue === "number" ? mapped.estimatedValue : 15000),
+    createdAt: data.createdAt || mapped.createdAt || new Date().toISOString(),
+    photos: Array.isArray(data.photos) ? data.photos : (Array.isArray(mapped.photos) ? mapped.photos : []),
+    notes: data.notes || mapped.notes || ""
+  };
+}
+
 function json(res: any, data: any, status = 200) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
@@ -142,9 +163,10 @@ export default async function handler(req: any, res: any) {
     const isPublicEmails = pathname === "/api/emails" && method === "POST";
     const isPublicChats = pathname === "/api/chats" && method === "POST" && (body.action === "create" || body.action === "message");
     const isPublicGallery = pathname === "/api/gallery" && method === "GET";
+    const isPublicBlogs = pathname === "/api/blogs" && method === "GET";
     const isPublicLogin = pathname === "/api/users" && method === "POST" && body.action === "login";
 
-    const isPublic = isPublicSettings || isPublicLeads || isPublicReviews || isPublicEmails || isPublicChats || isPublicGallery || isPublicLogin;
+    const isPublic = isPublicSettings || isPublicLeads || isPublicReviews || isPublicEmails || isPublicChats || isPublicGallery || isPublicBlogs || isPublicLogin;
 
     if (!isPublic) {
       if (!authUser) {
@@ -210,23 +232,50 @@ export default async function handler(req: any, res: any) {
       const col = db.collection("leads");
       if (method === "GET") {
         const docs = await col.find({}).toArray();
-        return json(res, docs.map(mapDoc));
+        return json(res, docs.map(normalizeLeadDoc));
       }
       if (method === "POST") {
-        await col.insertOne(body);
-        return json(res, body);
+        let leadObj = body;
+        if (body.leadData) {
+          let estimatedValue = 15000;
+          switch (body.leadData.projectType) {
+            case "remodeling": estimatedValue = 45000; break;
+            case "kitchen": estimatedValue = 85000; break;
+            case "bathroom": estimatedValue = 25000; break;
+            case "real-estate": estimatedValue = 350000; break;
+            case "cleaning": estimatedValue = 1200; break;
+            case "cabinets": estimatedValue = 15000; break;
+          }
+          leadObj = {
+            ...body.leadData,
+            id: body.id || "lead-" + Math.random().toString(36).substr(2, 9),
+            status: "new",
+            estimatedValue,
+            createdAt: new Date().toISOString(),
+            photos: []
+          };
+        } else if (body.lead) {
+          leadObj = {
+            ...body.lead,
+            id: body.id || "lead-" + Math.random().toString(36).substr(2, 9),
+            createdAt: new Date().toISOString()
+          };
+        }
+        const normalized = normalizeLeadDoc(leadObj);
+        await col.insertOne(normalized);
+        return json(res, normalized);
       }
       if (method === "PUT") {
         const idString = typeof body.id === "string" ? body.id : "";
         await col.updateOne({ id: idString }, { $set: body });
         const docs = await col.find({}).toArray();
-        return json(res, docs.map(mapDoc));
+        return json(res, docs.map(normalizeLeadDoc));
       }
       if (method === "DELETE") {
         const idString = typeof body.id === "string" ? body.id : "";
         await col.deleteOne({ id: idString });
         const docs = await col.find({}).toArray();
-        return json(res, docs.map(mapDoc));
+        return json(res, docs.map(normalizeLeadDoc));
       }
     }
 
@@ -458,6 +507,35 @@ export default async function handler(req: any, res: any) {
           const updated = users.find((u: any) => u.id === body.userId);
           return json(res, { success: true, username: updated?.username || body.username || "" });
         }
+      }
+    }
+
+    // ── /api/blogs ──
+    if (pathname === "/api/blogs") {
+      const col = db.collection("blog_posts");
+      if (method === "GET") {
+        const docs = await col.find({}).sort({ _id: -1 }).toArray();
+        return json(res, docs.map(mapDoc));
+      }
+      if (method === "POST") {
+        const newPost = {
+          ...body,
+          id: body.id || "blog-" + Math.random().toString(36).substr(2, 9),
+          date: body.date || new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+          createdAt: new Date().toISOString(),
+          isCustom: true
+        };
+        await col.insertOne(newPost);
+        const docs = await col.find({}).sort({ _id: -1 }).toArray();
+        return json(res, docs.map(mapDoc));
+      }
+      if (method === "DELETE") {
+        let id = url.searchParams.get("id");
+        if (!id) id = body.id;
+        const idString = typeof id === "string" ? id : String(id);
+        await col.deleteOne({ $or: [{ id: idString }, { id }] });
+        const docs = await col.find({}).sort({ _id: -1 }).toArray();
+        return json(res, docs.map(mapDoc));
       }
     }
 

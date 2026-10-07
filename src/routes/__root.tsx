@@ -99,7 +99,7 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("Route error:", error);
   const router = useRouter();
 
   return (
@@ -111,6 +111,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
+        {import.meta.env.DEV && error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-left text-xs font-mono text-red-600 dark:text-red-400 overflow-auto max-h-48">
+            <p className="font-bold">{error.name}: {error.message}</p>
+            {error.stack && <pre className="mt-1 text-[10px] whitespace-pre-wrap">{error.stack}</pre>}
+          </div>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {

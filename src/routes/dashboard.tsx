@@ -42,7 +42,8 @@ import {
   Layers,
   Play,
   CheckSquare,
-  Check
+  Check,
+  BookOpen
 } from "lucide-react";
 
 import {
@@ -98,6 +99,13 @@ import {
   GalleryPhoto,
   PortalUser
 } from "@/lib/leads-store";
+import {
+  BlogPost,
+  Category,
+  getBlogPosts,
+  addBlogPost,
+  deleteBlogPost
+} from "@/lib/blog-store";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
@@ -146,7 +154,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; role: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "reviews" | "settings" | "chat" | "gallery" | "emails" | "security">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "leads" | "reviews" | "settings" | "chat" | "gallery" | "emails" | "security" | "blog">("overview");
 
   // Database / state stores
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -157,6 +165,19 @@ function DashboardPage() {
   const [adminReplyText, setAdminReplyText] = useState("");
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
   const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+
+  // Blog Manager States
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [blogSearchTerm, setBlogSearchTerm] = useState("");
+  const [blogCategoryFilter, setBlogCategoryFilter] = useState<Category>("All");
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
+  const [isAddingBlogPost, setIsAddingBlogPost] = useState(false);
+  const [newBlogTitle, setNewBlogTitle] = useState("");
+  const [newBlogCategory, setNewBlogCategory] = useState<Category>("Kitchen");
+  const [newBlogReadTime, setNewBlogReadTime] = useState("5 min read");
+  const [newBlogExcerpt, setNewBlogExcerpt] = useState("");
+  const [newBlogContent, setNewBlogContent] = useState("");
+  const [isSubmittingBlog, setIsSubmittingBlog] = useState(false);
 
   // Gallery Upload Workflow States
   const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
@@ -280,6 +301,7 @@ function DashboardPage() {
       getWebEmails().then(setWebEmails);
       getChatSessions().then(setChatSessions);
       getGalleryPhotos().then(setGalleryPhotos);
+      getBlogPosts().then(setBlogPosts);
       getSiteSettings().then(settings => {
         if (settings) {
           setAlertEmail(settings.alertEmail || "");
@@ -733,27 +755,107 @@ function DashboardPage() {
     });
   };
 
+  // Blog Management Handlers
+  const handleAddBlogPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBlogTitle.trim()) {
+      toast.error("Please provide an article title");
+      return;
+    }
+    if (!newBlogContent.trim()) {
+      toast.error("Please provide article content");
+      return;
+    }
+    setIsSubmittingBlog(true);
+    try {
+      await addBlogPost({
+        title: newBlogTitle.trim(),
+        category: newBlogCategory,
+        readTime: newBlogReadTime.trim() || "5 min read",
+        excerpt: newBlogExcerpt.trim() || (newBlogContent.trim().slice(0, 160) + "..."),
+        content: newBlogContent.trim()
+      });
+      const updated = await getBlogPosts();
+      setBlogPosts(updated);
+      setIsAddingBlogPost(false);
+      setNewBlogTitle("");
+      setNewBlogCategory("Kitchen");
+      setNewBlogReadTime("5 min read");
+      setNewBlogExcerpt("");
+      setNewBlogContent("");
+      toast.success("Blog article published successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to publish blog article");
+    } finally {
+      setIsSubmittingBlog(false);
+    }
+  };
+
+  const handleDeleteBlogPost = (post: BlogPost) => {
+    triggerConfirm({
+      title: "Delete Blog Article?",
+      message: `Are you sure you want to delete "${post.title}"? This article will be permanently removed from the website and dashboard.`,
+      confirmText: "Delete Article",
+      onConfirm: async () => {
+        try {
+          const updated = await deleteBlogPost(post.id);
+          setBlogPosts(updated);
+          if (selectedBlogPost?.id === post.id) {
+            setSelectedBlogPost(null);
+          }
+          toast.success("Article deleted successfully");
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to delete article");
+        }
+      }
+    });
+  };
+
+  const filteredBlogPosts = useMemo(() => {
+    return blogPosts.filter((post) => {
+      const matchesCategory = blogCategoryFilter === "All" || post.category === blogCategoryFilter;
+      const term = blogSearchTerm.toLowerCase().trim();
+      const matchesSearch =
+        !term ||
+        post.title.toLowerCase().includes(term) ||
+        post.excerpt.toLowerCase().includes(term) ||
+        post.content.toLowerCase().includes(term) ||
+        post.category.toLowerCase().includes(term);
+      return matchesCategory && matchesSearch;
+    });
+  }, [blogPosts, blogCategoryFilter, blogSearchTerm]);
 
   // Filtering leads
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
+      const name = lead?.name || "";
+      const email = lead?.email || "";
+      const address = lead?.address || "";
+      const phone = lead?.phone || "";
+      const status = lead?.status || "new";
+      const projectType = lead?.projectType || "remodeling";
+
       const matchesSearch =
-        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.phone.includes(searchTerm);
-      const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
-      const matchesType = typeFilter === "all" || lead.projectType === typeFilter;
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        phone.includes(searchTerm);
+      const matchesStatus = statusFilter === "all" || status === statusFilter;
+      const matchesType = typeFilter === "all" || projectType === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [leads, searchTerm, statusFilter, typeFilter]);
 
-  if (isAuthenticated === null) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] text-slate-800 font-inter">
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-4 border-copper border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-xs uppercase font-bold tracking-widest text-slate-400">Loading Workspace...</p>
+          <p className="text-xs uppercase font-bold tracking-widest text-slate-400">
+            {isAuthenticated === false ? "Redirecting to login..." : "Loading Workspace..."}
+          </p>
         </div>
       </div>
     );
@@ -786,6 +888,7 @@ function DashboardPage() {
               { id: "leads", label: "Leads Manager", icon: Briefcase },
               { id: "reviews", label: "Reviews Moderator", icon: Star },
               { id: "gallery", label: "Update Gallery", icon: ImageIcon },
+              { id: "blog", label: "Blog", icon: BookOpen },
               { id: "chat", label: "Live Chat", icon: MessageCircle, badge: chatSessions.some(s => s.unread) },
               { id: "emails", label: "Web Emails", icon: Mail },
               { id: "settings", label: "Portal Settings", icon: Settings },
@@ -864,7 +967,7 @@ function DashboardPage() {
         <header className="bg-white border-b border-[#e3e6f0] px-6 py-4 flex items-center justify-between sticky top-0 z-30">
           <div>
             <h1 className="font-bold text-xl text-slate-800 leading-none capitalize">
-              {activeTab === "overview" ? "Dashboard" : activeTab.replace("-", " ")}
+              {activeTab === "overview" ? "Dashboard" : activeTab === "blog" ? "Blog Manager" : activeTab.replace("-", " ")}
             </h1>
             <p className="text-xs text-slate-500 mt-1.5 font-medium">
               {activeTab === "overview" && "Monitor and control your business leads and pipeline"}
@@ -873,6 +976,7 @@ function DashboardPage() {
               {activeTab === "emails" && "View details of incoming contact form submissions"}
               {activeTab === "chat" && "Respond to active website visitor chat messages"}
               {activeTab === "gallery" && "Manage images showcased on the public website"}
+              {activeTab === "blog" && "Publish, organize, and manage website blog articles"}
               {activeTab === "settings" && "Modify administrator login credentials"}
               {activeTab === "security" && "Create and manage system user accounts"}
             </p>
@@ -1196,14 +1300,14 @@ function DashboardPage() {
                     <tbody className="divide-y divide-slate-150">
                       {filteredLeads.slice(0, 5).map((lead) => (
                         <tr key={lead.id} className="hover:bg-slate-50/30 transition">
-                          <td className="p-4 pl-6 font-bold text-slate-800">{lead.name}</td>
-                          <td className="p-4 text-slate-500 font-medium capitalize">{lead.projectType.replace("-", " ")}</td>
+                          <td className="p-4 pl-6 font-bold text-slate-800">{lead.name || "Unknown"}</td>
+                          <td className="p-4 text-slate-500 font-medium capitalize">{(lead.projectType || "remodeling").replace("-", " ")}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-block ${lead.status === "won" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
                               lead.status === "lost" ? "bg-rose-50 text-rose-700 border border-rose-100" :
                                 "bg-amber-50 text-amber-700 border border-amber-100"
                               }`}>
-                              {lead.status.replace("_", " ")}
+                              {(lead.status || "new").replace("_", " ")}
                             </span>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">{lead.address?.split(",")?.[0] || "Tampa"}</td>
@@ -1301,19 +1405,19 @@ function DashboardPage() {
                     <tbody className="divide-y divide-slate-150 text-sm">
                       {filteredLeads.map((lead) => (
                         <tr key={lead.id} className="hover:bg-slate-50/50 transition">
-                          <td className="p-4 pl-6 font-bold text-slate-800">{lead.name}</td>
+                          <td className="p-4 pl-6 font-bold text-slate-800">{lead.name || "Unknown"}</td>
                           <td className="p-4 text-slate-500 font-medium">
-                            <div>{lead.phone}</div>
-                            <div className="text-xs text-slate-400 mt-0.5">{lead.email}</div>
+                            <div>{lead.phone || "—"}</div>
+                            <div className="text-xs text-slate-400 mt-0.5">{lead.email || "—"}</div>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">
-                            {lead.address?.split(",")?.slice(-3, -2)?.[0]?.trim() || "Tampa"}
+                            {lead.address?.split(",")?.slice(-3, -2)?.[0]?.trim() || lead.address || "Tampa"}
                           </td>
                           <td className="p-4 font-semibold text-slate-800">
-                            <span className="capitalize">{lead.projectType.replace("-", " ")}</span>
+                            <span className="capitalize">{(lead.projectType || "remodeling").replace("-", " ")}</span>
                           </td>
                           <td className="p-4 font-bold text-slate-900">
-                            ${lead.estimatedValue.toLocaleString()}
+                            ${(lead.estimatedValue || 0).toLocaleString()}
                           </td>
                           <td className="p-4">
                             <span
@@ -1322,7 +1426,7 @@ function DashboardPage() {
                                   "bg-amber-50 text-amber-700 border-amber-100"
                                 }`}
                             >
-                              {lead.status.replace("_", " ")}
+                              {(lead.status || "new").replace("_", " ")}
                             </span>
                           </td>
                           <td className="p-4 pr-6 text-right space-x-1.5 whitespace-nowrap">
@@ -1945,6 +2049,239 @@ function DashboardPage() {
                     <p className="text-sm font-semibold">No media in this category</p>
                   </div>
                 )}
+            </div>
+          )}
+
+          {/* TAB: BLOG */}
+          {activeTab === "blog" && (
+            <div className="space-y-6 animate-in fade-in duration-200 text-left">
+              {/* Blog Top Bar / Banner */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-slate-900">Blog & Articles Management</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-copper/10 text-copper border border-copper/20">
+                      {blogPosts.length} Published
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Manage design guides, project insights, and Tampa remodeling articles displayed on the public site.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/blog"
+                    target="_blank"
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex items-center gap-1.5"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-copper" />
+                    View Live Blog
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingBlogPost(true)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-copper hover:bg-copper-deep shadow-sm transition flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Write New Article
+                  </button>
+                </div>
+              </div>
+
+              {/* Stats & Quick Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-copper/10 text-copper flex items-center justify-center shrink-0">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Articles</p>
+                    <p className="text-lg font-bold text-slate-900">{blogPosts.length}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <Edit2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Custom Created</p>
+                    <p className="text-lg font-bold text-slate-900">{blogPosts.filter(p => p.isCustom).length}</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                    <Layers className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Categories</p>
+                    <p className="text-lg font-bold text-slate-900">5 Categories</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Status</p>
+                    <p className="text-lg font-bold text-emerald-600">Active & Live</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search & Filter Controls */}
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                {/* Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search articles by title, topic, or keyword..."
+                    value={blogSearchTerm}
+                    onChange={(e) => setBlogSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper transition"
+                  />
+                  {blogSearchTerm && (
+                    <button
+                      onClick={() => setBlogSearchTerm("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Pills */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(["All", "Kitchen", "Bathroom", "Remodeling", "Cabinetry", "Tampa Insights"] as Category[]).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setBlogCategoryFilter(cat)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        blogCategoryFilter === cat
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                      }`}
+                    >
+                      {cat}
+                      {cat === "All" && ` (${blogPosts.length})`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Showing count indicator */}
+              <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-medium">
+                <span>
+                  Showing <strong className="text-slate-800">{filteredBlogPosts.length}</strong> of {blogPosts.length} articles
+                </span>
+                {blogCategoryFilter !== "All" && (
+                  <span className="text-copper">
+                    Filtered by <strong>{blogCategoryFilter}</strong>
+                  </span>
+                )}
+              </div>
+
+              {/* Articles Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredBlogPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  >
+                    <div>
+                      {/* Badge & Metadata Header */}
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            post.category === "Kitchen"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : post.category === "Bathroom"
+                              ? "bg-sky-50 text-sky-700 border-sky-200"
+                              : post.category === "Remodeling"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : post.category === "Cabinetry"
+                              ? "bg-purple-50 text-purple-700 border-purple-200"
+                              : "bg-orange-50 text-orange-700 border-orange-200"
+                          }`}
+                        >
+                          {post.category}
+                        </span>
+
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                          {post.isCustom && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-copper/10 text-copper border border-copper/20">
+                              Custom
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {post.readTime}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Title */}
+                      <h4
+                        onClick={() => setSelectedBlogPost(post)}
+                        className="font-bold text-sm text-slate-800 group-hover:text-copper transition cursor-pointer line-clamp-2 leading-snug mb-2"
+                      >
+                        {post.title}
+                      </h4>
+
+                      {/* Excerpt */}
+                      <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-4">
+                        {post.excerpt}
+                      </p>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className="text-[11px] text-slate-400 font-medium">{post.date}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedBlogPost(post)}
+                          className="px-2.5 py-1 rounded-lg font-bold text-slate-600 bg-slate-50 hover:bg-slate-100 hover:text-slate-900 transition flex items-center gap-1 border border-slate-200"
+                        >
+                          <Eye className="w-3 h-3" />
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBlogPost(post)}
+                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                          title="Delete Article"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Empty State */}
+              {filteredBlogPosts.length === 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+                  <BookOpen className="w-12 h-12 opacity-30 text-copper" />
+                  <p className="text-sm font-bold text-slate-700">No blog articles match your search or filter</p>
+                  <p className="text-xs text-slate-400">Try adjusting your keywords or clearing the category filter.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBlogSearchTerm("");
+                      setBlogCategoryFilter("All");
+                    }}
+                    className="mt-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-copper bg-copper/10 hover:bg-copper/20 transition"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -2789,6 +3126,182 @@ function DashboardPage() {
                 {confirmConfig.confirmText || "Confirm"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blog Article Preview Modal */}
+      {selectedBlogPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 text-xs text-left">
+            <div className="bg-gradient-to-r from-copper to-[#975033] p-5 text-white flex items-center justify-between shrink-0">
+              <div className="space-y-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                  {selectedBlogPost.category}
+                </span>
+                <h3 className="font-bold text-base leading-snug line-clamp-1">{selectedBlogPost.title}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedBlogPost(null)}
+                className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 pb-3 border-b border-slate-100">
+                <span className="font-semibold text-slate-500">{selectedBlogPost.date}</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {selectedBlogPost.readTime}
+                </span>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Excerpt</h4>
+                <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
+                  "{selectedBlogPost.excerpt}"
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Full Content</h4>
+                <div className="text-xs text-slate-700 leading-relaxed space-y-3 whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200">
+                  {selectedBlogPost.content}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <Link
+                to="/blog"
+                target="_blank"
+                className="text-xs font-bold text-copper hover:text-copper-deep flex items-center gap-1"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                Open Live Blog Page
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSelectedBlogPost(null)}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white hover:bg-slate-900 transition"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Blog Article Modal */}
+      {isAddingBlogPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200 text-xs text-left">
+            <div className="bg-gradient-to-r from-copper to-[#975033] p-4 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                <h3 className="font-bold text-sm leading-tight">Publish New Blog Article</h3>
+              </div>
+              <button
+                onClick={() => setIsAddingBlogPost(false)}
+                className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddBlogPost} className="p-6 overflow-y-auto space-y-4 flex-1">
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                  Article Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newBlogTitle}
+                  onChange={(e) => setNewBlogTitle(e.target.value)}
+                  placeholder="e.g. Modern Minimalist Kitchen Island Innovations in Tampa"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                    Category *
+                  </label>
+                  <select
+                    value={newBlogCategory}
+                    onChange={(e) => setNewBlogCategory(e.target.value as Category)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper font-medium"
+                  >
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Bathroom">Bathroom</option>
+                    <option value="Remodeling">Remodeling</option>
+                    <option value="Cabinetry">Cabinetry</option>
+                    <option value="Tampa Insights">Tampa Insights</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                    Read Time
+                  </label>
+                  <input
+                    type="text"
+                    value={newBlogReadTime}
+                    onChange={(e) => setNewBlogReadTime(e.target.value)}
+                    placeholder="e.g. 5 min read"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper focus:border-copper"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                  Summary / Excerpt
+                </label>
+                <textarea
+                  rows={2}
+                  value={newBlogExcerpt}
+                  onChange={(e) => setNewBlogExcerpt(e.target.value)}
+                  placeholder="Brief 1-2 sentence preview for search results and cards..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                  Full Article Content *
+                </label>
+                <textarea
+                  rows={7}
+                  required
+                  value={newBlogContent}
+                  onChange={(e) => setNewBlogContent(e.target.value)}
+                  placeholder="Write the full body of the article here. You can separate paragraphs with blank lines..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 focus:outline-none focus:ring-1 focus:ring-copper resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingBlogPost(false)}
+                  className="w-1/2 border border-slate-200 rounded-xl py-3 font-bold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingBlog}
+                  className="w-1/2 bg-copper hover:bg-copper-deep text-white rounded-xl py-3 font-bold shadow-lg shadow-copper/10 transition disabled:opacity-50"
+                >
+                  {isSubmittingBlog ? "Publishing..." : "Publish Article"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

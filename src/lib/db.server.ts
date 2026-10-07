@@ -34,6 +34,27 @@ function mapDoc<T>(doc: any): T {
   } as T;
 }
 
+function normalizeLeadDoc(doc: any): any {
+  if (!doc) return null;
+  const mapped = mapDoc<any>(doc);
+  const data = mapped.leadData || mapped;
+  return {
+    ...mapped,
+    name: data.name || mapped.name || "Unknown Lead",
+    email: data.email || mapped.email || "",
+    phone: data.phone || mapped.phone || "",
+    address: data.address || mapped.address || "Tampa, FL",
+    projectType: data.projectType || mapped.projectType || "remodeling",
+    description: data.description || mapped.description || "",
+    contactTime: data.contactTime || mapped.contactTime || "anytime",
+    status: data.status || mapped.status || "new",
+    estimatedValue: typeof data.estimatedValue === "number" ? data.estimatedValue : (typeof mapped.estimatedValue === "number" ? mapped.estimatedValue : 15000),
+    createdAt: data.createdAt || mapped.createdAt || new Date().toISOString(),
+    photos: Array.isArray(data.photos) ? data.photos : (Array.isArray(mapped.photos) ? mapped.photos : []),
+    notes: data.notes || mapped.notes || ""
+  };
+}
+
 // ── LEADS ──
 export async function dbGetLeads(initialSeeds: any[]): Promise<any[]> {
   const db = await getDb();
@@ -44,14 +65,15 @@ export async function dbGetLeads(initialSeeds: any[]): Promise<any[]> {
     return initialSeeds;
   }
   const docs = await leadsCol.find({}).toArray();
-  return docs.map(mapDoc);
+  return docs.map(normalizeLeadDoc);
 }
 
 export async function dbAddLead(lead: any): Promise<any> {
   const db = await getDb();
   const leadsCol = db.collection("leads");
-  const result = await leadsCol.insertOne(lead);
-  return { ...lead, id: lead.id || String(result.insertedId) };
+  const normalized = normalizeLeadDoc(lead);
+  const result = await leadsCol.insertOne(normalized);
+  return { ...normalized, id: normalized.id || String(result.insertedId) };
 }
 
 export async function dbUpdateLead(id: string, updates: any): Promise<any[] | null> {
@@ -334,3 +356,51 @@ export async function dbSaveSettings(settings: any): Promise<any> {
   const doc = await settingsCol.findOne({ id: "site_config" });
   return mapDoc(doc);
 }
+
+// ── BLOG POSTS ──
+export async function dbGetBlogPosts(initialSeeds: any[]): Promise<any[]> {
+  const db = await getDb();
+  const blogCol = db.collection("blog_posts");
+  const count = await blogCol.countDocuments();
+  if (count === 0 && initialSeeds && initialSeeds.length > 0) {
+    try {
+      await blogCol.insertMany(initialSeeds);
+      return initialSeeds;
+    } catch (e) {
+      console.warn("Could not batch insert initial blog posts:", e);
+    }
+  }
+  const docs = await blogCol.find({}).sort({ _id: -1 }).toArray();
+  return docs.map(mapDoc);
+}
+
+export async function dbAddBlogPost(post: any): Promise<any> {
+  const db = await getDb();
+  const blogCol = db.collection("blog_posts");
+  const postToInsert = {
+    ...post,
+    id: post.id || "blog-" + Math.random().toString(36).substr(2, 9),
+    date: post.date || new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+    createdAt: new Date().toISOString(),
+    isCustom: true
+  };
+  const result = await blogCol.insertOne(postToInsert);
+  return { ...postToInsert, id: postToInsert.id || String(result.insertedId) };
+}
+
+export async function dbDeleteBlogPost(id: string | number): Promise<any[]> {
+  const db = await getDb();
+  const blogCol = db.collection("blog_posts");
+
+  const idStr = String(id);
+  let res = await blogCol.deleteOne({ $or: [{ id: idStr }, { id: typeof id === "number" ? id : -1 }] });
+  if (res.deletedCount === 0) {
+    if (ObjectId.isValid(idStr)) {
+      await blogCol.deleteOne({ _id: new ObjectId(idStr) });
+    }
+  }
+
+  const docs = await blogCol.find({}).sort({ _id: -1 }).toArray();
+  return docs.map(mapDoc);
+}
+

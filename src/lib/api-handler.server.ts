@@ -21,6 +21,9 @@ import {
   dbUpdatePortalUser,
   dbGetSettings,
   dbSaveSettings,
+  dbGetBlogPosts,
+  dbAddBlogPost,
+  dbDeleteBlogPost,
   getDb
 } from "./db.server.js";
 
@@ -30,6 +33,7 @@ import {
   INITIAL_CHATS,
   INITIAL_EMAILS
 } from "./leads-store.js";
+import { ALL_BLOG_POSTS } from "./blog-store.js";
 
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinary.server.js";
 import { hashPassword, verifyPassword } from "./crypto.server.js";
@@ -382,6 +386,33 @@ export async function handleApiRequest(request: Request): Promise<Response | nul
         const body = await request.json();
         const saved = await dbSaveSettings(body);
         return jsonResponse(saved);
+      }
+    }
+
+    // ── /api/blogs ──
+    if (pathname === "/api/blogs") {
+      if (method === "GET") {
+        const blogs = await dbGetBlogPosts(ALL_BLOG_POSTS);
+        return jsonResponse(blogs);
+      }
+      if (method === "POST") {
+        const body = await request.json();
+        const saved = await dbAddBlogPost(body);
+        return jsonResponse(saved);
+      }
+      if (method === "DELETE") {
+        let id: any = null;
+        try {
+          const body = await request.json();
+          id = body?.id;
+        } catch {}
+        if (!id) {
+          const urlObj = new URL(request.url);
+          id = urlObj.searchParams.get("id");
+        }
+        if (!id) return jsonResponse({ error: "Missing article ID" }, 400);
+        const updated = await dbDeleteBlogPost(id);
+        return jsonResponse(updated);
       }
     }
   } catch (error: any) {

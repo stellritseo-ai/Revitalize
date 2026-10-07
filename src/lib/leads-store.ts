@@ -370,15 +370,36 @@ async function apiCall<T>(url: string, method: string, body?: any): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export const normalizeLead = (raw: any): Lead => {
+  const d = raw?.leadData || raw || {};
+  return {
+    id: String(raw?.id || raw?._id || "lead-" + Math.random().toString(36).substr(2, 9)),
+    name: String(d.name || raw?.name || "Unknown Lead"),
+    email: String(d.email || raw?.email || ""),
+    phone: String(d.phone || raw?.phone || ""),
+    address: String(d.address || raw?.address || "Tampa, FL"),
+    projectType: String(d.projectType || raw?.projectType || "remodeling"),
+    description: String(d.description || raw?.description || ""),
+    contactTime: String(d.contactTime || raw?.contactTime || "anytime"),
+    status: (d.status || raw?.status || "new") as Lead["status"],
+    estimatedValue: typeof d.estimatedValue === "number" ? d.estimatedValue : (typeof raw?.estimatedValue === "number" ? raw.estimatedValue : 15000),
+    notes: String(d.notes || raw?.notes || ""),
+    createdAt: String(d.createdAt || raw?.createdAt || new Date().toISOString()),
+    photos: Array.isArray(d.photos) ? d.photos : (Array.isArray(raw?.photos) ? raw.photos : [])
+  };
+};
+
 // ── LEADS ──
 export const getLeads = async (): Promise<Lead[]> => {
   try {
-    const leads = await apiCall<Lead[]>("/api/leads", "GET");
+    const rawLeads = await apiCall<any[]>("/api/leads", "GET");
+    const leads = Array.isArray(rawLeads) ? rawLeads.map(normalizeLead) : [];
     setStorageItem("revitalize-leads", leads);
     return leads;
   } catch (err) {
     console.warn("MongoDB offline, falling back to local storage leads:", err);
-    return getStorageItem<Lead[]>("revitalize-leads", INITIAL_LEADS);
+    const raw = getStorageItem<any[]>("revitalize-leads", INITIAL_LEADS);
+    return Array.isArray(raw) ? raw.map(normalizeLead) : INITIAL_LEADS;
   }
 };
 
@@ -917,25 +938,28 @@ export const updateUserCredentials = async (userId: string, username?: string, p
 
 // Analytics calculator helper (preserved exactly)
 export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
-  const totalValue = leads.reduce((acc, curr) => curr.status !== "lost" ? acc + curr.estimatedValue : acc, 0);
-  const activeCount = leads.filter(l => ["contacted", "consultation_scheduled", "proposal_sent"].includes(l.status)).length;
+  const safeLeads = Array.isArray(leads) ? leads.map(normalizeLead) : [];
+
+  const totalValue = safeLeads.reduce((acc, curr) => (curr.status !== "lost" ? acc + (curr.estimatedValue || 0) : acc), 0);
+  const activeCount = safeLeads.filter(l => ["contacted", "consultation_scheduled", "proposal_sent"].includes(l.status)).length;
   
-  const wonLeads = leads.filter(l => l.status === "won");
-  const lostLeads = leads.filter(l => l.status === "lost");
-  const wonValue = wonLeads.reduce((acc, curr) => acc + curr.estimatedValue, 0);
+  const wonLeads = safeLeads.filter(l => l.status === "won");
+  const lostLeads = safeLeads.filter(l => l.status === "lost");
+  const wonValue = wonLeads.reduce((acc, curr) => acc + (curr.estimatedValue || 0), 0);
   const totalClosed = wonLeads.length + lostLeads.length;
   const winRate = totalClosed > 0 ? Math.round((wonLeads.length / totalClosed) * 100) : 0;
   
-  const averageValue = leads.length > 0 ? Math.round(leads.reduce((acc, curr) => acc + curr.estimatedValue, 0) / leads.length) : 0;
+  const averageValue = safeLeads.length > 0 ? Math.round(safeLeads.reduce((acc, curr) => acc + (curr.estimatedValue || 0), 0) / safeLeads.length) : 0;
 
   // 1. Project type distribution
   const typeCounts: Record<string, { count: number; value: number }> = {};
-  leads.forEach(l => {
-    if (!typeCounts[l.projectType]) {
-      typeCounts[l.projectType] = { count: 0, value: 0 };
+  safeLeads.forEach(l => {
+    const pType = l.projectType || "remodeling";
+    if (!typeCounts[pType]) {
+      typeCounts[pType] = { count: 0, value: 0 };
     }
-    typeCounts[l.projectType].count += 1;
-    typeCounts[l.projectType].value += l.estimatedValue;
+    typeCounts[pType].count += 1;
+    typeCounts[pType].value += l.estimatedValue || 0;
   });
 
   const projectTypesChart = Object.entries(typeCounts).map(([name, data]) => ({
@@ -945,7 +969,7 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
   }));
 
   // 2. Status distribution
-  const statusLabels: Record<Lead["status"], string> = {
+  const statusLabels: Record<string, string> = {
     new: "New Lead",
     contacted: "Contacted",
     consultation_scheduled: "Consultation Scheduled",
@@ -963,8 +987,8 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
     "Lost / Closed": 0
   };
 
-  leads.forEach(l => {
-    const label = statusLabels[l.status];
+  safeLeads.forEach(l => {
+    const label = statusLabels[l.status] || "New Lead";
     statusCounts[label] = (statusCounts[label] || 0) + 1;
   });
 
@@ -975,7 +999,7 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
 
   // 3. Regional distribution (cities)
   const cityCounts: Record<string, number> = {};
-  leads.forEach(l => {
+  safeLeads.forEach(l => {
     const addressStr = l.address || "";
     const parts = addressStr.split(",");
     let city = "Tampa";
@@ -1000,16 +1024,16 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
     "Jun": { count: 0, value: 0 }
   };
 
-  leads.forEach(l => {
+  safeLeads.forEach(l => {
     if (!l.createdAt) return;
     const date = new Date(l.createdAt);
     if (isNaN(date.getTime())) return;
     const month = date.toLocaleString("en-US", { month: "short" });
     if (monthlyData[month]) {
       monthlyData[month].count += 1;
-      monthlyData[month].value += l.estimatedValue;
+      monthlyData[month].value += l.estimatedValue || 0;
     } else {
-      monthlyData[month] = { count: 1, value: l.estimatedValue };
+      monthlyData[month] = { count: 1, value: l.estimatedValue || 0 };
     }
   });
 
@@ -1025,7 +1049,7 @@ export const getAnalyticsData = (leads: Lead[], reviews: Review[]) => {
     winRate,
     wonValue,
     averageValue,
-    totalLeads: leads.length,
+    totalLeads: safeLeads.length,
     projectTypesChart,
     statusChart,
     regionChart,
